@@ -187,6 +187,24 @@ h1 {
     border-left: 2px solid var(--accent);
 }
 
+/* Give the interactive stage room while keeping the post's reading column. */
+.blog-visualization {
+    display: block;
+    width: min(960px, calc(100vw - 3rem));
+    margin-top: 2rem;
+    margin-left: calc(50% - min(480px, calc(50vw - 1.5rem)));
+    font-family: var(--font-body);
+    font-size: 16px;
+    overflow-wrap: normal;
+    --psc-paper: #f4f1ea;
+    --psc-stage: #ece7dd;
+    --psc-ink: #3e3b39;
+    --psc-muted: #6d6058;
+    --psc-line: rgba(62, 59, 57, 0.16);
+    --psc-faint: rgba(62, 59, 57, 0.07);
+    --psc-radius: 8px;
+}
+
 @media (max-width: 768px) {
     .profile-container {
         grid-template-columns: 1fr;
