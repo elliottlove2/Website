@@ -9,9 +9,13 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,400&family=Lato:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.18.9/dist/katex.min.css" integrity="sha384-lPx0C4zIUZLpveABMwOFcFeGZwsvKBJfhJ85FN1PYOV7xApBcFMhcAEMVKF8loOI" crossorigin="anonymous">
     <script src="js/pin-spin-cat.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.18.9/dist/katex.min.js" integrity="sha384-19KE2cFb3U+RUWmyhBz7aLOGDG8WrRC6hE3oY/HTZZlAAVWYTdmvLC//+TIV3zUx" crossorigin="anonymous" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.18.9/dist/contrib/auto-render.min.js" integrity="sha384-bjyGPfbij8/NDKJhSGZNP/khQVgtHUE5exjm4Ydllo42FwIgYsdLO2lXGmRBf5Mz" crossorigin="anonymous" defer></script>
+    <script src="js/blog.js" defer></script>
 </head>
-<body>
+<body class="blog">
     <a class="skip-link" href="#main">Skip to content</a>
     <nav aria-label="Main navigation">
         <div class="nav-container">
@@ -24,15 +28,52 @@
 
     <main id="main" class="blog-page">
         <header class="blog-header">
-            <h1>Blog</h1>
+            <div class="blog-header-inner">
+                <h1>Blog</h1>
+                <!-- Optional subtitle: add <p class="blog-subtitle">Your subtitle.</p> here. -->
+            </div>
         </header>
         <div class="blog-posts">
             <!-- Add complete posts here, newest first. See README.md for the format. -->
             <article class="blog-post" id="reflections-rotations-and-spinors" aria-labelledby="reflections-title">
-                <h2 id="reflections-title">Reflections, Rotations, and Spinors</h2>
-                <!-- Post text will be added here later. -->
-                <pin-spin-cat class="blog-visualization" modes="mirrors,spin,kaleido" mode="mirrors" theme="light" aria-label="Interactive mirrors, rotations, and spin visualization"></pin-spin-cat>
-                <noscript>Enable JavaScript to use the interactive mirrors.</noscript>
+                <header class="post-header">
+                    <h2 id="reflections-title">Reflections, Rotations, and Spinors</h2>
+                </header>
+
+                <div class="post-text">
+                    <!-- WRITE HERE: opening paragraphs, before the mirrors demo.
+                         Use <p> for paragraphs, <h3> for section headings,
+                         \( ... \) for inline math, and \[ ... \] for display math.
+                         See README.md for copyable examples. -->
+                </div>
+
+                <details class="blog-demo" name="reflections-demos" open>
+                    <summary>Interactive mirrors</summary>
+                    <pin-spin-cat class="blog-visualization" modes="mirrors" mode="mirrors" theme="light" aria-label="Interactive mirrors demo"></pin-spin-cat>
+                </details>
+
+                <div class="post-text">
+                    <!-- WRITE HERE: text between the mirrors and spin demos. -->
+                </div>
+
+                <details class="blog-demo" name="reflections-demos">
+                    <summary>Spin and the 720° turn</summary>
+                    <pin-spin-cat class="blog-visualization" modes="spin" mode="spin" theme="light" aria-label="Interactive spin demo"></pin-spin-cat>
+                </details>
+
+                <div class="post-text">
+                    <!-- WRITE HERE: text between the spin and kaleidoscope demos. -->
+                </div>
+
+                <details class="blog-demo" name="reflections-demos">
+                    <summary>Kaleidoscope</summary>
+                    <pin-spin-cat class="blog-visualization" modes="kaleido" mode="kaleido" theme="light" aria-label="Interactive kaleidoscope demo"></pin-spin-cat>
+                </details>
+
+                <div class="post-text">
+                    <!-- WRITE HERE: closing paragraphs. -->
+                    <noscript><p>Enable JavaScript to use the interactive demos and typeset equations.</p></noscript>
+                </div>
             </article>
         </div>
     </main>

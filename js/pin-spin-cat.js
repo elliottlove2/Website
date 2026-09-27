@@ -322,6 +322,7 @@
       tab: "Mirrors",
       sub: "Pin(2) → O(2)",
       hint:
+        "The light grey cat is the starting point. " +
         "Drag an arrow to turn its mirror. Tap an arrow to flip its normal: same mirror, " +
         "same cat, opposite sign upstairs. Drag any cat to move it.",
     },
@@ -329,6 +330,7 @@
       tab: "Spin",
       sub: "the 720° trick",
       hint:
+        "The light grey cat is the starting point. " +
         "Drag the cat around the ball of yarn, or press Play. " +
         "The second mirror always sits at half the angle.",
     },

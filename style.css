@@ -131,68 +131,151 @@ h1 {
     box-shadow: 0 0 8px rgba(0, 0, 0, 0.3);
 }
 
-.blog-page {
-    max-width: 760px;
+body.blog {
+    background: #fff;
+}
+
+.blog > nav,
+.blog-header {
+    background: var(--bg-color);
+}
+
+main.blog-page {
+    max-width: none;
+    padding: 0;
 }
 
 .blog-header {
-    padding-bottom: 2rem;
-    border-bottom: 1px solid var(--border);
+    min-height: 288px;
+    padding: 52px 0 92px;
 }
 
-/* Posts form one continuous reading column, in the order written in blog.html. */
+.blog-header-inner {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding-inline: 2rem;
+}
+
+.blog-header h1 {
+    font-size: clamp(50px, 11vw, 78px);
+    line-height: 1;
+    font-weight: 600;
+    letter-spacing: -1.5px;
+}
+
+.blog-subtitle {
+    max-width: 580px;
+    margin-top: 20px;
+    color: var(--accent);
+    font: italic 22px/1.5 var(--font-heading);
+}
+
+/* Each full-width rule marks a post; prose stays in a comfortable reading column. */
 .blog-post {
-    padding: 3rem 0;
-    border-bottom: 1px solid var(--border);
-    overflow-wrap: anywhere;
+    border-top: 2px solid #8d7768;
+    padding-bottom: 48px;
+    background: #fff;
+    overflow-wrap: break-word;
 }
 
-.blog-post time {
+.post-header,
+.post-text {
+    width: min(680px, calc(100% - 3rem));
+    margin-inline: auto;
+}
+
+.post-header {
+    padding-block: 36px;
+    margin-bottom: 36px;
+}
+
+.post-header h2 {
+    font-size: clamp(31px, 5.7vw, 42px);
+    font-weight: 600;
+    line-height: 1.12;
+    letter-spacing: -0.5px;
+}
+
+.post-header time {
     display: block;
     margin-bottom: 0.5rem;
     color: var(--accent);
     font-size: 0.9rem;
 }
 
-.blog-post h2 {
-    margin-bottom: 1.5rem;
-    font-size: 2.25rem;
+.post-text {
+    font: 19px/1.75 Georgia, serif;
 }
 
-.blog-post h3 {
-    margin: 1.5rem 0 0.75rem;
-    font-size: 1.75rem;
+.post-text p {
+    margin-bottom: 1.25em;
 }
 
-.blog-post p + p {
-    margin-top: 1rem;
+.post-text h3 {
+    margin: 2rem 0 0.75rem;
+    font-size: 1.9rem;
 }
 
-.blog-post img {
+.post-text img {
     display: block;
     max-width: 100%;
     height: auto;
     margin: 1.5rem 0;
 }
 
-.blog-post ul,
-.blog-post ol {
+.post-text ul,
+.post-text ol {
     padding-left: 1.5rem;
     margin: 1rem 0;
 }
 
-.blog-post blockquote {
+.post-text blockquote {
     margin: 1.5rem 0;
     padding-left: 1.25rem;
     border-left: 2px solid var(--accent);
 }
 
-/* Give the interactive stage room while keeping the post's reading column. */
+.post-text .katex {
+    font-size: 1.1em;
+}
+
+.post-text .katex-display {
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding-block: 0.25rem;
+}
+
+.post-text .katex-display > .katex {
+    width: max-content;
+    min-width: 100%;
+}
+
+/* Each expandable section contains one visualization, with no mode tabs. */
+.blog-demo {
+    width: min(960px, calc(100% - 3rem));
+    margin: 26px auto 34px;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+}
+
+.blog-demo summary {
+    padding: 17px 0;
+    font-size: 15px;
+    cursor: pointer;
+}
+
+.blog-demo summary:focus-visible {
+    outline: 2px solid var(--text-secondary);
+    outline-offset: 4px;
+}
+
+.blog-demo[open] {
+    padding-bottom: 18px;
+}
+
 .blog-visualization {
     display: block;
-    width: min(960px, calc(100vw - 3rem));
-    margin-top: 2rem;
-    margin-left: calc(50% - min(480px, calc(50vw - 1.5rem)));
+    width: 100%;
     font-family: var(--font-body);
     font-size: 16px;
     overflow-wrap: normal;
@@ -227,5 +310,14 @@ h1 {
 
     main {
         padding: 3rem 1.5rem;
+    }
+
+    .blog-header {
+        min-height: 240px;
+        padding-block: 48px 64px;
+    }
+
+    .blog-header-inner {
+        padding-inline: 1.5rem;
     }
 }
