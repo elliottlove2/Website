@@ -346,36 +346,14 @@
   // Fixed, trusted definitions for the labels used by each view.
   const SYMBOLS = {
     common: [
-      ["O(2)", "All the rotations and reflections about the centre. The 2 means two dimensions."],
-      ["SO(2)", "Just the rotations, including a turn of zero degrees."],
-      ["Pin(2)", "The combined mirror steps, keeping the signs of their normal arrows."],
-      ["Spin(2)", "Combinations of an even number of mirror steps, with the signs kept. These give rotations."],
-      ["Normal / unit vector", "An arrow at a right angle to a mirror, treated as having length one."],
-      ["Even / odd", "An even number of reflections gives a rotation; an odd number gives a reflection. Zero is even."],
-      ["g / −g", "g combines the mirror normals; −g reverses its sign. Both give the same cat move. The filled dot is g; the hollow dot is −g."],
-      ["Signs kept / cat moves", "The upper circles keep the signs; the lower circles show the resulting moves. An upper choice is also called a lift."],
-      ["2 : 1 / curves", "Each move below has two choices above, g and −g. The curves connect them."],
-      ["1 / −1 / id", "1 and −1 are the two sign choices that leave the cat unchanged. id labels that unchanged move below."],
-      ["e₁ / e₂ / −e₁", "One-step arrows right, up, and left, respectively."],
-      ["e₁₂", "A symbol for the plane of rotation; it is not an extra direction."],
-      ["Numbers in formulas", "The numbers tell how much of each term is present. A number without an e is a multiple of 1."],
-      ["°", "Degrees measure a turn. 360° is one full turn."],
+      ["O(2)", "Rotations and reflections in 2 dimensions"],
+      ["SO(2)", "Just the rotations, which are composed of an even number of reflections"],
+      ["Pin(2)", "The combined mirror steps, keeping track of the signs of the arrows"],
+      ["Spin(2)", "The even / rotation part of Pin(2)"],
     ],
-    mirrors: [
-      ["u₁, u₂, …", "The mirror normals in reflection order. u₂u₁ means mirror 1 first, then mirror 2."],
-      ["Numbered cats", "The small numbered badges show the result after each intermediate reflection."],
-    ],
-    spin: [
-      ["u / w", "u is the fixed mirror normal; w is the moving mirror normal."],
-      ["θ / θ/2", "θ counts the cat’s total turn. θ/2 is how far w has turned from u."],
-      ["cos / sin", "Cosine and sine give the two circle coordinates used in the rotation formula."],
-      ["Yarn wound", "The number of full turns the cat has made. The yarn keeps counting past 360° and 720°."],
-    ],
-    kaleido: [
-      ["k / 180°/k", "k is the slider’s whole number. Dividing 180° by k gives the angle between the mirrors."],
-      ["2k cats / 4k choices", "There are 2k possible cat moves, with two signed choices for each: 4k in total."],
-      ["±", "Both signs: the displayed value and its negative give the same cat move."],
-    ],
+    mirrors: [],
+    spin: [],
+    kaleido: [],
   };
   const SYMBOL_KEYS = Object.fromEntries(
     Object.keys(MODES).map((mode) => [
