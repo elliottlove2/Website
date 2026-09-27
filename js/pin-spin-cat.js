@@ -324,7 +324,7 @@
       hint:
         "The light grey cat is the starting point. " +
         "Drag an arrow to turn its mirror. Tap an arrow to flip its normal: same mirror, " +
-        "same cat, opposite sign upstairs. Drag any cat to move it.",
+        "same cat, opposite sign in the upper diagram. Drag any cat to move it.",
     },
     spin: {
       tab: "Spin",
@@ -336,12 +336,55 @@
     },
     kaleido: {
       tab: "Kaleidoscope",
-      sub: "two lifts per cat",
+      sub: "two signs per cat",
       hint:
         "Two mirrors at 180°/k, as in a real kaleidoscope. Drag the cat, " +
-        "and point at any cat to light up its two lifts.",
+        "and point at any cat to light up its two sign choices.",
     },
   };
+
+  // Fixed, trusted definitions for the labels used by each view.
+  const SYMBOLS = {
+    common: [
+      ["O(2)", "All the rotations and reflections about the centre. The 2 means two dimensions."],
+      ["SO(2)", "Just the rotations, including a turn of zero degrees."],
+      ["Pin(2)", "The combined mirror steps, keeping the signs of their normal arrows."],
+      ["Spin(2)", "Combinations of an even number of mirror steps, with the signs kept. These give rotations."],
+      ["Normal / unit vector", "An arrow at a right angle to a mirror, treated as having length one."],
+      ["Even / odd", "An even number of reflections gives a rotation; an odd number gives a reflection. Zero is even."],
+      ["g / −g", "g combines the mirror normals; −g reverses its sign. Both give the same cat move. The filled dot is g; the hollow dot is −g."],
+      ["Signs kept / cat moves", "The upper circles keep the signs; the lower circles show the resulting moves. An upper choice is also called a lift."],
+      ["2 : 1 / curves", "Each move below has two choices above, g and −g. The curves connect them."],
+      ["1 / −1 / id", "1 and −1 are the two sign choices that leave the cat unchanged. id labels that unchanged move below."],
+      ["e₁ / e₂ / −e₁", "One-step arrows right, up, and left, respectively."],
+      ["e₁₂", "A symbol for the plane of rotation; it is not an extra direction."],
+      ["Numbers in formulas", "The numbers tell how much of each term is present. A number without an e is a multiple of 1."],
+      ["°", "Degrees measure a turn. 360° is one full turn."],
+    ],
+    mirrors: [
+      ["u₁, u₂, …", "The mirror normals in reflection order. u₂u₁ means mirror 1 first, then mirror 2."],
+      ["Numbered cats", "The small numbered badges show the result after each intermediate reflection."],
+    ],
+    spin: [
+      ["u / w", "u is the fixed mirror normal; w is the moving mirror normal."],
+      ["θ / θ/2", "θ counts the cat’s total turn. θ/2 is how far w has turned from u."],
+      ["cos / sin", "Cosine and sine give the two circle coordinates used in the rotation formula."],
+      ["Yarn wound", "The number of full turns the cat has made. The yarn keeps counting past 360° and 720°."],
+    ],
+    kaleido: [
+      ["k / 180°/k", "k is the slider’s whole number. Dividing 180° by k gives the angle between the mirrors."],
+      ["2k cats / 4k choices", "There are 2k possible cat moves, with two signed choices for each: 4k in total."],
+      ["±", "Both signs: the displayed value and its negative give the same cat move."],
+    ],
+  };
+  const SYMBOL_KEYS = Object.fromEntries(
+    Object.keys(MODES).map((mode) => [
+      mode,
+      [...SYMBOLS.common, ...SYMBOLS[mode]]
+        .map(([symbol, meaning]) => `<div><dt>${symbol}</dt><dd>${meaning}</dd></div>`)
+        .join(""),
+    ]),
+  );
 
   const LIGHT = `
     --psc-paper: #f6f8fa;  --psc-stage: #e9eef2;  --psc-ink: #1b2533;  --psc-muted: #5d6978;
@@ -442,6 +485,16 @@
     output { min-width: 6.5em; font-family: var(--psc-math-font); font-variant-numeric: tabular-nums; }
     .presets { display: inline-flex; gap: 6px; }
     .lab { font-size: 0.88em; color: var(--psc-muted); }
+    .symbol-key {
+      border-top: 1px solid var(--psc-line); padding-top: 10px;
+      font-size: max(14px, 0.9em); line-height: 1.5;
+    }
+    .symbol-key summary { cursor: pointer; font-weight: 600; padding: 3px 0; }
+    .symbol-key dl { display: grid; grid-template-columns: minmax(0, 1fr); gap: 14px 24px; margin: 16px 0 2px; }
+    .wide .symbol-key dl { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .symbol-key dl > div { min-width: 0; }
+    .symbol-key dt { font-weight: 600; }
+    .symbol-key dd { margin: 3px 0 0; color: var(--psc-muted); }
     .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
   `;
 
@@ -457,7 +510,7 @@
             <span><i class="sw odd"></i>odd</span>
             <span><i class="sw dot"></i><em>g</em></span>
             <span><i class="sw ring"></i><em>−g</em></span>
-            <span>curves: the 2 : 1 map</span>
+            <span>curves: two choices, one move</span>
           </div>
           <div class="readout"></div>
         </div>
@@ -486,6 +539,10 @@
         <input type="range" min="2" max="8" step="1" value="4" data-act="k" aria-label="Kaleidoscope order k">
         <output data-out="k"></output>
       </div>
+      <details class="symbol-key">
+        <summary>What the symbols mean</summary>
+        <dl></dl>
+      </details>
       <div class="sr" aria-live="polite"></div>
     </div>`;
 
@@ -586,6 +643,7 @@
         groups: $(".groups"),
         readout: $(".readout"),
         hint: $(".hint"),
+        symbols: $(".symbol-key dl"),
         chips: $(".chips"),
         add: $('[data-act="add"]'),
         remove: $('[data-act="remove"]'),
@@ -718,6 +776,7 @@
       }
       for (const panel of this.#el.panels) panel.hidden = panel.dataset.for !== mode;
       this.#el.hint.textContent = MODES[mode].hint;
+      this.#el.symbols.innerHTML = SYMBOL_KEYS[mode];
       if (mode === "spin") this.#maybeAutoplay();
       else this.#setPlaying(false);
       if (!quiet) this.#announce(`${MODES[mode].tab} view.`);
@@ -1457,9 +1516,9 @@
       text("even", X[0], 13, ui(11, 600), col.even);
       text("odd", X[1], 13, ui(11, 600), col.odd);
       text("Pin(2)", 12, Y[0] - 8, ui(14, 600), col.ink, "left");
-      text("the lifts", 12, Y[0] + 10, ui(11), col.muted, "left");
+      text("signs kept", 12, Y[0] + 10, ui(11), col.muted, "left");
       text("O(2)", 12, Y[1] - 8, ui(14, 600), col.ink, "left");
-      text("the cats", 12, Y[1] + 10, ui(11), col.muted, "left");
+      text("cat moves", 12, Y[1] + 10, ui(11), col.muted, "left");
       ctx.lineWidth = 1.25;
       ctx.strokeStyle = ctx.fillStyle = col.line;
       for (const x of X) {
@@ -1645,21 +1704,21 @@
 
     #readKaleido() {
       const k = this.#k;
-      let focus = `<p class="aside">Point at a cat (or tap it) to light up its two lifts.</p>`;
+      let focus = `<p class="aside">Point at a cat (or tap it) to light up its two sign choices above.</p>`;
       if (this.#hover) {
         const g = this.#lifts()[this.#hover.kind][this.#hover.j];
         const d = describe(g);
         const what = d.odd
           ? `the reflection across the line at ${degrees(mod(d.line, Math.PI))}`
           : Math.abs(turn(d.angle)) < 1e-6
-            ? "the real cat: the identity"
+            ? "no change from the starting cat"
             : `the rotation by ${degrees(turn(d.angle))}`;
-        focus = `<p>This cat is ${what}. Its lifts are ±(${formatMv(g)}).</p>`;
+        focus = `<p>This cat shows ${what}. Its two sign choices are ±(${formatMv(g)}).</p>`;
       }
       return (
-        `<p>Mirrors at 180°/${k} = ${+(180 / k).toFixed(1)}° make <b>${2 * k} cats</b>: the ` +
-        `dihedral group of order ${2 * k} inside O(2).</p>` +
-        `<p>Upstairs there are <b>${4 * k} lifts</b> in Pin(2). Every cat has exactly two, ` +
+        `<p>Mirrors at 180°/${k} = ${+(180 / k).toFixed(1)}° make <b>${2 * k} cats</b>: ` +
+        `the rotations and reflections these mirrors produce.</p>` +
+        `<p>The upper circles show <b>${4 * k} sign choices</b> in Pin(2). Every cat move has two, ` +
         `<i>g</i> and ${MINUS}<i>g</i>.</p>` +
         focus
       );

@@ -30,26 +30,37 @@
         <header class="blog-header">
             <div class="blog-header-inner">
                 <h1>Blog</h1>
-                <!-- Optional subtitle: add <p class="blog-subtitle">Your subtitle.</p> here. -->
+                <p class="blog-subtitle">this is my blog</p>
+                <img class="blog-banner" src="images/sperm-whale-banner-v1.png" width="2172" height="724" alt="An ivory sperm whale painted on textured sage-green paper" fetchpriority="high">
             </div>
         </header>
         <div class="blog-posts">
-            <!-- Add complete posts here, newest first. See README.md for the format. -->
+            <!-- Add new posts above older posts. These placeholders show the intended transitions.
+                 Categories: math, interactive, physics, literature, research, fitness.
+                 Add as many category tags as a post needs. -->
             <article class="blog-post" id="reflections-rotations-and-spinors" aria-labelledby="reflections-title">
                 <header class="post-header">
+                    <ul class="post-tags" aria-label="Post categories">
+                        <li>math</li>
+                        <li>interactive</li>
+                    </ul>
                     <h2 id="reflections-title">Reflections, Rotations, and Spinors</h2>
                 </header>
 
                 <div class="post-text">
                     <!-- WRITE HERE: opening paragraphs, before the mirrors demo.
                          Use <p> for paragraphs, <h3> for section headings,
-                         \( ... \) for inline math, and \[ ... \] for display math.
-                         See README.md for copyable examples. -->
+                         \( ... \) for inline math, and \[ ... \] for display math. -->
                 </div>
 
                 <details class="blog-demo" name="reflections-demos" open>
-                    <summary>Interactive mirrors</summary>
-                    <pin-spin-cat class="blog-visualization" modes="mirrors" mode="mirrors" theme="light" aria-label="Interactive mirrors demo"></pin-spin-cat>
+                    <summary>Rotating with mirrors</summary>
+                    <div class="post-text demo-intro">
+                        <p>Rotations about the origin and reflections across lines through it form a group called \(\mathrm{O}(2)\). The rotations, made from an even number of reflections, form \(\mathrm{SO}(2)\).</p>
+                        <p>The mirrors are described by their normal vectors: arrows at right angles to the mirrors. Flipping these arrows leaves the mirrors, and their effect on the cat, unchanged, so the result is the same element of \(\mathrm{O}(2)\).</p>
+                        <p>\(\operatorname{Pin}(2)\) keeps track of products of these normal vectors, including their sign. Each element of \(\mathrm{O}(2)\) has two representatives in \(\operatorname{Pin}(2)\), \(g\) and \(-g\). The even products form \(\operatorname{Spin}(2)\).</p>
+                    </div>
+                    <pin-spin-cat class="blog-visualization" modes="mirrors" mode="mirrors" theme="light" aria-label="Rotating with mirrors demo"></pin-spin-cat>
                 </details>
 
                 <div class="post-text">
@@ -57,8 +68,12 @@
                 </div>
 
                 <details class="blog-demo" name="reflections-demos">
-                    <summary>Spin and the 720° turn</summary>
-                    <pin-spin-cat class="blog-visualization" modes="spin" mode="spin" theme="light" aria-label="Interactive spin demo"></pin-spin-cat>
+                    <summary>Loops of Rotations</summary>
+                    <div class="post-text demo-intro">
+                        <p>Two reflections rotate the cat through twice the angle between the mirrors. Here, \(u\) stays fixed while \(w\), the other mirror’s normal arrow, turns at half the cat’s speed.</p>
+                        <p>After the cat travels around 360°, the mirror lines are back where they started, but \(w\) points the other way and \(g=-1\). To get that arrow back to its starting direction, the cat has to travel around twice: 720°. Then \(g=+1\).</p>
+                    </div>
+                    <pin-spin-cat class="blog-visualization" modes="spin" mode="spin" theme="light" aria-label="Loops of rotations demo"></pin-spin-cat>
                 </details>
 
                 <div class="post-text">
@@ -73,6 +88,59 @@
                 <div class="post-text">
                     <!-- WRITE HERE: closing paragraphs. -->
                     <noscript><p>Enable JavaScript to use the interactive demos and typeset equations.</p></noscript>
+                </div>
+            </article>
+
+            <article class="blog-post post-placeholder" id="covariant-derivatives" aria-labelledby="covariant-title">
+                <header class="post-header">
+                    <ul class="post-tags" aria-label="Post categories">
+                        <li>math</li>
+                        <li>physics</li>
+                    </ul>
+                    <h2 id="covariant-title">Covariant Derivatives</h2>
+                </header>
+                <div class="post-text">
+                    <p class="placeholder-note">Coming soon.</p>
+                    <!-- WRITE HERE: the Covariant Derivatives post. -->
+                </div>
+            </article>
+
+            <article class="blog-post post-placeholder" id="sperm-whales-and-moby-dick" aria-labelledby="whales-title">
+                <header class="post-header">
+                    <ul class="post-tags" aria-label="Post categories">
+                        <li>literature</li>
+                    </ul>
+                    <h2 id="whales-title">Sperm Whales and Moby Dick</h2>
+                </header>
+                <div class="post-text">
+                    <p class="placeholder-note">Coming soon.</p>
+                    <!-- WRITE HERE: the Sperm Whales and Moby Dick post. -->
+                </div>
+            </article>
+
+            <article class="blog-post" id="top-10-books-of-2026" aria-labelledby="books-title">
+                <header class="post-header">
+                    <ul class="post-tags" aria-label="Post categories">
+                        <li>literature</li>
+                    </ul>
+                    <h2 id="books-title">My Top 10 Books of 2026</h2>
+                </header>
+                <div class="post-text">
+                    <p class="placeholder-note">A reading list in progress.</p>
+                    <!-- WRITE HERE: an introduction to the list. Replace each title, author,
+                         and notes placeholder below with your own words. -->
+                    <ol class="book-list">
+                        <li><h3>Book title</h3><p class="book-author">Author</p><p class="book-notes">Your notes…</p></li>
+                        <li><h3>Book title</h3><p class="book-author">Author</p><p class="book-notes">Your notes…</p></li>
+                        <li><h3>Book title</h3><p class="book-author">Author</p><p class="book-notes">Your notes…</p></li>
+                        <li><h3>Book title</h3><p class="book-author">Author</p><p class="book-notes">Your notes…</p></li>
+                        <li><h3>Book title</h3><p class="book-author">Author</p><p class="book-notes">Your notes…</p></li>
+                        <li><h3>Book title</h3><p class="book-author">Author</p><p class="book-notes">Your notes…</p></li>
+                        <li><h3>Book title</h3><p class="book-author">Author</p><p class="book-notes">Your notes…</p></li>
+                        <li><h3>Book title</h3><p class="book-author">Author</p><p class="book-notes">Your notes…</p></li>
+                        <li><h3>Book title</h3><p class="book-author">Author</p><p class="book-notes">Your notes…</p></li>
+                        <li><h3>Book title</h3><p class="book-author">Author</p><p class="book-notes">Your notes…</p></li>
+                    </ol>
                 </div>
             </article>
         </div>
