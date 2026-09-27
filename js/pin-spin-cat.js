@@ -331,7 +331,7 @@
       sub: "the 720° trick",
       hint:
         "The light grey cat is the starting point. " +
-        "Drag the cat around the ball of yarn, or press Play. " +
+        "Drag the cat around the ball of yarn, or press play. " +
         "The second mirror always sits at half the angle.",
     },
     kaleido: {

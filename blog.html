@@ -69,8 +69,9 @@
                 <details class="blog-demo" name="reflections-demos">
                     <summary>Loops of Rotations</summary>
                     <div class="post-text demo-intro">
-                        <p>Two reflections rotate the cat through twice the angle between the mirrors. Here, \(u\) stays fixed while \(w\), the other mirror’s normal arrow, turns at half the cat’s speed.</p>
-                        <p>After the cat travels around 360°, the mirror lines are back where they started, but \(w\) points the other way and \(g=-1\). To get that arrow back to its starting direction, the cat has to travel around twice: 720°. Then \(g=+1\).</p>
+                        <p>Two reflections rotate the cat through twice the angle between the mirrors. Here, \(u\) stays fixed while \(w\), the other mirror’s normal arrow, turns.</p>
+                        <p>After the cat travels around 360°, the mirror lines are back where they started, the rotation is the same. But the \(w\) vector points the other way around, it is the negative of where it started. The group element in \(\mathrm{SO}(2)\) is the same \(1\), but in \(\operatorname{Spin}(2)\) the group element is \(-1\).</p>
+                        <p>To get the arrows back to normal, the cat has to go around twice, then the Spin element is back to the identity.</p>
                     </div>
                     <pin-spin-cat class="blog-visualization" modes="spin" mode="spin" theme="light" aria-label="Loops of rotations demo"></pin-spin-cat>
                 </details>
