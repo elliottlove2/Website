@@ -705,6 +705,10 @@
     .stage:focus { outline: none; }
     .stage:focus-visible { outline: 2px solid var(--bs-glass); outline-offset: 2px; }
     .view { position: absolute; top: 6px; right: 6px; font-size: 0.78em; padding: 4px 9px; }
+    .camera-presets { display: flex; align-items: center; gap: 6px; padding-top: 8px; }
+    .camera-presets .lab { margin-right: 2px; }
+    .camera-presets .btn { min-width: 34px; min-height: 34px; padding: 6px 9px; }
+    @media (pointer: coarse) { .camera-presets .btn { min-width: 44px; min-height: 44px; } }
     .side { display: grid; gap: 10px; align-content: start; min-width: 0; }
     .panel { background: var(--bs-stage); border-radius: 12px; }
 
@@ -774,6 +778,17 @@
     details.sub[open] > summary { margin-bottom: 8px; }
     details.sub > .controls, details.sub > .solve-out { margin-bottom: 8px; }
     .solve-out { font-size: 0.94em; }
+    .axis-fields { display: flex; flex-wrap: wrap; align-items: end; gap: 8px; max-width: 440px; margin-bottom: 6px; }
+    .axis-values { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; flex: 1 1 210px; min-width: 0; }
+    .axis-values label { display: grid; gap: 3px; font-size: 0.88em; color: var(--bs-muted); }
+    .axis-values input {
+      box-sizing: border-box; width: 100%; min-width: 0; padding: 6px 7px;
+      font: inherit; font-size: 16px; color: var(--bs-ink); background: var(--bs-paper);
+      border: 1px solid var(--bs-line); border-radius: 7px;
+    }
+    .axis-values input[aria-invalid="true"] { border-color: var(--bs-odd); }
+    .axis-error { margin: 6px 0 0; color: var(--bs-odd); font-size: 0.84em; }
+    .axis-error:empty { display: none; }
 
     .symbol-key {
       border-top: 1px solid var(--bs-line); padding-top: 10px;
@@ -795,6 +810,7 @@
         <div class="stage-wrap">
           <canvas class="stage" tabindex="0" role="img" aria-describedby="bs-keys"></canvas>
           <button class="btn quiet view" type="button" title="Reset the view (double-click the diagram, or press V)">Reset view</button>
+          <div class="camera-presets" role="group" aria-label="Camera presets" hidden></div>
         </div>
         <div class="side">
           <canvas class="panel" role="img"></canvas>
@@ -826,6 +842,12 @@
   // inside the disc is the sphere point with depth ±√(1 − x² − y²).
 
   const VIEW = { yaw: 24 * DEG, pitch: 17 * DEG };
+  const CAMERA_PRESETS = [
+    { ...VIEW, label: "Perspective" },
+    { yaw: 0, pitch: 0, label: "Front" },
+    { yaw: 90 * DEG, pitch: 0, label: "Side" },
+    { yaw: VIEW.yaw, pitch: 75 * DEG, label: "Above" },
+  ];
   const RADIUS = 0.39; // one world unit as a fraction of the stage's short side
 
   // Wireframe: equator, four meridians, two latitudes. Precomputed once.
@@ -1498,6 +1520,30 @@
   const btnHTML = (act, text, cls = "", aria = "") =>
     `<button type="button" class="btn ${cls}" data-act="${act}"${aria ? ` aria-label="${aria}"` : ""}>${text}</button>`;
   const checkHTML = (name, text) => `<label class="check"><input type="checkbox" name="${name}"> ${text}</label>`;
+  const axisEditorHTML = () => `
+    <details class="sub custom-axis">
+      <summary>Custom axis</summary>
+      <form class="axis-editor" aria-label="Custom axis" novalidate>
+        <div class="axis-fields">
+          <div class="axis-values">
+            ${["x", "y", "z"].map((c) => `<label>${c}<input type="number" name="axis-${c}" data-axis-component="${c}" step="any" required aria-label="Custom axis ${c}"></label>`).join("")}
+          </div>
+          <button class="btn" type="submit">Apply</button>
+        </div>
+        <p class="hint">Direction only; normalized to unit length.</p>
+        <p class="axis-error" role="status" aria-live="polite"></p>
+      </form>
+    </details>`;
+
+  // Scale before measuring length so finite extremes do not overflow or underflow.
+  const normalizedAxis = (v) => {
+    if (v.length !== 3 || !v.every(Number.isFinite)) return null;
+    const largest = Math.max(...v.map(Math.abs));
+    if (largest === 0) return null;
+    const scaled = v.map((x) => x / largest);
+    const length = Math.hypot(...scaled);
+    return scaled.map((x) => x / length);
+  };
 
   // Parse an axis attribute: "x", "-z", or "nx,ny,nz".
   const parseAxis = (s) => {
@@ -1506,7 +1552,7 @@
     const named = { x: [1, 0, 0], y: [0, 1, 0], z: [0, 0, 1], "-x": [-1, 0, 0], "-y": [0, -1, 0], "-z": [0, 0, -1] };
     if (named[t]) return named[t];
     const v = t.split(/[\s,]+/).map(Number);
-    return v.length === 3 && v.every(Number.isFinite) && norm(v) > 0 ? unit(v) : null;
+    return normalizedAxis(v);
   };
   const numAttr = (s, fallback) => {
     const v = parseFloat(s);
@@ -1545,11 +1591,30 @@
   };
 
   class Mode {
-    constructor(api) { this.api = api; this.el = null; }
+    constructor(api) { this.api = api; this.el = null; this.axisEditorAxis = null; }
     mount(el) {
       this.el = el;
+      this.axisEditorAxis = null;
       el.innerHTML = this.controls();
-      el.addEventListener("input", (e) => { if (e.target.name) this.onInput(e.target); this.api.draw(); });
+      el.addEventListener("input", (e) => {
+        if (e.target.matches("[data-axis-component]")) this.axisError("");
+        else if (e.target.name) this.onInput(e.target);
+        this.api.draw();
+      });
+      el.addEventListener("submit", (e) => {
+        if (!e.target.matches(".axis-editor")) return;
+        e.preventDefault();
+        const fields = [...e.target.querySelectorAll("[data-axis-component]")];
+        if (fields.some((field) => !field.value.trim() || !Number.isFinite(field.valueAsNumber))) {
+          this.axisError("Enter finite numbers for x, y and z.");
+          return;
+        }
+        const axis = normalizedAxis(fields.map((field) => field.valueAsNumber));
+        if (!axis) { this.axisError("Use at least one nonzero component."); return; }
+        this.applyCustomAxis(axis);
+        this.api.announce("Custom axis applied and normalized.");
+        this.api.draw();
+      });
       el.addEventListener("click", (e) => {
         const b = e.target.closest("[data-act]");
         if (b && !b.disabled) { this.onAction(b.dataset.act, b); this.api.draw(); }
@@ -1558,6 +1623,31 @@
     }
     $(name) { return this.el ? this.el.querySelector(`[name="${name}"]`) : null; }
     q(sel) { return this.el ? this.el.querySelector(sel) : null; }
+    axisError(message) {
+      const form = this.q(".axis-editor");
+      if (!form) return;
+      form.querySelector(".axis-error").textContent = message;
+      for (const field of form.querySelectorAll("[data-axis-component]")) {
+        if (message) field.setAttribute("aria-invalid", "true");
+        else field.removeAttribute("aria-invalid");
+      }
+    }
+    syncAxisControls(axis, presets, force = false) {
+      const form = this.q(".axis-editor");
+      if (!form) return;
+      // Animation and unrelated controls must leave an unfinished draft alone.
+      if (force || !this.axisEditorAxis || axis.some((x, i) => x !== this.axisEditorAxis[i])) {
+        [...form.querySelectorAll("[data-axis-component]")].forEach((field, i) => { field.value = String(Number(axis[i].toPrecision(6))); });
+        this.axisEditorAxis = axis.slice();
+        this.axisError("");
+      }
+      for (const [key, [preset]] of Object.entries(presets)) {
+        const button = this.q(`[data-act="${key}"]`);
+        // Match at the precision shown in the numeric fields.
+        if (button) button.setAttribute("aria-pressed", String(Math.hypot(...axis.map((x, i) => x - preset[i])) < 1e-6));
+      }
+    }
+    applyCustomAxis() {}
     setOut(name, value, text) {
       const s = this.$(name), o = this.$(`${name}-out`);
       // don't fight the user's thumb while they drag this slider
@@ -1852,7 +1942,8 @@
         <div class="controls" role="group" aria-label="Rotation axis presets">
           <span class="lab">axis</span>
           ${Object.entries(ROT_AXES).map(([k, a]) => btnHTML(k, `<span class="m">${a[1]}</span>`, "", `Axis ${a[1]}`)).join("")}
-        </div>`;
+        </div>
+        ${axisEditorHTML()}`;
     }
 
     sync() {
@@ -1861,6 +1952,14 @@
       if (b) b.textContent = this.playing ? "Pause" : "Play";
       const c = this.$("op");
       if (c) c.checked = this.opView;
+      this.syncAxisControls(this.n, ROT_AXES);
+    }
+
+    applyCustomAxis(axis) {
+      this.pause();
+      this.n = axis;
+      this.syncAxisControls(this.n, ROT_AXES, true);
+      this.sync();
     }
 
     onInput(t) {
@@ -1891,6 +1990,7 @@
       else if (act === "p720") this.goTo(2 * TAU);
       else if (ROT_AXES[act]) {
         this.n = ROT_AXES[act][0].slice();
+        this.syncAxisControls(this.n, ROT_AXES, true);
         this.api.announce(`Axis ${ROT_AXES[act][1]}.`);
       }
       this.sync();
@@ -1940,7 +2040,10 @@
     }
 
     handles() {
-      return [{ id: "n", label: "rotation axis n̂", key: "arrow", get: () => this.n, set: (v) => { this.n = v; } }];
+      return [{ id: "n", label: "rotation axis n̂", key: "arrow", get: () => this.n, set: (v) => {
+        this.n = v;
+        this.syncAxisControls(this.n, ROT_AXES, true);
+      } }];
     }
 
     drawStage(R, active) {
@@ -2522,7 +2625,8 @@
         <div class="controls" role="group" aria-label="Target axis presets">
           <span class="lab">axis</span>
           ${Object.entries(PULSE_AXES).map(([k, a]) => btnHTML(k, `<span class="m">${a[1]}</span>`, "", `Target axis ${a[1]}`)).join("")}
-        </div>`;
+        </div>
+        ${axisEditorHTML()}`;
     }
 
     sync() {
@@ -2534,6 +2638,14 @@
       if (bk) bk.disabled = this.s <= 0;
       const c = this.$("compare");
       if (c) c.checked = this.compare;
+      this.syncAxisControls(this.n, PULSE_AXES);
+    }
+
+    applyCustomAxis(axis) {
+      this.pause();
+      this.n = axis;
+      this.syncAxisControls(this.n, PULSE_AXES, true);
+      this.sync();
     }
 
     onInput(t) {
@@ -2571,6 +2683,7 @@
         this.say(0);
       } else if (PULSE_AXES[act]) {
         this.n = PULSE_AXES[act][0].slice();
+        this.syncAxisControls(this.n, PULSE_AXES, true);
         this.api.announce(`Target axis ${PULSE_AXES[act][1]}.`);
       }
       this.sync();
@@ -2613,7 +2726,10 @@
     }
 
     handles() {
-      return [{ id: "n", label: "target axis n̂", key: "arrow", get: () => this.n, set: (v) => { this.n = v; } }];
+      return [{ id: "n", label: "target axis n̂", key: "arrow", get: () => this.n, set: (v) => {
+        this.n = v;
+        this.syncAxisControls(this.n, PULSE_AXES, true);
+      } }];
     }
 
     drawStage(R, active) {
@@ -3291,6 +3407,7 @@
         wrap: $(".stage-wrap"),
         stage: $(".stage"),
         view: $(".view"),
+        cameras: $(".camera-presets"),
         side: $(".side"),
         panel: $(".panel"),
         legend: $(".legend"),
@@ -3301,6 +3418,9 @@
         live: $('[aria-live]'),
       };
       this.#bg = document.createElement("canvas");
+      this.#el.cameras.innerHTML = `<span class="lab">View</span>` + CAMERA_PRESETS.map((view, i) =>
+        `<button type="button" class="btn" data-camera="${i}" aria-label="Camera preset ${i + 1}: ${view.label}" title="${view.label}" aria-pressed="false">${i + 1}</button>`
+      ).join("");
       this.#api = {
         draw: () => this.#invalidate(),
         announce: (t) => this.#announce(t),
@@ -3312,7 +3432,15 @@
     }
 
     #wire(root) {
-      const { tabs, stage, view, panels } = this.#el;
+      const { tabs, stage, view, panels, cameras } = this.#el;
+
+      cameras.addEventListener("click", (e) => {
+        const button = e.target.closest("[data-camera]");
+        if (!button) return;
+        const i = Number(button.dataset.camera);
+        this.#touched = true;
+        this.#moveView(CAMERA_PRESETS[i], `Camera preset ${i + 1}: ${CAMERA_PRESETS[i].label}.`);
+      });
 
       tabs.addEventListener("click", (e) => {
         const tab = e.target.closest("[data-mode]");
@@ -3394,6 +3522,7 @@
       this.#mode = m;
       this.#bgDirty = true;
       this.#drag = null;
+      this.#el.cameras.hidden = id !== "mirrors3d";
       for (const tab of this.#el.tabs.children) tab.setAttribute("aria-selected", String(tab.dataset.mode === id));
       for (const box of this.#el.panels.children) box.hidden = box.dataset.for !== id;
       const hs = m.handles();
@@ -3413,13 +3542,30 @@
     }
 
     #resetView() {
-      const to = [VIEW.yaw + TAU * Math.round((this.#yaw - VIEW.yaw) / TAU), VIEW.pitch];
+      this.#moveView(VIEW, "View reset.");
+    }
+
+    #moveView(view, announcement) {
+      const turn = Math.atan2(Math.sin(view.yaw - this.#yaw), Math.cos(view.yaw - this.#yaw));
+      const to = [this.#yaw + turn, view.pitch];
+      this.#viewTween.on = false;
+      this.#drag = null;
       if (this.#api.reduced()) {
         [this.#yaw, this.#pitch] = to;
         this.#bgDirty = true;
       } else this.#viewTween.go([this.#yaw, this.#pitch], to, 0.45);
-      this.#announce("View reset.");
+      this.#announce(announcement);
       this.#invalidate();
+    }
+
+    #cameraSelection() {
+      if (this.#el.cameras.hidden) return;
+      for (const button of this.#el.cameras.querySelectorAll("[data-camera]")) {
+        const view = CAMERA_PRESETS[Number(button.dataset.camera)];
+        const yawError = Math.atan2(Math.sin(view.yaw - this.#yaw), Math.cos(view.yaw - this.#yaw));
+        const selected = String(Math.abs(yawError) < 1e-6 && Math.abs(view.pitch - this.#pitch) < 1e-6);
+        if (button.getAttribute("aria-pressed") !== selected) button.setAttribute("aria-pressed", selected);
+      }
     }
 
     // ── pointer and keys ──
@@ -3530,6 +3676,7 @@
         const step = (e.shiftKey ? 15 : 3) * DEG;
         const h = hs.find((x) => x.id === this.#active) || hs[0];
         if (e.altKey || !h) {
+          this.#viewTween.on = false;
           this.#yaw -= dir[0] * step;
           this.#pitch = clamp(this.#pitch + dir[1] * step, -85 * DEG, 85 * DEG);
           this.#bgDirty = true;
@@ -3652,6 +3799,7 @@
       this.#palette();
       const R = this.#R, S = this.#S, dpr = this.#dpr;
       R.view(S, S, this.#yaw, this.#pitch);
+      this.#cameraSelection();
 
       if (this.#bgDirty) {
         const b = this.#bg.getContext("2d");
