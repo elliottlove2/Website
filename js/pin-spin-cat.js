@@ -529,6 +529,8 @@
   class PinSpinCat extends HTMLElement {
     static observedAttributes = ["theme", "cat-src"];
     static algebra = { mv, unit, mul, neg, reverse, act, matrixOf, describe };
+    // Reuse the same asymmetric cat in the 3D reflection and rotation views.
+    static drawVectorCat = drawVectorCat;
 
     #el = {}; // handles into the shadow DOM
     #colors = null; // palette, read from the --psc-* properties

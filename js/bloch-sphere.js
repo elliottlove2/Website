@@ -90,7 +90,7 @@
     return { theta: Math.acos(clamp(u[2], -1, 1)), phi: Math.atan2(u[1], u[0]) };
   };
 
-  // Any unit vector perpendicular to n (used for flags, discs and arcs).
+  // Any unit vector perpendicular to n (used for flags, planes and arcs).
   const perp = (n) => {
     const u = unit(n);
     const t = Math.abs(u[2]) < 0.9 ? [0, 0, 1] : [1, 0, 0];
@@ -624,6 +624,10 @@
     glass: "#6f9cc0", arrow: "#2e4a6c", even: "#1b8478", odd: "#c0437c",
   };
 
+  const CAT_PALETTE = {
+    fur: "#ee9f4f", furDark: "#c2692a", catInk: "#43291a", pink: "#f2a2a4", bell: "#e8b830",
+  };
+
   const MATH_FONT = '"Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", "STIX Two Text", Georgia, serif';
 
   // Numbers with a real minus sign (U+2212), and no "−0.000".
@@ -790,7 +794,7 @@
       <div class="body">
         <div class="stage-wrap">
           <canvas class="stage" tabindex="0" role="img" aria-describedby="bs-keys"></canvas>
-          <button class="btn quiet view" type="button" title="Reset the view (double-click the sphere, or press V)">Reset view</button>
+          <button class="btn quiet view" type="button" title="Reset the view (double-click the diagram, or press V)">Reset view</button>
         </div>
         <div class="side">
           <canvas class="panel" role="img"></canvas>
@@ -804,7 +808,7 @@
         <summary>What the symbols mean</summary>
         <dl></dl>
       </details>
-      <p class="sr" id="bs-keys">Drag the sphere to turn the view. With the sphere focused, arrow keys move the highlighted handle
+      <p class="sr" id="bs-keys">Drag the diagram to turn the view. With the diagram focused, arrow keys move the highlighted handle
         (Shift for bigger steps), Enter picks the next handle, F flips a mirror normal, Alt with arrow keys turns the view,
         and V resets it.</p>
       <div class="sr" aria-live="polite"></div>
@@ -822,7 +826,7 @@
   // inside the disc is the sphere point with depth ±√(1 − x² − y²).
 
   const VIEW = { yaw: 24 * DEG, pitch: 17 * DEG };
-  const RADIUS = 0.39; // sphere radius as a fraction of the stage's short side
+  const RADIUS = 0.39; // one world unit as a fraction of the stage's short side
 
   // Wireframe: equator, four meridians, two latitudes. Precomputed once.
   const WIRE_N = 96;
@@ -1164,27 +1168,83 @@
       });
     }
 
-    // A mirror plane through the origin: a unit disc with normal n, split
-    // into the half facing the viewer and the half behind the origin.
-    disc(n, key, alpha = 0.14) {
-      const u = unit(n);
-      let L = cross(u, Array.from(this.d));
-      if (norm(L) < 1e-6) L = perp(u);
-      L = unit(L);
-      const M = cross(u, L);
-      const md = this.depth(M);
-      for (const side of [0, 1]) {
-        const t0 = side ? Math.PI : 0;
-        const count = fillRing([0, 0, 0], L, M, t0, t0 + Math.PI, 49);
-        const z = (side ? -1 : 1) * 0.42 * md;
-        this.fill(SCRATCH, count, key, alpha, z - 0.001);
-        this.curve(SCRATCH, count, key, { width: 1.2, alpha: 0.8, dashBack: false, backAlpha: 0.5 });
+    // A cat centered at a unit position p, with vertical tangent f and left
+    // tangent gdir. Project the transformed frame itself: a reflection must
+    // reflect the cat, and orbiting the camera must reveal its foreshortening.
+    cat(p, f, gdir, key, { alpha = 1 } = {}) {
+      const drawCat = customElements.get("pin-spin-cat")?.drawVectorCat;
+      if (!drawCat) {
+        // Keep this standalone element usable without the optional cat widget.
+        this.flag(p, f, gdir, key, { alpha });
+        return;
       }
+      this.pv(p);
+      const x = this.X, y = this.Y, z = this.Z;
+      const size = Math.min(48, 0.34 * this.R);
+      const right = scale(gdir, -1);
+      const xx = size * dot(right, this.rt), xy = -size * dot(right, this.up);
+      const yx = size * dot(f, this.rt), yy = -size * dot(f, this.up);
+      const opacity = alpha * this.fade(z);
+      const palette = this.dark ? { ...CAT_PALETTE, catInk: "#2a1a10" } : CAT_PALETTE;
+      const collar = this.col(key);
+      this.push(z + 0.01, (g) => {
+        g.globalAlpha = opacity;
+        g.transform(xx, xy, yx, yy, x, y);
+        drawCat(g, 1 / size, palette, collar);
+      });
     }
 
-    // ── Background: shaded ball, wireframe, axes. Drawn to an offscreen
-    // canvas and reused until the camera, size or palette changes.
-    background(g) {
+    // A rectangular patch of the infinite mirror plane through the origin.
+    // Its frame is fixed in world space, and n and −n use identical corners.
+    plane(n, key, alpha = 0.14, tangent = null) {
+      let u = unit(n);
+      const major = Math.abs(u[0]) >= Math.abs(u[1]) && Math.abs(u[0]) >= Math.abs(u[2]) ? 0 :
+        Math.abs(u[1]) >= Math.abs(u[2]) ? 1 : 2;
+      if (u[major] < 0) u = scale(u, -1);
+      // Transport the previous tangent when a handle moves, avoiding a
+      // sudden in-plane turn when the fallback reference axis changes.
+      const t = tangent && sub(tangent, scale(u, dot(tangent, u)));
+      const a = t && norm(t) > 1e-6 ? unit(t) : perp(u), b = cross(u, a);
+      // Every corner is within 1.18 units of the origin, leaving room even
+      // when a corner points toward a stage edge on a small screen.
+      const corners = [[-1, -1], [1, -1], [1, 1], [-1, 1]]
+        .map(([s, t]) => add(scale(a, 0.9 * s), scale(b, 0.75 * t)));
+      const depths = corners.map((p) => this.depth(p));
+
+      // Split at the camera's zero-depth plane for the painter's queue.
+      // Only the outer edges are stroked, so the split adds no visible seam.
+      const faceOn = depths.every((z) => Math.abs(z) < 1e-10);
+      for (const side of faceOn ? [1] : [-1, 1]) {
+        const polygon = faceOn ? corners.slice() : [];
+        for (let i = 0; !faceOn && i < 4; i++) {
+          const j = (i + 1) % 4;
+          const da = side * depths[i], db = side * depths[j];
+          if (da >= 0) polygon.push(corners[i]);
+          if ((da >= 0) !== (db >= 0)) {
+            polygon.push(add(corners[i], scale(sub(corners[j], corners[i]), da / (da - db))));
+          }
+        }
+        let z = 0;
+        polygon.forEach((p, i) => {
+          SCRATCH[3 * i] = p[0]; SCRATCH[3 * i + 1] = p[1]; SCRATCH[3 * i + 2] = p[2];
+          z += this.depth(p);
+        });
+        if (polygon.length >= 3) this.fill(SCRATCH, polygon.length, key, alpha, z / polygon.length - 0.001);
+      }
+      for (let i = 0; i < 4; i++) {
+        const j = (i + 1) % 4;
+        const edge = { width: 1.2, alpha: 0.8, dashBack: false };
+        if ((depths[i] >= 0) !== (depths[j] >= 0)) {
+          const middle = add(corners[i], scale(sub(corners[j], corners[i]), depths[i] / (depths[i] - depths[j])));
+          this.line(corners[i], middle, key, edge);
+          this.line(middle, corners[j], key, edge);
+        } else this.line(corners[i], corners[j], key, edge);
+      }
+      return a;
+    }
+
+    // The shaded ball and wireframe belong only to the Bloch-state views.
+    sphereBackground(g) {
       const { cx, cy, R } = this;
       const grad = g.createRadialGradient(cx - 0.38 * R, cy - 0.42 * R, 0.05 * R, cx, cy, R);
       const hi = this.dark ? "ink" : "paper";
@@ -1223,7 +1283,12 @@
       g.setLineDash([]);
       g.strokeStyle = this.col("muted", 0.4);
       runs(false);
+    }
 
+    // ── Background: axes, plus the sphere in the Bloch-state views. Drawn
+    // offscreen and reused until the mode, camera, size or palette changes.
+    background(g, sphere) {
+      if (sphere) this.sphereBackground(g);
       // axes: back halves dashed
       g.lineWidth = 0.9;
       for (let k = 0; k < 3; k++) {
@@ -1448,7 +1513,7 @@
     return Number.isFinite(v) ? v : fallback;
   };
 
-  // The "north" tangent at r, used to attach flags.
+  // The "north" tangent at r, used to orient cats and flags.
   const northOf = (r) => {
     const t = sub([0, 0, 1], scale(r, r[2]));
     return norm(t) > 1e-6 ? unit(t) : [1, 0, 0];
@@ -1515,6 +1580,7 @@
     readout() { return ""; }
     applyAttrs() {}
     get kets() { return true; }
+    get sphere() { return true; }
   }
 
   // ─── 6a. State → arrow ─────────────────────────────────────────────────────
@@ -1735,7 +1801,7 @@
 
   // ─── 6b. Rotate: U vs R ────────────────────────────────────────────────────
   //
-  // One rotor drives everything: the arrow and its flag move by act(rotor),
+  // One rotor drives everything: the cat and its frame move by act(rotor),
   // the matrix is toSU2(rotor), and the phasors are toSU2(rotor) ψ₀.
 
   const ROT_AXES = {
@@ -1747,6 +1813,9 @@
     static id = "rotate";
     static label = "Rotate";
     static sub = "U vs R";
+
+    get kets() { return false; }
+    get sphere() { return false; }
 
     constructor(api) {
       super(api);
@@ -1844,7 +1913,7 @@
 
     noteCrossing(a, b, always = false) {
       const say = (x) => {
-        if (Math.abs(x - TAU) < 1e-9) this.api.announce(`360°: the arrow is home, but U = ${MINUS}I and the state is ${MINUS}ψ.`);
+        if (Math.abs(x - TAU) < 1e-9) this.api.announce(`360°: the cat is home, but U = ${MINUS}I and the state is ${MINUS}ψ.`);
         else if (Math.abs(x - 2 * TAU) < 1e-9) this.api.announce("720°: home again, and now U = +I.");
         else if (x === 0) this.api.announce("0°: U = +I.");
       };
@@ -1893,10 +1962,8 @@
         R.curve(SCRATCH, c, "even", { width: 2.4 });
       }
 
-      R.arrow([0, 0, 0], this.r0, "even", { width: 2, alpha: 0.3 });
-      R.flag(this.r0, this.f0, this.g0, "even", { alpha: 0.3 });
-      R.arrow([0, 0, 0], r, "even", { width: 3.2 });
-      R.flag(r, f, gg, "even");
+      R.cat(this.r0, this.f0, this.g0, "even", { alpha: 0.3 });
+      R.cat(r, f, gg, "even");
     }
 
     panelAspect() { return 1.12; }
@@ -1907,7 +1974,7 @@
       groupPanel(g, R, 0, 0, w, gh, {
         key: "even", up: a / 2, down: a, upTrail: a / 2, downTrail: a,
         upTitle: "SU(2)", upSub: "signs kept", upSub2: "dot at s/2",
-        downTitle: "SO(3)", downSub: "arrow moves", downSub2: "dot at s",
+        downTitle: "SO(3)", downSub: "cat moves", downSub2: "dot at s",
         upInner: "U", downInner: "R", mapName: "Ad",
         upMarks: [[0, "I"], [Math.PI, `${MINUS}I`]], downMarks: [[0, "I"]],
         upName: "U", antiName: `${MINUS}U`,
@@ -1925,26 +1992,27 @@
     }
 
     legend() {
-      return [["even", "the arrow and its flag"], ["even", "<em>U</em>"], ["even", `<em>${MINUS}U</em>`, "ring"], ["arrow", "axis <em>n̂</em>, amplitudes of <em>U</em>ψ₀"]];
+      return [["even", "the cat’s collar"], ["even", "<em>U</em>"], ["even", `<em>${MINUS}U</em>`, "ring"], ["arrow", "axis <em>n̂</em>, amplitudes of <em>U</em>ψ₀"]];
     }
     hint() {
-      return "Drag the axis handle, set θ, or press Play. The arrow and its flag come home at 360°, but U = −I there and both phasors point backwards (dashed: the start). Only at 720° is U = +I again.";
+      return "Drag the axis handle, set θ, or press Play. The cat moves and turns in space, so it can appear edge-on. " +
+        "It comes home at 360°, but U = −I there and both phasors point backwards (dashed: the start). Only at 720° is U = +I again.";
     }
     glossary() {
       return [
         ["n̂, θ", "rotation axis and angle"],
         ["U = R(θ, n̂)", "exp(−iθ/2 n̂·σ) = cos(θ/2) I − i sin(θ/2) n̂·σ, in SU(2)"],
-        ["R(θ, n̂)", "the 3×3 rotation of the arrow, in SO(3)"],
+        ["R(θ, n̂)", "the 3×3 rotation of the cat’s position and orientation, in SO(3)"],
         ["I", "identity matrix"],
         ["U†", "conjugate transpose of U"],
         ["Ad", "the 2 : 1 map SU(2) → SO(3), U ↦ R with U(v·σ)U† = (Rv)·σ"],
-        ["r∥, r⊥", "parts of r along and across n̂"],
+        ["r∥, r⊥", "parts of the cat’s unit position vector r along and across n̂"],
         ["α, β", "amplitudes of the rotated state Uψ₀"],
       ];
     }
     describe() {
       const r = act(this.rotor(), this.r0);
-      return `Rotation by ${fmt(this.angle / DEG, 0)}° about n̂ = (${this.n.map((x) => fmt(x, 2)).join(", ")}); arrow at (${r.map((x) => fmt(x, 2)).join(", ")}).`;
+      return `Rotation by ${fmt(this.angle / DEG, 0)}° about n̂ = (${this.n.map((x) => fmt(x, 2)).join(", ")}); cat at (${r.map((x) => fmt(x, 2)).join(", ")}).`;
     }
     readout() {
       const Rt = this.rotor(), U = toSU2(Rt), M = o3(Rt);
@@ -1952,7 +2020,7 @@
       const near = (x) => Math.abs(deg - x) < 0.5;
       let note;
       if (near(0)) note = `<div class="note">U = +I: nothing has turned yet.</div>`;
-      else if (near(360)) note = `<div class="note">Home again: the arrow and its flag are back, but U = ${MINUS}I and the state is ${MINUS}ψ₀.</div>`;
+      else if (near(360)) note = `<div class="note">Home again: the cat’s position and orientation are back, but U = ${MINUS}I and the state is ${MINUS}ψ₀.</div>`;
       else if (near(720)) note = `<div class="note">Home again, and now U = +I.</div>`;
       else if (near(180)) note = `<div class="note">Half turn: U = ${MINUS}i n̂·σ.</div>`;
       else if (near(540)) note = `<div class="note">One and a half turns: U = +i n̂·σ, the negative of the half-turn operator.</div>`;
@@ -2758,9 +2826,9 @@
   // ─── 6e. Mirrors: Pin(3) → O(3) ────────────────────────────────────────────
   //
   // The first post's mirrors, one dimension up. A mirror is now a plane, still
-  // named by a unit normal whose sign it cannot see. The object (an arrow with
-  // a flag and a fin, so it is chiral) is moved by the versor g = … w u, the
-  // product of the normals in the order the mirrors act.
+  // named by a unit normal whose sign it cannot see. A cat's unit position
+  // and tangent frame are moved by the versor g = … w u, the product of the
+  // normals in the order the mirrors act.
 
   const MIRROR_START = [sph(80 * DEG, 100 * DEG), sph(62 * DEG, 150 * DEG), sph(25 * DEG, 20 * DEG)];
   const MIRROR_NAMES = ["u", "w", "v"];
@@ -2782,6 +2850,7 @@
       super(api);
       this.count = 2;
       this.normals = MIRROR_START.map((v) => v.slice());
+      this.planeTangents = [];
       this.flipAt = [-Infinity, -Infinity, -Infinity];
       this.pulseAt = -Infinity;
       this.steps = true;
@@ -2793,6 +2862,7 @@
     }
 
     get kets() { return false; }
+    get sphere() { return false; }
 
     applyAttrs(get) {
       this.count = clamp(Math.round(numAttr(get("mirrors"), 2)), 1, 3);
@@ -2876,6 +2946,7 @@
         this.api.announce(`${this.count} mirror${this.count > 1 ? "s" : ""} left. ${this.describe()}`);
       } else if (act === "reset") {
         this.normals = MIRROR_START.map((v) => v.slice());
+        this.planeTangents = [];
         this.steps = true;
         this.track = {};
         this.api.announce("Reset.");
@@ -2883,7 +2954,7 @@
       this.sync();
     }
 
-    // Same mirror, opposite normal. The arrow cannot tell; Pin(3) can.
+    // Same mirror, opposite normal. The cat cannot tell; Pin(3) can.
     flip(k) {
       if (k >= this.count) return;
       this.normals[k] = scale(this.normals[k], -1);
@@ -2917,7 +2988,7 @@
       const N = this.normals, c = this.count;
       const parity = (j) => (j % 2 ? "odd" : "even");
 
-      for (let k = 0; k < c; k++) R.disc(N[k], "glass", 0.16);
+      for (let k = 0; k < c; k++) this.planeTangents[k] = R.plane(N[k], "glass", 0.16, this.planeTangents[k]);
 
       // the line where the first two mirrors meet, and the angle between their normals
       if (c >= 2) {
@@ -2942,20 +3013,18 @@
         }
       }
 
-      // the starting arrow, each bounce, and the final image
-      R.arrow([0, 0, 0], this.r0, "even", { width: 2, alpha: 0.28 });
-      R.flag(this.r0, this.f0, this.g0, "even", { alpha: 0.28 });
+      // The starting cat, each bounce, and the final image. Position vectors
+      // are invisible; only the mirror normals are drawn as arrows.
+      R.cat(this.r0, this.f0, this.g0, "even", { alpha: 0.28 });
       if (this.steps) {
         for (let j = 1; j < c; j++) {
           const gj = this.spin(j), rj = act(gj, this.r0);
-          R.arrow([0, 0, 0], rj, parity(j), { width: 2, alpha: 0.5 });
-          R.flag(rj, act(gj, this.f0), act(gj, this.g0), parity(j), { alpha: 0.5 });
+          R.cat(rj, act(gj, this.f0), act(gj, this.g0), parity(j), { alpha: 0.5 });
           R.text(scale(rj, 1.13), String(j), "muted", { size: 11 });
         }
       }
       const G = this.spin(), rG = act(G, this.r0);
-      R.arrow([0, 0, 0], rG, parity(c), { width: 3.2 });
-      R.flag(rG, act(G, this.f0), act(G, this.g0), parity(c));
+      R.cat(rG, act(G, this.f0), act(G, this.g0), parity(c));
 
       // the normals: during a flip the arrow shrinks through zero and regrows
       // the other way, while the mirror itself never moves
@@ -2982,7 +3051,7 @@
       groupPanel(g, R, 0, 0, w, h, {
         key: odd ? "odd" : "even", up: a, down: 2 * a,
         upTitle: "Pin(3)", upSub: "signs kept", upSub2: odd ? "odd half" : "even half",
-        downTitle: "O(3)", downSub: "arrow moves", downSub2: odd ? `det ${MINUS}1` : "det +1",
+        downTitle: "O(3)", downSub: "cat moves", downSub2: odd ? `det ${MINUS}1` : "det +1",
         upInner: odd ? "" : "Spin(3)", downInner: odd ? "" : "SO(3)",
         upMarks: odd ? [[0, "I"], [Math.PI, `${MINUS}I`]] : [[0, "1"], [Math.PI, `${MINUS}1`]],
         downMarks: [[0, odd ? `${MINUS}id` : "id"]],
@@ -2995,14 +3064,15 @@
       const k = this.count % 2 ? "odd" : "even";
       return [
         ["glass", "mirror", "bar"], ["arrow", "normal"],
-        ["even", "even"], ["odd", "odd"],
+        ["even", "even collar"], ["odd", "odd collar"],
         [k, "<em>g</em>"], [k, `<em>${MINUS}g</em>`, "ring"],
       ];
     }
     hint() {
-      return "The light arrow is the starting point. Drag the tip of a normal to turn its mirror. Tap a tip (or press its chip) " +
+      return "The light cat is the starting point; every cat stays one unit from the origin. Each rectangle marks a mirror plane through the origin. " +
+        "Drag the tip of a normal to turn its mirror. Tap a tip (or press its chip) " +
         "to flip the normal: same mirror, same image, opposite sign in the upper diagram. Two mirrors, u then w, make the " +
-        "rotation by twice their angle about the line u × w where they meet.";
+        "rotation by twice their angle about the line u × w where they meet. Cats turn with the transformation and can appear edge-on.";
     }
     glossary() {
       return [
@@ -3038,7 +3108,7 @@
       let s = `<p>g = ${this.word()} = ${mvHTML(G)}</p>`;
       if (c === 1) {
         s += `<p class="aside">One mirror: x ↦ ${MINUS}u x u = x ${MINUS} 2(u·x)u, the reflection in the plane ⟂ u.
-          An odd element: in Pin(3) but not in Spin(3). The flag's fin swaps sides; no rotation can do that.</p>`;
+          An odd element: in Pin(3) but not in Spin(3). Its action on space reverses handedness.</p>`;
       } else if (c === 2) {
         const al = Math.acos(clamp(dot(N[0], N[1]), -1, 1));
         const x = cross(N[0], N[1]);
@@ -3048,7 +3118,7 @@
           <p>w u = w·u + w∧u = cos α ${MINUS} sin α I n̂</p>
           <p>quaternion: ${quatHTML(quat(G))}</p>
           <div class="mat-row">(w·σ)(u·σ) = ${mat2HTML(toSU2(G))}</div>
-          <p class="aside">Two reflections (an even number) make a <b>rotation</b>: the arrow keeps its handedness. This g lies in Spin(3) = SU(2).</p>`;
+          <p class="aside">Two reflections (an even number) make a <b>rotation</b>: the cat’s position and orientation turn together. This g lies in Spin(3) = SU(2).</p>`;
       } else {
         const Rp = mul(G, I3).map((x) => -x);
         const { angle, axis } = rotorAngleAxis(Rp);
@@ -3058,7 +3128,7 @@
             then x ↦ ${MINUS}x. A rotoreflection, with determinant ${MINUS}1.</p>`;
       }
       s += `<div class="mat-row">x ↦ ${c % 2 ? "ĝ x g̃" : "g x g̃"} = ${mat3HTML(M, 2)} <span class="lbl">det = ${fmt(det3(M), 0).replace(/^(\d)/, "+$1")}</span></div>`;
-      s += `<p class="aside">${MINUS}g = ${mvHTML(G.map((x) => -x))} draws exactly the same arrow. Flip any normal to swap the two.</p>`;
+      s += `<p class="aside">${MINUS}g = ${mvHTML(G.map((x) => -x))} draws exactly the same cat. Flip any normal to swap the two.</p>`;
       return s;
     }
   }
@@ -3070,7 +3140,7 @@
   const MODE_ATTRS = ["theta", "phi", "measure", "axis", "angle", "omega", "delta", "drive-phase", "mirrors"];
   const KEYS_ROW = [
     "Keys",
-    "With the sphere focused: arrow keys move the highlighted handle (Shift: 15° steps), Enter picks the next handle, " +
+    "With the diagram focused: arrow keys move the highlighted handle (Shift: 15° steps), Enter picks the next handle, " +
       "F flips a mirror normal, Alt + arrow keys turn the view, V resets it.",
   ];
   const WIDE = 720; // px of container width for the side-by-side layout
@@ -3106,7 +3176,7 @@
     #ready = false;
 
     #R = new Renderer();
-    #bg = null; // offscreen canvas: ball, wireframe and axes
+    #bg = null; // offscreen canvas: axes, plus the sphere in Bloch-state views
     #bgDirty = true;
     #yaw = VIEW.yaw;
     #pitch = VIEW.pitch;
@@ -3269,15 +3339,15 @@
       stage.addEventListener("keydown", (e) => this.#onKey(e));
       stage.addEventListener("blur", () => { this.#keyboard = false; this.#invalidate(); });
       view.addEventListener("click", () => this.#resetView());
-      // On touch screens, claim the gesture only when it starts on the sphere
-      // or a handle, so readers can still scroll the page past the widget.
+      // On touch screens, claim gestures in the mode's diagram or on a handle.
+      // Leave a margin available for scrolling the page past the widget.
       stage.addEventListener(
         "touchstart",
         (e) => {
           const t = e.touches[0];
           if (!t || e.touches.length > 1) return;
           const [x, y] = this.#local(t);
-          if (this.#hit(x, y, true) || this.#R.insideDisc(x, y, 1.05)) e.preventDefault();
+          if (this.#hit(x, y, true) || this.#insideOrbit(x, y)) e.preventDefault();
         },
         { passive: false },
       );
@@ -3322,6 +3392,7 @@
       if (!m || m === this.#mode) return;
       this.#mode?.pause();
       this.#mode = m;
+      this.#bgDirty = true;
       this.#drag = null;
       for (const tab of this.#el.tabs.children) tab.setAttribute("aria-selected", String(tab.dataset.mode === id));
       for (const box of this.#el.panels.children) box.hidden = box.dataset.for !== id;
@@ -3358,6 +3429,13 @@
       return [e.clientX - r.left, e.clientY - r.top];
     }
 
+    #insideOrbit(x, y) {
+      const R = this.#R;
+      if (this.#mode?.sphere) return R.insideDisc(x, y, 1.05);
+      const margin = 0.04 * Math.min(R.w, R.h);
+      return x >= margin && x <= R.w - margin && y >= margin && y <= R.h - margin;
+    }
+
     // The handle under (x, y): front-facing handles win, then the nearest.
     #hit(x, y, touch = false) {
       if (!this.#mode) return null;
@@ -3384,7 +3462,7 @@
       if (hit) {
         this.#active = hit.h.id;
         this.#drag = { kind: "handle", h: hit.h, hemi: hit.front ? 1 : -1 };
-      } else if (!touch || this.#R.insideDisc(x, y, 1.05)) {
+      } else if (!touch || this.#insideOrbit(x, y)) {
         this.#viewTween.on = false;
         this.#drag = { kind: "orbit", yaw: this.#yaw, pitch: this.#pitch };
       } else return;
@@ -3580,7 +3658,7 @@
         b.setTransform(1, 0, 0, 1, 0, 0);
         b.clearRect(0, 0, this.#bg.width, this.#bg.height);
         b.setTransform(dpr, 0, 0, dpr, 0, 0);
-        R.background(b);
+        R.background(b, m.sphere);
         this.#bgDirty = false;
       }
       const g = this.#el.stage.getContext("2d");
@@ -3624,7 +3702,7 @@
       }).join(""), (v) => { el.legend.innerHTML = v; });
       set("symbols", [...m.glossary(), KEYS_ROW].map(([s, meaning]) => `<div><dt>${s}</dt><dd>${meaning}</dd></div>`).join(""),
         (v) => { el.symbols.innerHTML = v; });
-      set("label", `Bloch sphere. ${m.describe()}`, (v) => el.stage.setAttribute("aria-label", v));
+      set("label", `${m.sphere ? "Bloch sphere" : "Three-dimensional space"}. ${m.describe()}`, (v) => el.stage.setAttribute("aria-label", v));
       set("panel", m.panelLabel ? m.panelLabel() : "", (v) => el.panel.setAttribute("aria-label", v));
     }
   }
