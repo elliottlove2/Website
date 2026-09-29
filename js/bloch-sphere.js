@@ -15,12 +15,14 @@
  *   <bloch-sphere></bloch-sphere>
  *
  * Views (tabs)
- *   state      State → arrow   the arrow is quadratic in ψ; global phase drops out
- *   rotate     Rotate          U = exp(−iθ/2 n̂·σ) against R(θ, n̂); 360° vs 720°
+ *   state      State → arrow   amplitudes and relative phase in radians
+ *   rotate     Rotate          U = exp(−iθ/2 n̂·σ) against R(θ, n̂); 2π vs 4π
  *   drive      Drive           H = (ħ/2)(Ω σx′ + δ σz): precession, cone, P₁(t), solver
  *   pulses     Three pulses    R(θ, n̂) from pulses about xy-plane axes
  *   mirrors3d  Mirrors         Pin(3) → O(3): two reflections make a rotation
  *
+ * Controls and readouts use radians. For compatibility, the theta, phi,
+ * angle and drive-phase HTML attributes retain their original degree units.
  * Attributes (all optional)
  *   modes        tabs to show, comma-separated: "state,rotate" (default: all)
  *   mode         the tab that opens first
@@ -332,7 +334,7 @@
   // Generalised Rabi frequency √(Ω² + δ²).
   const rabi = (omega, delta) => Math.hypot(omega, delta);
   // Angle between â and +z, the cone's half-angle for a start at |0⟩:
-  // arctan(Ω/δ), taken in (0°, 180°) so negative δ tilts past the equator.
+  // arctan(Ω/δ), taken in (0, π) so negative δ tilts past the equator.
   const coneAngle = (omega, delta) => Math.atan2(omega, delta);
   // P₁(t) from |0⟩: r_z(t) = cos(Ω_R t) + (1 − cos Ω_R t) â_z², so
   //   P₁ = (1 − r_z)/2 = (Ω²/Ω_R²) sin²(Ω_R t / 2),  maximum Ω²/(Ω² + δ²).
@@ -485,7 +487,7 @@
       return Math.max(vdist(r, sph(th, ph)), vdist(r, byDef), Math.abs(norm(r) - 1));
     });
 
-    check("Bloch(R(θ,n̂)ψ) = Rodrigues(θ,n̂)·Bloch(ψ); n̂ = ẑ, 90°: +x → +y", (k) => {
+    check("Bloch(R(θ,n̂)ψ) = Rodrigues(θ,n̂)·Bloch(ψ); n̂ = ẑ, π/2: +x → +y", (k) => {
       let e = 0;
       if (k === 0) {
         const plus = ket(Math.PI / 2, 0); // Bloch vector +x
@@ -639,6 +641,18 @@
   };
   const fmtSigned = (x, d = 3) => (x < 0 && Number(Math.abs(x).toFixed(d)) !== 0 ? ` ${MINUS} ` : " + ") + Math.abs(x).toFixed(d);
   const fmtDeg = (rad, d = 0) => `${fmt(rad / DEG, d)}°`;
+  const fmtRad = (rad, d = 3) => {
+    if (Math.abs(rad) < 1e-9) return "0 rad";
+    for (const denominator of [1, 2, 3, 4, 6, 8, 12]) {
+      const numerator = Math.round(rad * denominator / Math.PI);
+      if (numerator && Math.abs(rad - numerator * Math.PI / denominator) < 1e-9) {
+        const sign = numerator < 0 ? MINUS : "";
+        const multiple = Math.abs(numerator) === 1 ? "" : Math.abs(numerator);
+        return `${sign}${multiple}π${denominator === 1 ? "" : `/${denominator}`} rad`;
+      }
+    }
+    return `${fmt(rad, d)} rad`;
+  };
   const fmtSci = (x) => {
     if (x === 0) return "0";
     const [m, e] = x.toExponential(1).split("e");
@@ -1190,8 +1204,8 @@
       });
     }
 
-    // A cat centered at a unit position p, with vertical tangent f and left
-    // tangent gdir. Project the transformed frame itself: a reflection must
+    // A cat centered at a unit position p, with local up f and left gdir.
+    // Project the transformed world frame itself: a reflection must
     // reflect the cat, and orbiting the camera must reveal its foreshortening.
     cat(p, f, gdir, key, { alpha = 1 } = {}) {
       const drawCat = customElements.get("pin-spin-cat")?.drawVectorCat;
@@ -1357,7 +1371,7 @@
   const mathFont = (R, size, italic = false) => `${italic ? "italic " : ""}${size}px ${R.math}`;
 
   // A phasor dial: the complex amplitude z drawn as an arrow in the unit disc.
-  function dial(g, R, x, y, rad, z, name, { key = "arrow", ghost = null, ref = null, refName = "", caption = true } = {}) {
+  function dial(g, R, x, y, rad, z, name, { key = "arrow", ghost = null, ref = null, refName = "", caption = true, radians = true } = {}) {
     g.save();
     g.strokeStyle = R.col("line", 1); g.lineWidth = 1;
     g.beginPath(); g.arc(x, y, rad, 0, TAU); g.stroke();
@@ -1399,7 +1413,8 @@
     g.fillText(name, x - rad - 2, y - rad + 2);
     if (caption) {
       g.font = mathFont(R, 11.5); g.fillStyle = R.col("muted"); g.textAlign = "center";
-      g.fillText(`|${name}| = ${fmt(m, 2)},  arg ${m > 1e-6 ? fmt(wrap360(carg(z) / DEG), 0) : "—"}°`, x, y + rad + 15);
+      const phase = m > 1e-6 ? (radians ? fmtRad(wrap360(carg(z) / DEG) * DEG, 2) : fmtDeg(wrap360(carg(z) / DEG) * DEG)) : "—";
+      g.fillText(`|${name}| = ${fmt(m, 2)},  arg ${phase}`, x, y + rad + 15);
     }
     g.restore();
   }
@@ -1652,6 +1667,7 @@
       const s = this.$(name), o = this.$(`${name}-out`);
       // don't fight the user's thumb while they drag this slider
       if (s && value !== null && this.api.root.activeElement !== s) s.value = value;
+      if (s && text.endsWith(" rad")) s.setAttribute("aria-valuetext", text.replace(/ rad$/, " radians"));
       if (o) o.textContent = text;
     }
     controls() { return ""; }
@@ -1675,9 +1691,9 @@
 
   // ─── 6a. State → arrow ─────────────────────────────────────────────────────
   //
-  // The arrow r is computed from ψ with the quadratic formulas of §1d, not
-  // from (θ, φ) directly, so the global phase χ really is fed in and really
-  // drops out.
+  // The arrow r is computed from ψ with the quadratic formulas of §1d.
+  // Choose the usual representative with a real, nonnegative α; the only
+  // phase shown here is the relative phase φ of β.
 
   const STATE_PRESETS = {
     k0: [0, null, "|0⟩"], k1: [180, null, "|1⟩"],
@@ -1694,7 +1710,6 @@
       super(api);
       this.theta = 60 * DEG;
       this.phi = 70 * DEG;
-      this.chi = 0;
       this.measure = false;
       this.m = sph(50 * DEG, -40 * DEG);
       this.tw = new Tween();
@@ -1707,17 +1722,22 @@
       this.sync();
     }
 
-    psi() { return withPhase(ket(this.theta, this.phi), this.chi); }
+    psi() { return ket(this.theta, this.phi); }
     r() { return bloch(this.psi()); }
+    displayPhi() {
+      // Keep the slider's 2π endpoint visible; preset tweens may take a
+      // shortest path outside the slider's interval.
+      if (this.phi >= 0 && this.phi <= TAU) return this.phi;
+      return ((this.phi % TAU) + TAU) % TAU;
+    }
 
     controls() {
       return `
         <div class="controls">
-          ${sliderHTML("theta", "θ", 0, 180, 1, 60, "Polar angle theta, degrees")}
-          ${sliderHTML("phi", "φ", 0, 360, 1, 70, "Relative phase phi, degrees")}
+          ${sliderHTML("theta", "θ", 0, Math.PI, "any", 60 * DEG, "Polar angle theta, radians")}
+          ${sliderHTML("phi", "φ", 0, TAU, "any", 70 * DEG, "Relative phase phi, radians")}
         </div>
         <div class="controls">
-          ${sliderHTML("chi", "χ", 0, 360, 1, 0, "Global phase chi, degrees")}
           ${checkHTML("measure", `Measure along <span class="m">m̂</span>`)}
         </div>
         <div class="controls" role="group" aria-label="Preset states">
@@ -1726,21 +1746,20 @@
     }
 
     sync() {
-      this.setOut("theta", Math.round(this.theta / DEG), fmtDeg(this.theta));
-      this.setOut("phi", Math.round(wrap360(this.phi / DEG)), `${fmt(wrap360(this.phi / DEG), 0)}°`);
-      this.setOut("chi", Math.round(wrap360(this.chi / DEG)), `${fmt(wrap360(this.chi / DEG), 0)}°`);
+      for (const [name, value] of [["theta", this.theta], ["phi", this.displayPhi()]]) {
+        const text = fmtRad(value);
+        this.setOut(name, value, text);
+        this.$(name)?.setAttribute("aria-valuetext", text.replace(" rad", " radians"));
+      }
       const c = this.$("measure");
       if (c) c.checked = this.measure;
     }
 
     onInput(t) {
       this.tw.on = false;
-      if (t.name === "theta") this.theta = t.value * DEG;
-      else if (t.name === "phi") this.phi = t.value * DEG;
-      else if (t.name === "chi") {
-        this.chi = t.value * DEG;
-        this.api.announceSoon(`Global phase ${t.value}°. Both amplitudes turn; the arrow stays put.`);
-      } else if (t.name === "measure") this.measure = t.checked;
+      if (t.name === "theta") this.theta = clamp(Number(t.value), 0, Math.PI);
+      else if (t.name === "phi") this.phi = clamp(Number(t.value), 0, TAU);
+      else if (t.name === "measure") this.measure = t.checked;
       this.sync();
       if (t.name === "theta" || t.name === "phi") this.api.announceSoon(this.describe());
     }
@@ -1830,33 +1849,46 @@
         R.text(scale(m, 1.14), "m̂", "ink", { italic: true, size: 14 });
       }
 
-      R.arrow([0, 0, 0], r, "even", { width: 3.2 });
-      R.handle(r, "even", active === "r");
+      // Use the polar tangent explicitly so the cat's frame stays continuous
+      // as θ reaches either pole (where a generic north tangent is ambiguous).
+      const f = [-Math.cos(th) * Math.cos(this.phi), -Math.cos(th) * Math.sin(this.phi), Math.sin(th)];
+      R.arrow([0, 0, 0], r, "even", { width: 1.8 });
+      R.cat(r, f, cross(r, f), "even");
+      if (active === "r") R.handle(r, "even", true);
     }
 
     panelAspect() { return 0.56; }
 
     drawPanel(g, R, w, h) {
       const psi = this.psi();
-      const rad = Math.min(w * 0.17, h * 0.3);
-      const y = h * 0.47;
-      dial(g, R, w * 0.27, y, rad, psi[0], "α", { ref: 0, refName: "χ" });
-      dial(g, R, w * 0.73, y, rad, psi[1], "β", { ref: carg(psi[0]), refName: "φ" });
-      g.font = mathFont(R, 11.5); g.fillStyle = R.col("muted"); g.textAlign = "center";
-      g.fillText("the arrow sees only |α|, |β| and the angle φ between them", w / 2, h - 10);
+      const compact = w < 340;
+      const rad = Math.min(w * (compact ? 0.16 : 0.17), h * (compact ? 0.26 : 0.3));
+      const y = h * (compact ? 0.39 : 0.47);
+      dial(g, R, w * 0.27, y, rad, psi[0], "α", { radians: true, caption: !compact });
+      dial(g, R, w * 0.73, y, rad, psi[1], "β", { ref: 0, refName: "φ", radians: true, caption: !compact });
+      g.font = mathFont(R, compact ? 12 : 11.5); g.fillStyle = R.col("muted"); g.textAlign = "center";
+      if (compact) {
+        for (const [index, name, x] of [[0, "α", w * 0.27], [1, "β", w * 0.73]]) {
+          const z = psi[index], magnitude = Math.hypot(z[0], z[1]);
+          const phase = magnitude > 1e-6 ? fmtRad(((carg(z) % TAU) + TAU) % TAU, 2) : "—";
+          g.fillText(`|${name}| = ${fmt(magnitude, 2)}`, x, y + rad + 15);
+          g.fillText(`arg ${phase}`, x, y + rad + 30);
+        }
+      } else {
+        g.fillText("the arrow sees only |α|, |β| and the angle φ between them", w / 2, h - 10);
+      }
     }
 
     legend() {
       return [["even", "Bloch vector <em>r</em> and <em>θ</em>"], ["muted", "<em>θ</em>/2, the angle between state vectors", "bar"], ["arrow", "amplitudes <em>α</em>, <em>β</em>"]];
     }
     hint() {
-      return "Drag the arrow tip, or use the sliders. χ multiplies ψ by e<sup>iχ</sup>: both amplitudes turn together, but r = ⟨ψ|σ|ψ⟩ is quadratic in ψ, so the phase cancels and the arrow does not move.";
+      return "Drag the cat at the arrow tip, or use the sliders. Angles are in radians: θ runs from 0 to π, and φ from 0 to 2π. The polar angle θ sets the amplitudes' magnitudes; their relative phase φ sets the direction around the equator.";
     }
     glossary() {
       return [
         ["|ψ⟩ = α|0⟩ + β|1⟩", "the qubit state; α, β are complex amplitudes"],
-        ["θ, φ", "polar angle from |0⟩ (north) and azimuth from +x"],
-        ["χ", "global phase: ψ → e<sup>iχ</sup>ψ"],
+        ["θ, φ", "angles in radians: polar angle from |0⟩ (north) and azimuth from +x"],
         ["r", "Bloch vector, rᵢ = ⟨ψ|σᵢ|ψ⟩"],
         [`${sig("x")}, ${sig("y")}, ${sig("z")}`, "Pauli matrices"],
         ["ᾱ", "complex conjugate of α"],
@@ -1866,24 +1898,24 @@
     }
     describe() {
       const r = this.r();
-      return `State arrow at θ ${fmt(this.theta / DEG, 0)}°, φ ${fmt(wrap360(this.phi / DEG), 0)}°; r = (${r.map((x) => fmt(x, 2)).join(", ")}).`;
+      return `State arrow at θ ${fmtRad(this.theta)}, φ ${fmtRad(this.displayPhi())}; r = (${r.map((x) => fmt(x, 2)).join(", ")}).`;
     }
     readout() {
       const psi = this.psi(), r = bloch(psi);
       const ab = cmul(cconj(psi[0]), psi[1]);
       let s = `
-        <p>|ψ⟩ = e<sup>iχ</sup>[cos(θ/2)|0⟩ + e<sup>iφ</sup> sin(θ/2)|1⟩]</p>
+        <p>|ψ⟩ = cos(θ/2)|0⟩ + e<sup>iφ</sup> sin(θ/2)|1⟩</p>
         <p><span class="lbl">α =</span> ${fmtC(psi[0])}, <span class="lbl">β =</span> ${fmtC(psi[1])}</p>
         <p>⟨${sig("x")}⟩ = 2 Re(ᾱβ) = <span class="even">${fmt(2 * ab[0])}</span></p>
         <p>⟨${sig("y")}⟩ = 2 Im(ᾱβ) = <span class="even">${fmt(2 * ab[1])}</span></p>
         <p>⟨${sig("z")}⟩ = |α|² ${MINUS} |β|² = <span class="even">${fmt(r[2])}</span></p>
-        <p class="aside">Between |0⟩ and |ψ⟩: <b>θ/2 = ${fmtDeg(this.theta / 2, 1)}</b> in state space,
-          <span class="even">θ = ${fmtDeg(this.theta, 1)}</span> on the sphere. Orthogonal states (90°) are antipodal (180°).</p>`;
+        <p class="aside">Between |0⟩ and |ψ⟩: <b>θ/2 = ${fmtRad(this.theta / 2)}</b> in state space,
+          <span class="even">θ = ${fmtRad(this.theta)}</span> on the sphere. Orthogonal states (π/2) are antipodal (π).</p>`;
       if (this.measure) {
         const md = dot(this.m, r);
         const gam = Math.acos(clamp(md, -1, 1));
         s += `<p>|⟨m̂|ψ⟩|² = (1 + m̂·r)/2 = cos²(γ/2) = <span class="even">${fmt((1 + md) / 2)}</span>
-          <span class="lbl">(γ = ${fmtDeg(gam, 1)})</span></p>`;
+          <span class="lbl">(γ = ${fmtRad(gam)})</span></p>`;
       }
       return s;
     }
@@ -1909,7 +1941,7 @@
 
     constructor(api) {
       super(api);
-      this.n = sph(50 * DEG, 80 * DEG);
+      this.n = [0, 0, 1];
       this.angle = 0;
       this.psi0 = ket(50 * DEG, -20 * DEG);
       this.r0 = bloch(this.psi0);
@@ -1932,11 +1964,11 @@
     controls() {
       return `
         <div class="controls">
-          ${sliderHTML("angle", "θ", 0, 720, 1, 0, "Rotation angle theta, degrees")}
+          ${sliderHTML("angle", "θ", 0, 2 * TAU, "any", 0, "Rotation angle theta, radians")}
         </div>
         <div class="controls">
           ${btnHTML("play", "Play", "primary")}
-          ${btnHTML("p0", "0°")}${btnHTML("p360", "360°")}${btnHTML("p720", "720°")}
+          ${btnHTML("p0", "0")}${btnHTML("p360", "2π")}${btnHTML("p720", "4π")}
           ${checkHTML("op", "Operator view")}
         </div>
         <div class="controls" role="group" aria-label="Rotation axis presets">
@@ -1947,7 +1979,7 @@
     }
 
     sync() {
-      this.setOut("angle", Math.round(this.angle / DEG), fmtDeg(this.angle));
+      this.setOut("angle", this.angle, fmtRad(this.angle));
       const b = this.q('[data-act="play"]');
       if (b) b.textContent = this.playing ? "Pause" : "Play";
       const c = this.$("op");
@@ -1966,7 +1998,7 @@
       if (t.name === "angle") {
         this.playing = false; this.tw.on = false;
         const before = this.angle;
-        this.angle = t.value * DEG;
+        this.angle = Number(t.value);
         this.noteCrossing(before, this.angle);
       } else if (t.name === "op") this.opView = t.checked;
       this.sync();
@@ -2013,9 +2045,9 @@
 
     noteCrossing(a, b, always = false) {
       const say = (x) => {
-        if (Math.abs(x - TAU) < 1e-9) this.api.announce(`360°: the cat is home, but U = ${MINUS}I and the state is ${MINUS}ψ.`);
-        else if (Math.abs(x - 2 * TAU) < 1e-9) this.api.announce("720°: home again, and now U = +I.");
-        else if (x === 0) this.api.announce("0°: U = +I.");
+        if (Math.abs(x - TAU) < 1e-9) this.api.announce(`2π radians: the cat is home, but U = ${MINUS}I and the state is ${MINUS}ψ.`);
+        else if (Math.abs(x - 2 * TAU) < 1e-9) this.api.announce("4π radians: home again, and now U = +I.");
+        else if (x === 0) this.api.announce("0 radians: U = +I.");
       };
       if (always) { say(b); return; }
       for (const x of [TAU, 2 * TAU]) if ((a < x && b >= x) || (a > x && b <= x)) say(x);
@@ -2032,7 +2064,7 @@
       if (!this.playing) return false;
       const before = this.angle;
       this.angle = Math.min(2 * TAU, this.angle + this.speed * dt);
-      // hold briefly at 360° so the sign flip can be seen
+      // Announce the first full turn so the sign flip can be noticed.
       this.noteCrossing(before, this.angle);
       if (this.angle >= 2 * TAU) this.playing = false;
       this.sync();
@@ -2054,7 +2086,7 @@
       R.arrow([0, 0, 0], n, "arrow", { width: 1.8, head: 0.8 });
       R.line([0, 0, 0], scale(n, -1), "arrow", { dash: [3, 4], alpha: 0.7 });
       R.handle(n, "arrow", active === "n");
-      R.text(scale(n, 1.14), "n̂", "ink", { italic: true, size: 15 });
+      R.text(scale(n, 1.14), "n̂", "ink", { italic: true, size: 15, dx: 14 });
 
       // the cone: its rim, a faint base, and the trail swept so far
       let c = fillOrbit(n, this.r0, 0, TAU, 1, 96);
@@ -2084,14 +2116,20 @@
       });
       const U = toSU2(this.rotor());
       const psi = m2apply(U, this.psi0);
-      const rad = Math.min(w * 0.14, (h - gh) * 0.27);
-      const y = gh + (h - gh) * 0.53;
+      const rad = Math.min(w * 0.14, (h - gh) * 0.23);
+      const y = gh + (h - gh) * 0.43;
       g.strokeStyle = R.col("line"); g.lineWidth = 1;
       g.beginPath(); g.moveTo(12, gh); g.lineTo(w - 12, gh); g.stroke();
       g.font = uiFont(R, 11); g.fillStyle = R.col("muted"); g.textAlign = "left"; g.textBaseline = "middle";
       g.fillText("amplitudes of Uψ₀ (dashed: ψ₀)", 12, gh + 12);
-      dial(g, R, w * 0.27, y, rad, psi[0], "α", { ghost: this.psi0[0], caption: true });
-      dial(g, R, w * 0.73, y, rad, psi[1], "β", { ghost: this.psi0[1], caption: true });
+      for (const [i, name, x] of [[0, "α", w * 0.27], [1, "β", w * 0.73]]) {
+        dial(g, R, x, y, rad, psi[i], name, { ghost: this.psi0[i], caption: false });
+        const magnitude = Math.sqrt(cabs2(psi[i]));
+        const phase = magnitude > 1e-6 ? fmtRad(((carg(psi[i]) % TAU) + TAU) % TAU, 2) : "—";
+        g.font = mathFont(R, 11.5); g.fillStyle = R.col("muted"); g.textAlign = "center";
+        g.fillText(`|${name}| = ${fmt(magnitude, 2)}`, x, y + rad + 15);
+        g.fillText(`arg ${phase}`, x, y + rad + 29);
+      }
     }
 
     legend() {
@@ -2099,11 +2137,11 @@
     }
     hint() {
       return "Drag the axis handle, set θ, or press Play. The cat moves and turns in space, so it can appear edge-on. " +
-        "It comes home at 360°, but U = −I there and both phasors point backwards (dashed: the start). Only at 720° is U = +I again.";
+        "It comes home at 2π radians, but U = −I there and both phasors point backwards (dashed: the start). Only at 4π is U = +I again.";
     }
     glossary() {
       return [
-        ["n̂, θ", "rotation axis and angle"],
+        ["n̂, θ", "rotation axis and angle in radians"],
         ["U = R(θ, n̂)", "exp(−iθ/2 n̂·σ) = cos(θ/2) I − i sin(θ/2) n̂·σ, in SU(2)"],
         ["R(θ, n̂)", "the 3×3 rotation of the cat’s position and orientation, in SO(3)"],
         ["I", "identity matrix"],
@@ -2115,23 +2153,22 @@
     }
     describe() {
       const r = act(this.rotor(), this.r0);
-      return `Rotation by ${fmt(this.angle / DEG, 0)}° about n̂ = (${this.n.map((x) => fmt(x, 2)).join(", ")}); cat at (${r.map((x) => fmt(x, 2)).join(", ")}).`;
+      return `Rotation by ${fmtRad(this.angle)} about n̂ = (${this.n.map((x) => fmt(x, 2)).join(", ")}); cat at (${r.map((x) => fmt(x, 2)).join(", ")}).`;
     }
     readout() {
       const Rt = this.rotor(), U = toSU2(Rt), M = o3(Rt);
-      const deg = this.angle / DEG;
-      const near = (x) => Math.abs(deg - x) < 0.5;
+      const near = (x) => Math.abs(this.angle - x) < 1e-9;
       let note;
       if (near(0)) note = `<div class="note">U = +I: nothing has turned yet.</div>`;
-      else if (near(360)) note = `<div class="note">Home again: the cat’s position and orientation are back, but U = ${MINUS}I and the state is ${MINUS}ψ₀.</div>`;
-      else if (near(720)) note = `<div class="note">Home again, and now U = +I.</div>`;
-      else if (near(180)) note = `<div class="note">Half turn: U = ${MINUS}i n̂·σ.</div>`;
-      else if (near(540)) note = `<div class="note">One and a half turns: U = +i n̂·σ, the negative of the half-turn operator.</div>`;
+      else if (near(TAU)) note = `<div class="note">Home again: the cat’s position and orientation are back, but U = ${MINUS}I and the state is ${MINUS}ψ₀.</div>`;
+      else if (near(2 * TAU)) note = `<div class="note">Home again, and now U = +I.</div>`;
+      else if (near(Math.PI)) note = `<div class="note">Half turn: U = ${MINUS}i n̂·σ.</div>`;
+      else if (near(3 * Math.PI)) note = `<div class="note">One and a half turns: U = +i n̂·σ, the negative of the half-turn operator.</div>`;
       else note = "";
       let s = `
         <div class="mat-row">U = cos(θ/2) I ${MINUS} i sin(θ/2) n̂·σ = ${mat2HTML(U)}</div>
         <div class="mat-row">R(θ, n̂) = ${mat3HTML(M)}</div>
-        <p class="aside">n̂ = ${vecHTML(this.n, 2)}, θ = ${fmt(deg, 0)}°, θ/2 = ${fmt(deg / 2, 0)}°</p>
+        <p class="aside">n̂ = ${vecHTML(this.n, 2)}, θ = ${fmtRad(this.angle)}, θ/2 = ${fmtRad(this.angle / 2)}</p>
         ${note}`;
       if (this.opView) {
         // U†σᵢU = Σⱼ Rᵢⱼ σⱼ, row i of R
@@ -2184,9 +2221,14 @@
       this.rate = 1.2; // time units per second of animation
       this.solveOpen = false;
       this.target = { angle: 90 * DEG, n: sph(60 * DEG, 110 * DEG) };
+      this.targetAzimuth = 110 * DEG;
       this.run = null; // { T, rate } while a solved pulse is running
       this.landed = null; // errors after it lands
       this.lastSolve = "";
+      // An upright world frame keeps the starting cat readable; the drive
+      // rotates this frame rigidly along with its unit position.
+      this.f0 = [0, 0, 1];
+      this.g0 = [0, -1, 0];
     }
 
     applyAttrs(get) {
@@ -2207,7 +2249,7 @@
           ${sliderHTML("delta", "δ", -3, 3, 0.01, 0.5, "Detuning delta")}
         </div>
         <div class="controls">
-          ${sliderHTML("phase", "φ<sub>d</sub>", 0, 360, 1, 0, "Drive phase, degrees")}
+          ${sliderHTML("phase", "φ<sub>d</sub>", 0, TAU, "any", 0, "Drive phase, radians")}
           ${sliderHTML("t", "t", 0, DRIVE_T_MAX, 0.01, 0, "Time")}
         </div>
         <div class="controls">
@@ -2218,11 +2260,11 @@
         <details class="sub">
           <summary>Solve: which pulse makes R(θ, n̂)?</summary>
           <div class="controls">
-            ${sliderHTML("sangle", "θ", 0, 360, 1, 90, "Target rotation angle, degrees")}
+            ${sliderHTML("sangle", "θ", 0, TAU, "any", Math.PI / 2, "Target rotation angle, radians")}
           </div>
           <div class="controls">
-            ${sliderHTML("spolar", "θ<sub>n</sub>", 0, 180, 1, 60, "Target axis polar angle, degrees")}
-            ${sliderHTML("sazim", "φ<sub>n</sub>", 0, 360, 1, 110, "Target axis azimuth, degrees")}
+            ${sliderHTML("spolar", "θ<sub>n</sub>", 0, Math.PI, "any", Math.PI / 3, "Target axis polar angle, radians")}
+            ${sliderHTML("sazim", "φ<sub>n</sub>", 0, TAU, "any", 110 * DEG, "Target axis azimuth, radians")}
           </div>
           <div class="solve-out"></div>
           <div class="controls">${btnHTML("run", "Run pulse", "primary", "Run the solved pulse for time T")}</div>
@@ -2244,15 +2286,16 @@
       const reduced = this.api.reduced();
       this.setOut("omega", this.omega, fmt(this.omega, 2));
       this.setOut("delta", clamp(this.delta, -3, 3), fmt(this.delta, 2));
-      this.setOut("phase", Math.round(wrap360(this.phase / DEG)), `${fmt(wrap360(this.phase / DEG), 0)}°`);
+      const phase = this.phase >= 0 && this.phase <= TAU ? this.phase : ((this.phase % TAU) + TAU) % TAU;
+      this.setOut("phase", phase, fmtRad(phase));
       this.setOut("t", Math.min(this.t, DRIVE_T_MAX), fmt(this.t, 2));
       const b = this.q('[data-act="play"]');
       if (b) b.textContent = reduced ? "Jump ½ period" : this.playing ? "Pause" : "Play";
       const { angle, n } = this.target;
       const a = angles(n);
-      this.setOut("sangle", Math.round(angle / DEG), fmtDeg(angle));
-      this.setOut("spolar", Math.round(a.theta / DEG), fmtDeg(a.theta));
-      this.setOut("sazim", Math.round(wrap360(a.phi / DEG)), `${fmt(wrap360(a.phi / DEG), 0)}°`);
+      this.setOut("sangle", angle, fmtRad(angle));
+      this.setOut("spolar", a.theta, fmtRad(a.theta));
+      this.setOut("sazim", this.targetAzimuth, fmtRad(this.targetAzimuth));
       const html = this.solveHTML();
       const out = this.q(".solve-out");
       if (out && html !== this.lastSolve) { out.innerHTML = html; this.lastSolve = html; }
@@ -2274,10 +2317,10 @@
       }
       const big = Math.abs(sol.delta) > 3;
       let s = `
-        <p>φ<sub>d</sub> = atan2(n<sub>y</sub>, n<sub>x</sub>) = ${fmtDeg(wrap360(sol.phase / DEG) * DEG, 1)}</p>
+        <p>φ<sub>d</sub> = atan2(n<sub>y</sub>, n<sub>x</sub>) = ${fmtRad(((sol.phase % TAU) + TAU) % TAU)}</p>
         <p>δ = Ω n<sub>z</sub>/n<sub>ρ</sub> = ${fmt(sol.delta)}${big ? ` <span class="lbl">(beyond the slider; the run uses the exact value)</span>` : ""}</p>
         <p>T = θ n<sub>ρ</sub>/Ω = ${fmt(sol.T)}</p>
-        <p class="aside">n<sub>ρ</sub> = ${fmt(sol.nr)}, so Ω T = θ n<sub>ρ</sub> = ${fmt(this.omega * sol.T)} and δ T = θ n<sub>z</sub> = ${fmt(sol.delta * sol.T)}</p>`;
+        <p class="aside">n<sub>ρ</sub> = ${fmt(sol.nr)}, so Ω T = θ n<sub>ρ</sub> = ${fmtRad(this.omega * sol.T)} and δ T = θ n<sub>z</sub> = ${fmtRad(sol.delta * sol.T)}</p>`;
       if (sol.nr < 0.15) s += `<p class="aside">Close to the pole: δ/Ω = n<sub>z</sub>/n<sub>ρ</sub> = ${fmt(n[2] / sol.nr, 1)}, and it diverges as n<sub>ρ</sub> → 0.</p>`;
       if (this.landed) {
         const L = this.landed;
@@ -2293,12 +2336,13 @@
       const v = Number(t.value);
       if (t.name === "omega") this.omega = v;
       else if (t.name === "delta") this.delta = v;
-      else if (t.name === "phase") this.phase = v * DEG;
+      else if (t.name === "phase") this.phase = v;
       else if (t.name === "t") { this.t = v; this.playing = false; }
-      else if (t.name === "sangle") this.target.angle = v * DEG;
+      else if (t.name === "sangle") this.target.angle = v;
       else if (t.name === "spolar" || t.name === "sazim") {
         const a = angles(this.target.n);
-        this.target.n = sph(t.name === "spolar" ? v * DEG : a.theta, t.name === "sazim" ? v * DEG : a.phi);
+        if (t.name === "sazim") this.targetAzimuth = v;
+        this.target.n = sph(t.name === "spolar" ? v : a.theta, this.targetAzimuth);
       } else return;
       this.changed();
       this.sync();
@@ -2308,7 +2352,7 @@
     solveSummary() {
       const sol = this.solution();
       if (!sol.ok) return sol.reason === "omega" ? "Drive off: no solution." : "Target axis on the z-axis: no drive solution.";
-      return `Target ${fmt(this.target.angle / DEG, 0)}°: drive phase ${fmt(wrap360(sol.phase / DEG), 0)}°, δ ${fmt(sol.delta, 2)}, T ${fmt(sol.T, 2)}.`;
+      return `Target ${fmtRad(this.target.angle)}: drive phase ${fmtRad(((sol.phase % TAU) + TAU) % TAU)}, δ ${fmt(sol.delta, 2)}, T ${fmt(sol.T, 2)}.`;
     }
 
     onAction(act) {
@@ -2353,7 +2397,7 @@
       }
       const dur = clamp(1 + 1.5 * this.target.angle / Math.PI, 1, 4);
       this.run = { T: sol.T, rate: sol.T / dur };
-      this.api.announce(`Running the pulse: φ_d ${fmt(wrap360(sol.phase / DEG), 0)}°, δ ${fmt(sol.delta, 3)}, for T = ${fmt(sol.T, 3)}.`);
+      this.api.announce(`Running the pulse: φ_d ${fmtRad(((sol.phase % TAU) + TAU) % TAU)}, δ ${fmt(sol.delta, 3)}, for T = ${fmt(sol.T, 3)}.`);
       this.api.draw();
     }
 
@@ -2386,7 +2430,11 @@
       return [{
         id: "n", label: "target axis n̂", key: "arrow",
         get: () => this.target.n,
-        set: (v) => { this.target.n = v; this.changed(); this.sync(); },
+        set: (v) => {
+          this.target.n = v;
+          if (Math.hypot(v[0], v[1]) > 1e-10) this.targetAzimuth = ((Math.atan2(v[1], v[0]) % TAU) + TAU) % TAU;
+          this.changed(); this.sync();
+        },
       }];
     }
 
@@ -2425,7 +2473,8 @@
       // the homework target
       if (this.solveOpen) {
         const { angle, n } = this.target;
-        const goal = act(rotor(angle, n), ZHAT);
+        const targetRotation = rotor(angle, n);
+        const goal = act(targetRotation, ZHAT);
         R.line([0, 0, 0], n, "arrow", { dash: [5, 4], alpha: 0.85, width: 1.4 });
         R.handle(n, "arrow", active === "n");
         R.text(scale(n, 1.15), "n̂", "ink", { italic: true, size: 14 });
@@ -2433,11 +2482,14 @@
           const c = fillOrbit(n, ZHAT, 0, angle, 1, Math.max(4, Math.ceil((64 * angle) / Math.PI)));
           R.curve(SCRATCH, c, "muted", { width: 1.2, dash: [2, 3], alpha: 0.9 });
         }
-        R.arrow([0, 0, 0], goal, "muted", { width: 2, dash: [4, 3], alpha: 0.85 });
+        R.arrow([0, 0, 0], goal, "muted", { width: 1.6, dash: [4, 3], alpha: 0.7 });
+        R.cat(goal, act(targetRotation, this.f0), act(targetRotation, this.g0), "muted", { alpha: 0.55 });
         R.text(scale(goal, 1.17), "target", "muted", { size: 11 });
       }
 
-      R.arrow([0, 0, 0], this.r(), "even", { width: 3.2 });
+      const evolution = evolve(a, this.t), r = act(evolution, ZHAT);
+      R.arrow([0, 0, 0], r, "even", { width: 2.2, head: 0.85 });
+      R.cat(r, act(evolution, this.f0), act(evolution, this.g0), "even");
     }
 
     panelAspect() { return 0.62; }
@@ -2512,25 +2564,25 @@
     }
 
     legend() {
-      const l = [["even", "Bloch vector, cone, <em>P</em>₁(<em>t</em>)"], ["arrow", "precession axis <em>â</em>"], ["muted", "drive axis <em>x′</em>", "bar"]];
+      const l = [["even", "cat, Bloch vector, cone, <em>P</em>₁(<em>t</em>)"], ["arrow", "precession axis <em>â</em>"], ["muted", "drive axis <em>x′</em>", "bar"]];
       if (this.solveOpen) l.push(["muted", "target, and its path", "ring"]);
       return l;
     }
     hint() {
-      return "Ω tilts the axis â toward x′, δ tilts it toward z. The arrow starts at |0⟩ and precesses about â (dr/dt = a × r) around a cone; " +
+      return "Ω tilts the axis â toward x′, δ tilts it toward z. The cat and its state vector start at |0⟩ and rotate about â (dr/dt = a × r) around a cone; " +
         "with detuning the cone misses |1⟩, so the inversion is never complete. Open Solve for the inverse problem.";
     }
     glossary() {
       return [
-        ["Ω", "Rabi frequency: the drive strength, the in-plane part of a"],
-        ["δ", "detuning between drive and qubit: the z part of a"],
-        ["φ<sub>d</sub>, x′", "drive phase and the in-plane drive axis (cos φ<sub>d</sub>, sin φ<sub>d</sub>, 0)"],
+        ["Ω", "Rabi frequency in radians per unit time: the drive strength, the in-plane part of a"],
+        ["δ", "detuning in radians per unit time between drive and qubit: the z part of a"],
+        ["φ<sub>d</sub>, x′", "drive phase in radians and the in-plane drive axis (cos φ<sub>d</sub>, sin φ<sub>d</sub>, 0)"],
         ["a, â", "precession vector (Ω cos φ<sub>d</sub>, Ω sin φ<sub>d</sub>, δ) and its direction; H = (ħ/2) a·σ"],
         ["Ω<sub>R</sub>", "generalised Rabi frequency |a| = √(Ω² + δ²)"],
-        ["ϑ", "cone half-angle: from +z to â, arctan(Ω/δ)"],
+        ["ϑ", "cone half-angle in radians: from +z to â, arctan(Ω/δ)"],
         ["P₁", "population of |1⟩, (1 − r<sub>z</sub>)/2"],
-        ["θ, n̂", "target rotation angle and axis (Solve)"],
-        ["θ<sub>n</sub>, φ<sub>n</sub>", "polar angle and azimuth of n̂"],
+        ["θ, n̂", "target rotation angle in radians and axis (Solve)"],
+        ["θ<sub>n</sub>, φ<sub>n</sub>", "polar angle and azimuth of n̂, in radians"],
         ["n<sub>ρ</sub>, n<sub>z</sub>", "in-plane and z parts of n̂, n<sub>ρ</sub> = √(n<sub>x</sub>² + n<sub>y</sub>²)"],
         ["T", "pulse duration"],
         ["‖A − B‖", "largest entry of the difference, in absolute value"],
@@ -2538,7 +2590,8 @@
     }
     describe() {
       const r = this.r();
-      return `Drive with Ω ${fmt(this.omega, 2)}, δ ${fmt(this.delta, 2)}, phase ${fmt(wrap360(this.phase / DEG), 0)}°; t ${fmt(this.t, 2)}, P₁ ${fmt((1 - r[2]) / 2, 2)}.`;
+      const phase = this.phase >= 0 && this.phase <= TAU ? this.phase : ((this.phase % TAU) + TAU) % TAU;
+      return `Drive with Ω ${fmt(this.omega, 2)}, δ ${fmt(this.delta, 2)}, phase ${fmtRad(phase)}; t ${fmt(this.t, 2)}, P₁ ${fmt((1 - r[2]) / 2, 2)}.`;
     }
     panelLabel() {
       return `Plot of P₁ against time. Now ${fmt(rabiP1(this.omega, this.delta, this.t), 2)}; the maximum is ${fmt(maxP1(this.omega, this.delta), 2)}.`;
@@ -2555,7 +2608,7 @@
         <p>H = (ħ/2)(Ω ${sig("x′")} + δ ${sig("z")}) = (ħ/2) a·σ</p>
         <p>a = (Ω cos φ<sub>d</sub>, Ω sin φ<sub>d</sub>, δ) = ${vecHTML(a, 2)}</p>
         <p>Ω<sub>R</sub> = √(Ω² + δ²) = <span class="even">${fmt(W)}</span></p>
-        <p>cone half-angle ϑ = arctan(Ω/δ) = <span class="even">${fmtDeg(coneAngle(this.omega, this.delta), 1)}</span></p>
+        <p>cone half-angle ϑ = arctan(Ω/δ) = <span class="even">${fmtRad(coneAngle(this.omega, this.delta))}</span></p>
         <p>max P₁ = Ω²/(Ω² + δ²) = ${fmt(m)}</p>
         <p>t = ${fmt(this.t, 2)}: P₁ = (1 ${MINUS} r<sub>z</sub>)/2 = <span class="even">${fmt((1 - r[2]) / 2)}</span></p>
         ${note}`;
@@ -2587,8 +2640,10 @@
       this.compare = false;
       this.speed = 100 * DEG; // per second, within a pulse
       this.r0 = [0, 0, 1];
-      this.f0 = [1, 0, 0];
-      this.g0 = [0, 1, 0];
+      // Keep the starting cat upright in world space, then carry its whole
+      // frame through the same pulse rotations as its unit position.
+      this.f0 = [0, 0, 1];
+      this.g0 = [0, -1, 0];
     }
 
     applyAttrs(get) {
@@ -2613,7 +2668,7 @@
     controls() {
       return `
         <div class="controls">
-          ${sliderHTML("angle", "θ", 0, 360, 1, 120, "Target rotation angle theta, degrees")}
+          ${sliderHTML("angle", "θ", 0, TAU, "any", 2 * Math.PI / 3, "Target rotation angle theta, radians")}
         </div>
         <div class="controls">
           ${btnHTML("back", "Back", "", "Back one pulse")}
@@ -2630,7 +2685,7 @@
     }
 
     sync() {
-      this.setOut("angle", Math.round(this.angle / DEG), fmtDeg(this.angle));
+      this.setOut("angle", this.angle, fmtRad(this.angle));
       const b = this.q('[data-act="play"]');
       if (b) b.textContent = this.playing ? "Pause" : "Play";
       const st = this.q('[data-act="step"]'), bk = this.q('[data-act="back"]');
@@ -2649,15 +2704,15 @@
     }
 
     onInput(t) {
-      if (t.name === "angle") this.angle = t.value * DEG;
+      if (t.name === "angle") this.angle = Number(t.value);
       else if (t.name === "compare") this.compare = t.checked;
       this.sync();
-      if (t.name === "angle") this.api.announceSoon(`Target angle ${t.value}°.`);
+      if (t.name === "angle") this.api.announceSoon(`Target angle ${fmtRad(this.angle)}.`);
     }
 
     say(k) {
       const msg = [
-        "Start: the arrow at |0⟩.",
+        "Start: the cat and its state vector at |0⟩.",
         "Pulse 1 done: the tilt R(−π/2, x̂′) has carried n̂ down to m̂ in the equator.",
         "Pulse 2 done: the turn by θ about the in-plane axis m̂.",
         "Pulse 3 done: the untilt carries m̂ back to n̂. The product equals R(θ, n̂) exactly, sign included.",
@@ -2772,8 +2827,8 @@
           R.curve(SCRATCH, c, "muted", { width: 1.3, dash: [2, 3] });
         }
         const rd = act(Rd, this.r0);
-        R.arrow([0, 0, 0], rd, "muted", { width: 2.4, dash: [4, 3], alpha: 0.85 });
-        R.flag(rd, act(Rd, this.f0), act(Rd, this.g0), "muted", { alpha: 0.7 });
+        R.arrow([0, 0, 0], rd, "muted", { width: 1.8, dash: [4, 3], alpha: 0.7 });
+        R.cat(rd, act(Rd, this.f0), act(Rd, this.g0), "muted", { alpha: 0.55 });
       }
 
       // the state's path, pulse by pulse
@@ -2788,12 +2843,12 @@
       }
 
       if (s > 0) {
-        R.arrow([0, 0, 0], this.r0, "even", { width: 2, alpha: 0.28 });
-        R.flag(this.r0, this.f0, this.g0, "even", { alpha: 0.28 });
+        R.arrow([0, 0, 0], this.r0, "even", { width: 1.6, alpha: 0.28 });
+        R.cat(this.r0, this.f0, this.g0, "even", { alpha: 0.28 });
       }
       const r = act(Rt, this.r0);
-      R.arrow([0, 0, 0], r, "even", { width: 3.2 });
-      R.flag(r, act(Rt, this.f0), act(Rt, this.g0), "even");
+      R.arrow([0, 0, 0], r, "even", { width: 2.2, head: 0.85 });
+      R.cat(r, act(Rt, this.f0), act(Rt, this.g0), "even");
     }
 
     panelAspect() { return 0.66; }
@@ -2816,10 +2871,10 @@
 
       const phases = [F.xp, F.m, F.xp].map((ax, j) => {
         let ph = Math.atan2(ax[1], ax[0]);
-        if (P[j].angle < 0) ph += Math.PI; // R(−π/2, x̂′) is a +π/2 pulse at phase φ′ + 180°
-        return wrap360(ph / DEG);
+        if (P[j].angle < 0) ph += Math.PI; // R(−π/2, x̂′) is a +π/2 pulse at phase φ′ + π.
+        return ((ph % TAU) + TAU) % TAU;
       });
-      const top = ["−π/2", `θ = ${fmt(this.angle / DEG, 0)}°`, "+π/2"];
+      const top = ["−π/2", `θ = ${fmtRad(this.angle, 2)}`, "+π/2"];
       const axn = ["x̂′", "m̂", "x̂′"];
       for (let j = 0; j < 3; j++) {
         const x = xs[j], f = clamp(s - j, 0, 1);
@@ -2835,7 +2890,7 @@
         g.font = mathFont(R, 13, true);
         g.fillText(axn[j], mid, by + bh + 13);
         g.font = mathFont(R, 11); g.fillStyle = R.col("muted");
-        g.fillText(`phase ${fmt(phases[j], 0)}°`, mid, by + bh + 29);
+        g.fillText(`phase ${fmtRad(phases[j], 2)}`, mid, by + bh + 29);
       }
       // time cursor
       let tx = L;
@@ -2872,12 +2927,12 @@
       });
       g.font = mathFont(R, 12); g.textAlign = "center";
       if (k === 3) { g.fillStyle = R.col("even"); g.fillText("= R(θ, n̂) exactly, overall sign +1", w / 2, h - 11); }
-      else { g.fillStyle = R.col("muted"); g.fillText("operators act right to left: the rightmost is applied first", w / 2, h - 11); }
+      else { g.fillStyle = R.col("muted"); g.fillText(w < 340 ? "Rightmost operator acts first." : "operators act right to left: the rightmost is applied first", w / 2, h - 11); }
       g.restore();
     }
 
     legend() {
-      const l = [["even", "the state: arrow, flag, path"], ["arrow", "target axis <em>n̂</em>; dashed: the axis being carried"]];
+      const l = [["even", "the state: cat, vector, path"], ["arrow", "target axis <em>n̂</em>; dashed: the axis being carried"]];
       if (this.compare) l.push(["muted", "direct <em>R</em>(<em>θ</em>, <em>n̂</em>), for comparison", "ring"]);
       return l;
     }
@@ -2887,12 +2942,12 @@
     }
     glossary() {
       return [
-        ["n̂, θ", "target axis and angle: the goal is R(θ, n̂)"],
+        ["n̂, θ", "target axis and angle in radians: the goal is R(θ, n̂)"],
         ["x̂′", "(n<sub>x</sub>, n<sub>y</sub>, 0)/n<sub>ρ</sub>, the in-plane direction under n̂"],
-        ["ŷ′", "ẑ × x̂′, in the xy-plane, 90° ahead of x̂′"],
+        ["ŷ′", "ẑ × x̂′, in the xy-plane, π/2 ahead of x̂′"],
         ["m̂", "n<sub>ρ</sub> x̂′ + n<sub>z</sub> ŷ′: n̂ tilted down into the xy-plane"],
         ["W", "R(π/2, x̂′), which carries m̂ to n̂; R<sub>W</sub> is its 3×3 rotation"],
-        ["phase", "the drive phase of each pulse (direction of its axis in the xy-plane)"],
+        ["phase", "the drive phase of each pulse in radians (direction of its axis in the xy-plane)"],
         ["U", "the SU(2) product of the pulses so far"],
         ["Tr", "trace; ½ Tr(U†R) = +1 means U = R, sign included"],
         ["‖A − B‖", "largest entry of the difference, in absolute value"],
@@ -2902,7 +2957,7 @@
       const k = this.stage();
       const where = k === 3 ? "all three pulses done" : this.s === 0 ? "at the start" : `pulse ${k + 1} of 3 running`;
       const r = act(this.rotorAt(this.s), this.r0);
-      return `Three pulses toward R(${fmt(this.angle / DEG, 0)}°, n̂), n̂ = (${this.n.map((x) => fmt(x, 2)).join(", ")}); ${where}; arrow at (${r.map((x) => fmt(x, 2)).join(", ")}).`;
+      return `Three pulses toward R(${fmtRad(this.angle)}, n̂), n̂ = (${this.n.map((x) => fmt(x, 2)).join(", ")}); ${where}; cat at (${r.map((x) => fmt(x, 2)).join(", ")}).`;
     }
     panelLabel() { return "Timeline of the three pulses, with the operator product written right to left."; }
     readout() {
@@ -2946,7 +3001,7 @@
   // and tangent frame are moved by the versor g = … w u, the product of the
   // normals in the order the mirrors act.
 
-  const MIRROR_START = [sph(80 * DEG, 100 * DEG), sph(62 * DEG, 150 * DEG), sph(25 * DEG, 20 * DEG)];
+  const MIRROR_START = [[0, 1, 0], unit([1, 1, 0]), [0, 0, 1]];
   const MIRROR_NAMES = ["u", "w", "v"];
   const FLIP_MS = 320;
   const PULSE_MS = 650;
@@ -2964,13 +3019,13 @@
 
     constructor(api) {
       super(api);
-      this.count = 2;
+      this.count = this.startCount = 1;
       this.normals = MIRROR_START.map((v) => v.slice());
       this.planeTangents = [];
       this.flipAt = [-Infinity, -Infinity, -Infinity];
       this.pulseAt = -Infinity;
       this.steps = true;
-      this.r0 = sph(55 * DEG, -35 * DEG);
+      this.r0 = unit([1, -0.6, 0.3]);
       this.f0 = northOf(this.r0);
       this.g0 = cross(this.r0, this.f0);
       this.track = {};
@@ -2981,7 +3036,7 @@
     get sphere() { return false; }
 
     applyAttrs(get) {
-      this.count = clamp(Math.round(numAttr(get("mirrors"), 2)), 1, 3);
+      this.count = this.startCount = clamp(Math.round(numAttr(get("mirrors"), 1)), 1, 3);
       this.sync();
     }
 
@@ -2993,8 +3048,8 @@
       return `
         <div class="controls">
           <div class="chips" role="group" aria-label="Mirror normals"></div>
-          ${btnHTML("add", "Add mirror")}
-          ${btnHTML("remove", "Remove mirror")}
+          ${btnHTML("add", "+ Add second mirror", "primary")}
+          ${btnHTML("remove", "Remove mirror", "quiet")}
           <label class="check"><input type="checkbox" name="steps" checked> Show each bounce</label>
           ${btnHTML("reset", "Reset", "quiet")}
         </div>`;
@@ -3029,21 +3084,24 @@
         }
         const text = this.normals.slice(0, this.count).map((n) => {
           const a = angles(n);
-          return [Math.round(a.theta / DEG), Math.round(wrap360(a.phi / DEG))];
+          return [fmtRad(a.theta, 2), fmtRad(((a.phi % TAU) + TAU) % TAU, 2)];
         });
         const key = JSON.stringify(text);
         if (key !== this.chipText) {
           this.chipText = key;
           text.forEach(([t, p], i) => {
             const chip = chips.children[i];
-            chip.lastChild.textContent = `${t}°, ${p}°`;
+            chip.lastChild.textContent = `${t.replace(" rad", "")}, ${p}`;
             chip.setAttribute("aria-label",
-              `Normal ${MIRROR_NAMES[i]}: polar ${t} degrees, azimuth ${p} degrees. Press to flip the normal; arrow keys turn the mirror.`);
+              `Normal ${MIRROR_NAMES[i]}: polar ${t}, azimuth ${p}. Press to flip the normal; arrow keys turn the mirror.`);
           });
         }
       }
       const add = this.q('[data-act="add"]'), rem = this.q('[data-act="remove"]');
-      if (add) add.disabled = this.count >= 3;
+      if (add) {
+        add.disabled = this.count >= 3;
+        add.textContent = this.count === 1 ? "+ Add second mirror" : this.count === 2 ? "+ Add third mirror" : "3 mirrors (maximum)";
+      }
       if (rem) rem.disabled = this.count <= 1;
       const s = this.$("steps");
       if (s) s.checked = this.steps;
@@ -3061,8 +3119,10 @@
         this.count--;
         this.api.announce(`${this.count} mirror${this.count > 1 ? "s" : ""} left. ${this.describe()}`);
       } else if (act === "reset") {
+        this.count = this.startCount;
         this.normals = MIRROR_START.map((v) => v.slice());
         this.planeTangents = [];
+        this.pause();
         this.steps = true;
         this.track = {};
         this.api.announce("Reset.");
@@ -3185,7 +3245,8 @@
       ];
     }
     hint() {
-      return "The light cat is the starting point; every cat stays one unit from the origin. Each rectangle marks a mirror plane through the origin. " +
+      return (this.count === 1 ? "One mirror reflects the cat. Add a second mirror to make a rotation. " : "") +
+        "The light cat is the starting point; every cat stays one unit from the origin. Each rectangle marks a mirror plane through the origin. " +
         "Drag the tip of a normal to turn its mirror. Tap a tip (or press its chip) " +
         "to flip the normal: same mirror, same image, opposite sign in the upper diagram. Two mirrors, u then w, make the " +
         "rotation by twice their angle about the line u × w where they meet. Cats turn with the transformation and can appear edge-on.";
@@ -3211,7 +3272,7 @@
       const c = this.count;
       if (c === 2) {
         const al = Math.acos(clamp(dot(this.normals[0], this.normals[1]), -1, 1));
-        return `Two mirrors at ${fmt(al / DEG, 0)}° between their normals: a rotation by ${fmt((2 * al) / DEG, 0)}° about u × w.`;
+        return `Two mirrors at ${fmtRad(al)} between their normals: a rotation by ${fmtRad(2 * al)} about u × w.`;
       }
       return c === 1 ? "One mirror: a reflection, determinant −1." : "Three mirrors: odd again, a rotation followed by x ↦ −x, determinant −1.";
     }
@@ -3229,7 +3290,7 @@
         const al = Math.acos(clamp(dot(N[0], N[1]), -1, 1));
         const x = cross(N[0], N[1]);
         s += `
-          <p>∠(u, w) = α = ${fmtDeg(al, 1)}, so the rotation is by <b>2α = ${fmtDeg(2 * al, 1)}</b></p>
+          <p>∠(u, w) = α = ${fmtRad(al)}, so the rotation is by <b>2α = ${fmtRad(2 * al)}</b></p>
           <p>about u × w = ${norm(x) > 1e-9 ? vecHTML(unit(x), 2) : "(the mirrors coincide)"}</p>
           <p>w u = w·u + w∧u = cos α ${MINUS} sin α I n̂</p>
           <p>quaternion: ${quatHTML(quat(G))}</p>
@@ -3240,7 +3301,7 @@
         const { angle, axis } = rotorAngleAxis(Rp);
         s += `
           <p>R′ = ${MINUS}g e₁e₂e₃ = ${mvHTML(Rp)}</p>
-          <p class="aside">Three reflections (odd again) make x ↦ ${MINUS}R′ x R̃′: the rotation by ${fmtDeg(angle, 1)} about ${vecHTML(axis, 2)},
+          <p class="aside">Three reflections (odd again) make x ↦ ${MINUS}R′ x R̃′: the rotation by ${fmtRad(angle)} about ${vecHTML(axis, 2)},
             then x ↦ ${MINUS}x. A rotoreflection, with determinant ${MINUS}1.</p>`;
       }
       s += `<div class="mat-row">x ↦ ${c % 2 ? "ĝ x g̃" : "g x g̃"} = ${mat3HTML(M, 2)} <span class="lbl">det = ${fmt(det3(M), 0).replace(/^(\d)/, "+$1")}</span></div>`;
@@ -3256,7 +3317,7 @@
   const MODE_ATTRS = ["theta", "phi", "measure", "axis", "angle", "omega", "delta", "drive-phase", "mirrors"];
   const KEYS_ROW = [
     "Keys",
-    "With the diagram focused: arrow keys move the highlighted handle (Shift: 15° steps), Enter picks the next handle, " +
+    "With the diagram focused: arrow keys move the highlighted handle (Shift: π/12 rad steps), Enter picks the next handle, " +
       "F flips a mirror normal, Alt + arrow keys turn the view, V resets it.",
   ];
   const WIDE = 720; // px of container width for the side-by-side layout
@@ -3687,7 +3748,8 @@
           const th = clamp(a.theta + dir[1] * step, 0, Math.PI);
           this.#kbPhi += dir[0] * step;
           h.set(sph(th, this.#kbPhi));
-          this.#announceSoon(`${h.label}: polar ${fmt(th / DEG, 0)}°, azimuth ${fmt(wrap360(this.#kbPhi / DEG), 0)}°. ${m.describe()}`);
+          const angleText = `polar ${fmtRad(th)}, azimuth ${fmtRad(wrap360(this.#kbPhi / DEG) * DEG)}`;
+          this.#announceSoon(`${h.label}: ${angleText}. ${m.describe()}`);
         }
         this.#invalidate();
         return;

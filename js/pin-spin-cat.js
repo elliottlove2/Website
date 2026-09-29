@@ -18,7 +18,7 @@
  *   modes      tabs to show, comma-separated: "mirrors,spin,kaleido" (default: all)
  *   mode       the tab that opens first
  *   mirrors    starting mirror normals in degrees, e.g. "90,150" ("none" for none)
- *   k          kaleidoscope order, 2 to 8 (mirrors at 180°/k)
+ *   k          kaleidoscope order, 2 to 8 (mirrors at π/k)
  *   autoplay   start the spin animation when the widget scrolls into view
  *   cat-src    URL of your own cat picture (pick an asymmetric one!)
  *   theme      "light", "dark" or "auto" (default: follow the reader's system)
@@ -80,7 +80,6 @@
   // ─── 2. Small helpers ─────────────────────────────────────────────────────
 
   const TAU = 2 * Math.PI;
-  const toDeg = (r) => (r * 180) / Math.PI;
   const toRad = (d) => (d * Math.PI) / 180;
   const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
   const mod = (v, m) => ((v % m) + m) % m;
@@ -92,9 +91,18 @@
   const MINUS = "\u2212";
   const signed = (v, text) => (v < 0 ? MINUS : "") + text;
   const sub = (n) => String(n).replace(/\d/g, (d) => "₀₁₂₃₄₅₆₇₈₉"[d]);
-  const degrees = (rad) => {
-    const d = Math.round(toDeg(rad));
-    return signed(d, `${Math.abs(d)}°`);
+  const radians = (rad) => {
+    if (Math.abs(rad) < 1e-9) return "0 rad";
+    const multiple = Math.abs(rad) / Math.PI;
+    for (const denominator of [1, 2, 3, 4, 5, 6, 7, 8, 10, 12]) {
+      const numerator = Math.round(multiple * denominator);
+      if (numerator && Math.abs(multiple - numerator / denominator) < 1e-9) {
+        const fraction = `${numerator === 1 ? "" : numerator}π${denominator === 1 ? "" : `/${denominator}`}`;
+        return signed(rad, fraction);
+      }
+    }
+    const value = Number(Math.abs(rad).toFixed(3));
+    return signed(value ? rad : 0, `${value} rad`);
   };
 
   // "0.50 − 0.87 e₁₂", "0.26 e₁ + 0.97 e₂", and so on.
@@ -312,8 +320,8 @@
   const BALL = 0.075; // the ball of yarn at the hinge
   const HOME = { x: 0.52 * Math.cos(0.35), y: 0.52 * Math.sin(0.35) }; // where the cat sits
   const MAX_MIRRORS = 5;
-  const SPIN_MAX = 1440; // four full turns, in degrees
-  const SPIN_SPEED = 90; // degrees per second
+  const SPIN_MAX = 4 * TAU; // four full turns, in radians
+  const SPIN_SPEED = Math.PI / 2; // radians per second
   const FLIP_MS = 320;
   const PULSE_MS = 650;
 
@@ -328,7 +336,7 @@
     },
     spin: {
       tab: "Spin",
-      sub: "the 720° trick",
+      sub: "the 4π trick",
       hint:
         "The light grey cat is the starting point. " +
         "Drag the cat around the ball of yarn, or press play. " +
@@ -338,7 +346,7 @@
       tab: "Kaleidoscope",
       sub: "two signs per cat",
       hint:
-        "Two mirrors at 180°/k, as in a real kaleidoscope. Drag the cat, " +
+        "Two mirrors at π/k, as in a real kaleidoscope. Drag the cat, " +
         "and point at any cat to light up its two sign choices.",
     },
   };
@@ -503,13 +511,13 @@
       </div>
       <div class="controls" data-for="spin" hidden>
         <button class="btn primary" data-act="play" aria-pressed="false">Play</button>
-        <input type="range" min="0" max="${SPIN_MAX}" step="1" value="0" data-act="theta"
-          aria-label="Rotation angle θ in degrees">
+        <input type="range" min="0" max="${SPIN_MAX}" step="any" value="0" data-act="theta"
+          aria-label="Rotation angle θ in radians">
         <output data-out="theta"></output>
         <span class="presets">
-          <button class="btn" data-go="0">0°</button>
-          <button class="btn" data-go="360">360°</button>
-          <button class="btn" data-go="720">720°</button>
+          <button class="btn" data-go="0">0</button>
+          <button class="btn" data-go="${TAU}">2π</button>
+          <button class="btn" data-go="${2 * TAU}">4π</button>
         </span>
       </div>
       <div class="controls" data-for="kaleido" hidden>
@@ -544,7 +552,7 @@
     #k = 4;
     #steps = true;
 
-    #theta = 0; // spin view: the total turn in degrees, still counting past 360
+    #theta = 0; // spin view: the total turn in radians, still counting past 2π
     #playing = false;
     #dir = 1;
     #tween = null;
@@ -694,7 +702,7 @@
         if (!chip || !step) return;
         e.preventDefault();
         const m = this.#mirrors[Number(chip.dataset.i)];
-        m.angle = mod(m.angle + toRad(step * (e.shiftKey ? 15 : 5)), TAU);
+        m.angle = mod(m.angle + step * (e.shiftKey ? Math.PI / 12 : Math.PI / 36), TAU);
         this.#invalidate();
       });
 
@@ -713,7 +721,7 @@
         this.#k = Number(k.value);
         this.#kcat = null;
         this.#hover = null;
-        this.#announce(`Mirrors at ${+(180 / this.#k).toFixed(1)} degrees: ${2 * this.#k} cats, ${4 * this.#k} lifts.`);
+        this.#announce(`Mirrors at ${radians(Math.PI / this.#k)} radians: ${2 * this.#k} cats, ${4 * this.#k} lifts.`);
         this.#invalidate();
       });
 
@@ -800,18 +808,18 @@
       this.#setPlaying(false);
       const from = this.#theta;
       const span = Math.abs(target - from);
-      if (span < 1 || matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      if (span < Math.PI / 180 || matchMedia("(prefers-reduced-motion: reduce)").matches) {
         this.#theta = target;
       } else {
-        this.#tween = { from, to: target, t0: performance.now(), dur: clamp(span * 2.2, 400, 2600) };
+        this.#tween = { from, to: target, t0: performance.now(), dur: clamp(span * 396 / Math.PI, 400, 2600) };
       }
       this.#invalidate();
     }
 
     #addMirror() {
       if (this.#mirrors.length >= MAX_MIRRORS) return;
-      const previous = this.#mirrors.length ? last(this.#mirrors).angle : toRad(50);
-      this.#mirrors.push({ angle: mod(previous + toRad(40), TAU), flipAt: -Infinity });
+      const previous = this.#mirrors.length ? last(this.#mirrors).angle : 5 * Math.PI / 18;
+      this.#mirrors.push({ angle: mod(previous + 2 * Math.PI / 9, TAU), flipAt: -Infinity });
       this.#announce(`Added mirror ${this.#mirrors.length}.`);
       this.#invalidate();
     }
@@ -855,10 +863,10 @@
     // Two mirrors with normals u (fixed) and w (at half the spin angle): g = wu.
     #rotor() {
       const u = Math.PI / 2;
-      return mul(unit(u + toRad(this.#theta) / 2), unit(u));
+      return mul(unit(u + this.#theta / 2), unit(u));
     }
 
-    // Mirrors at 180°/k generate 2k cats; their lifts are the 4k products of u and w.
+    // Mirrors at π/k generate 2k cats; their lifts are the 4k products of u and w.
     #lifts() {
       const u = unit(Math.PI / 2);
       const w = unit(Math.PI / 2 + Math.PI / this.#k);
@@ -967,12 +975,12 @@
       }
       if (drag.kind === "mirror") {
         let a = Math.atan2(p.y, p.x);
-        const snap = Math.round(a / toRad(15)) * toRad(15); // gently magnetic at 15°
-        if (Math.abs(a - snap) < toRad(3)) a = snap;
+        const snap = Math.round(a / (Math.PI / 12)) * (Math.PI / 12); // gently magnetic at π/12
+        if (Math.abs(a - snap) < Math.PI / 60) a = snap;
         this.#mirrors[drag.i].angle = mod(a, TAU);
       } else if (drag.kind === "spin") {
         const a = Math.atan2(p.y, p.x);
-        this.#theta = clamp(this.#theta + toDeg(wrapPi(a - drag.prev)), 0, SPIN_MAX);
+        this.#theta = clamp(this.#theta + wrapPi(a - drag.prev), 0, SPIN_MAX);
         drag.prev = a;
       } else {
         const [a, b, c, d] = drag.M;
@@ -1127,11 +1135,12 @@
 
     #syncControls() {
       const { add, remove, theta, thetaOut, k, kOut, chips } = this.#el;
-      const t = Math.round(this.#theta);
+      const t = this.#theta;
       if (theta.value !== String(t)) theta.value = String(t);
-      thetaOut.textContent = `θ = ${t}°`;
+      thetaOut.textContent = `θ = ${radians(t)}`;
+      theta.setAttribute("aria-valuetext", radians(t));
       if (k.value !== String(this.#k)) k.value = String(this.#k);
-      kOut.textContent = `180°/${this.#k} = ${+(180 / this.#k).toFixed(1)}°`;
+      kOut.textContent = `π/${this.#k} rad`;
       add.disabled = this.#mirrors.length >= MAX_MIRRORS;
       remove.disabled = this.#mirrors.length === 0;
 
@@ -1142,13 +1151,13 @@
       }
       this.#mirrors.forEach((m, i) => {
         const chip = chips.children[i];
-        const deg = String(Math.round(toDeg(m.angle)) % 360);
-        if (chip.dataset.deg === deg) return;
-        chip.dataset.deg = deg;
-        chip.lastChild.textContent = `${deg}°`;
+        const angle = radians(mod(m.angle, TAU));
+        if (chip.dataset.angle === angle) return;
+        chip.dataset.angle = angle;
+        chip.lastChild.textContent = angle;
         chip.setAttribute(
           "aria-label",
-          `Mirror ${i + 1}, normal at ${deg} degrees. Press to flip the normal; arrow keys turn the mirror.`,
+          `Mirror ${i + 1}, normal at ${angle}. Press to flip the normal; arrow keys turn the mirror.`,
         );
       });
     }
@@ -1346,7 +1355,7 @@
 
     #stageSpin(kit) {
       const { ctx, col, px, R } = kit;
-      const th = toRad(this.#theta);
+      const th = this.#theta;
       const u = Math.PI / 2;
       const w = u + th / 2;
       this.#drawMirror(kit, u);
@@ -1623,7 +1632,7 @@
           ctx.restore();
         }
       } else if (this.#mode === "spin") {
-        const th = toRad(this.#theta);
+        const th = this.#theta;
         trail(0, 0, th / 2, col.even); // Spin(2) goes round at half speed...
         trail(0, 1, th, col.even); // ...while SO(2) and the yarn count every turn
         plot(this.#rotor());
@@ -1663,8 +1672,8 @@
           ? "No mirrors yet, so the cat is untouched."
           : d.odd
             ? `${bounces} (an odd number) make a <b>reflection</b> across the line at ` +
-              `${degrees(mod(d.line, Math.PI))}. This <i>g</i> is in Pin(2) but not in Spin(2).`
-            : `${bounces} (an even number) make a <b>rotation</b> by ${degrees(turn(d.angle))}. ` +
+              `${radians(mod(d.line, Math.PI))}. This <i>g</i> is in Pin(2) but not in Spin(2).`
+            : `${bounces} (an even number) make a <b>rotation</b> by ${radians(turn(d.angle))}. ` +
               `This <i>g</i> lies in Spin(2).`;
       return (
         `<p class="eq"><i>g</i> = ${n ? `${word} = ${formatMv(g)}` : "1"}</p>` +
@@ -1675,24 +1684,24 @@
     }
 
     #readSpin() {
-      const t = Math.round(this.#theta);
-      const turns = this.#theta / 360;
+      const t = this.#theta;
+      const turns = t / TAU;
       const n = Math.round(turns);
-      const home = Math.abs(this.#theta - 360 * n) < 2.5;
+      const home = Math.abs(t - TAU * n) < Math.PI / 72;
       let note;
       if (home && n === 0) note = "Nothing has turned yet, so <i>g</i> = 1.";
       else if (home && n % 2) {
         note =
-          `The cat is home after ${360 * n}°, but <i>g</i> = ${MINUS}1: the second mirror lies ` +
+          `The cat is home after ${radians(TAU * n)}, but <i>g</i> = ${MINUS}1: the second mirror lies ` +
           `on the first with its normal reversed.`;
-      } else if (home) note = `Home again, and now <i>g</i> = +1. Spin needs 720° where SO(2) needs 360°.`;
+      } else if (home) note = `Home again, and now <i>g</i> = +1. Spin needs 4π where SO(2) needs 2π.`;
       else {
         note =
-          "The mirror angle is half the turn, so <i>g</i> takes 720° to come home. The yarn counts " +
+          "The mirror angle is half the turn, so <i>g</i> takes 4π to come home. The yarn counts " +
           "every turn; the sign of <i>g</i> only remembers whether the count is even or odd.";
       }
       return (
-        `<p class="eq"><i>θ</i> = ${t}°, so the cat is turned by ${mod(t, 360)}°</p>` +
+        `<p class="eq"><i>θ</i> = ${radians(t)}, so the cat is turned by ${radians(mod(t, TAU))}</p>` +
         `<p class="eq"><i>g</i> = cos(<i>θ</i>/2) ${MINUS} sin(<i>θ</i>/2) e₁₂ = ${formatMv(this.#rotor())}</p>` +
         `<p class="aside">Yarn wound: ${turns.toFixed(2)} turns.</p>` +
         `<p>${note}</p>`
@@ -1706,14 +1715,14 @@
         const g = this.#lifts()[this.#hover.kind][this.#hover.j];
         const d = describe(g);
         const what = d.odd
-          ? `the reflection across the line at ${degrees(mod(d.line, Math.PI))}`
+          ? `the reflection across the line at ${radians(mod(d.line, Math.PI))}`
           : Math.abs(turn(d.angle)) < 1e-6
             ? "no change from the starting cat"
-            : `the rotation by ${degrees(turn(d.angle))}`;
+            : `the rotation by ${radians(turn(d.angle))}`;
         focus = `<p>This cat shows ${what}. Its two sign choices are ±(${formatMv(g)}).</p>`;
       }
       return (
-        `<p>Mirrors at 180°/${k} = ${+(180 / k).toFixed(1)}° make <b>${2 * k} cats</b>: ` +
+        `<p>Mirrors at π/${k} make <b>${2 * k} cats</b>: ` +
         `the rotations and reflections these mirrors produce.</p>` +
         `<p>The upper circles show <b>${4 * k} sign choices</b> in Pin(2). Every cat move has two, ` +
         `<i>g</i> and ${MINUS}<i>g</i>.</p>` +
