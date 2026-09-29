@@ -17,7 +17,7 @@
  * Views (tabs)
  *   state      State → arrow   amplitudes and relative phase in radians
  *   rotate     Rotate          U = exp(−iθ/2 n̂·σ) against R(θ, n̂); 2π vs 4π
- *   drive      Drive           H = (ħ/2)(Ω σx′ + δ σz): precession, cone, P₁(t), solver
+ *   drive      Drive           lab and rotating frames: precession, cone, P₁(t), solver
  *   pulses     Three pulses    R(θ, n̂) from pulses about xy-plane axes
  *   mirrors3d  Mirrors         Pin(3) → O(3): two reflections make a rotation
  *
@@ -320,7 +320,7 @@
 
   // 1e. Dynamics.
   //
-  // H = (ħ/2) a·σ generates exp(−iHt/ħ) = exp(−i(|a|t/2) â·σ) = R(|a|t, â),
+  // H = (1/2) a·σ generates exp(−iHt) = exp(−i(|a|t/2) â·σ) = R(|a|t, â),
   // so the Bloch vector obeys dr/dt = a × r: precession about â at rate |a|.
   // This is the closed form; nothing is integrated, so nothing drifts.
   const evolve = (a, t) => {
@@ -328,7 +328,7 @@
     return w * Math.abs(t) > 0 ? rotor(w * t, a) : ONE;
   };
 
-  // The rotating-frame drive H = (ħ/2)(Ω σ_x′ + δ σ_z), where x′ is the
+  // The rotating-frame drive H = (1/2)(Ω σ_x′ + δ σ_z), where x′ is the
   // in-plane axis at drive phase φ_d:  a = (Ω cos φ_d, Ω sin φ_d, δ).
   const driveVector = (omega, delta, phase) => [omega * Math.cos(phase), omega * Math.sin(phase), delta];
   // Generalised Rabi frequency √(Ω² + δ²).
@@ -711,13 +711,21 @@
     .wide .body { grid-template-columns: minmax(0, 1.12fr) minmax(0, 1fr); align-items: start; }
     .stage-wrap { position: relative; width: 100%; max-width: 560px; justify-self: center; }
     .wide .stage-wrap { max-width: none; }
+    .frame-title { margin: 0 0 7px; font-size: 0.94em; font-weight: 600; }
+    .drive-layout.wide .body { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .drive-layout .side { grid-column: 1 / -1; }
+    .drive-layout.wide .side { grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; }
+    .drive-layout.wide .panel { grid-column: 1; grid-row: 1; }
+    .drive-layout.wide .legend { grid-column: 1; grid-row: 2; }
+    .drive-layout.wide .readout { grid-column: 2; grid-row: 1 / span 2; }
+    .drive-layout .view { top: 36px; }
     canvas { display: block; width: 100%; }
-    .stage {
+    .stage, .lab-stage {
       aspect-ratio: 1 / 1; height: auto; background: var(--bs-stage);
       border-radius: 14px; touch-action: pan-y pinch-zoom;
     }
-    .stage:focus { outline: none; }
-    .stage:focus-visible { outline: 2px solid var(--bs-glass); outline-offset: 2px; }
+    .stage:focus, .lab-stage:focus { outline: none; }
+    .stage:focus-visible, .lab-stage:focus-visible { outline: 2px solid var(--bs-glass); outline-offset: 2px; }
     .view { position: absolute; top: 6px; right: 6px; font-size: 0.78em; padding: 4px 9px; }
     .camera-presets { display: flex; align-items: center; gap: 6px; padding-top: 8px; }
     .camera-presets .lab { margin-right: 2px; }
@@ -736,6 +744,7 @@
     .readout { font-size: 0.94em; min-height: 7.5em; overflow-x: auto; }
     .readout p, .solve-out p { margin: 0 0 0.45em; font-family: var(--bs-math-font); font-size: 1.04em; }
     .readout p.aside, .solve-out p.aside { font-family: inherit; font-size: 0.93em; }
+    .amplitude-symbol { font-family: system-ui, sans-serif; font-style: normal; }
     .readout i { font-family: var(--bs-math-font); }
     .readout b { font-weight: 600; }
     .aside, .lbl { color: var(--bs-muted); }
@@ -821,7 +830,12 @@
     <div class="bs" part="container">
       <div class="tabs" role="tablist" aria-label="Views"></div>
       <div class="body">
-        <div class="stage-wrap">
+        <div class="stage-wrap lab-wrap" hidden>
+          <div class="frame-title">Lab frame</div>
+          <canvas class="lab-stage" tabindex="0" role="img" aria-label="Lab-frame Bloch sphere" aria-describedby="bs-lab-keys"></canvas>
+        </div>
+        <div class="stage-wrap primary-wrap">
+          <div class="frame-title rotating-title" hidden>Rotating frame</div>
           <canvas class="stage" tabindex="0" role="img" aria-describedby="bs-keys"></canvas>
           <button class="btn quiet view" type="button" title="Reset the view (double-click the diagram, or press V)">Reset view</button>
           <div class="camera-presets" role="group" aria-label="Camera presets" hidden></div>
@@ -841,6 +855,7 @@
       <p class="sr" id="bs-keys">Drag the diagram to turn the view. With the diagram focused, arrow keys move the highlighted handle
         (Shift for bigger steps), Enter picks the next handle, F flips a mirror normal, Alt with arrow keys turns the view,
         and V resets it.</p>
+      <p class="sr" id="bs-lab-keys">Drag the lab diagram or use arrow keys to turn both views together. V resets the view.</p>
       <div class="sr" aria-live="polite"></div>
     </div>`;
 
@@ -1409,7 +1424,7 @@
     if (!arrowPath(g, x, y, x + z[0] * rad, y - z[1] * rad, 2.4, 0.85)) {
       g.beginPath(); g.arc(x, y, 2.5, 0, TAU); g.fill();
     }
-    g.fillStyle = R.col("ink"); g.font = mathFont(R, 15, true); g.textAlign = "left";
+    g.fillStyle = R.col("ink"); g.font = uiFont(R, 15); g.textAlign = "left";
     g.fillText(name, x - rad - 2, y - rad + 2);
     if (caption) {
       g.font = mathFont(R, 11.5); g.fillStyle = R.col("muted"); g.textAlign = "center";
@@ -1905,7 +1920,7 @@
       const ab = cmul(cconj(psi[0]), psi[1]);
       let s = `
         <p>|ψ⟩ = cos(θ/2)|0⟩ + e<sup>iφ</sup> sin(θ/2)|1⟩</p>
-        <p><span class="lbl">α =</span> ${fmtC(psi[0])}, <span class="lbl">β =</span> ${fmtC(psi[1])}</p>
+        <p><span class="lbl amplitude-symbol">α =</span> ${fmtC(psi[0])}, <span class="lbl amplitude-symbol">β =</span> ${fmtC(psi[1])}</p>
         <p>⟨${sig("x")}⟩ = 2 Re(ᾱβ) = <span class="even">${fmt(2 * ab[0])}</span></p>
         <p>⟨${sig("y")}⟩ = 2 Im(ᾱβ) = <span class="even">${fmt(2 * ab[1])}</span></p>
         <p>⟨${sig("z")}⟩ = |α|² ${MINUS} |β|² = <span class="even">${fmt(r[2])}</span></p>
@@ -2191,13 +2206,22 @@
 
   // ─── 6c. Drive: Ω, δ and the cone ──────────────────────────────────────────
   //
-  // Everything is closed form: r(t) = act(evolve(a, t), ẑ) with
-  // a = (Ω cos φ_d, Ω sin φ_d, δ). Moving a slider keeps t and recomputes the
-  // whole path from |0⟩, so the arrow and the plot always agree with
-  //   P₁(t) = (Ω²/Ω_R²) sin²(Ω_R t / 2).
+  // Exact circular drive, with frequencies in inverse time units:
+  // U_lab(t) = R(ω_d t, z) U_rot(t), U_rot(t) = exp(−it a·σ/2),
+  // a = (Ω cos φ_d, Ω sin φ_d, δ), δ = ω_0 − ω_d. The two frames share
+  // r_z and hence P₁; every path and amplitude uses the selected initial state.
 
   const ZHAT = [0, 0, 1];
   const DRIVE_T_MAX = 30;
+  const DRIVE_W0 = 4;
+  const DRIVE_STATES = {
+    d0: { label: "|0⟩", psi: [[1, 0], [0, 0]], r: [0, 0, 1] },
+    d1: { label: "|1⟩", psi: [[0, 0], [1, 0]], r: [0, 0, -1] },
+    dp: { label: "|+⟩", psi: [[Math.SQRT1_2, 0], [Math.SQRT1_2, 0]], r: [1, 0, 0] },
+    dm: { label: "|−⟩", psi: [[Math.SQRT1_2, 0], [-Math.SQRT1_2, 0]], r: [-1, 0, 0] },
+    dpi: { label: "|+i⟩", psi: [[Math.SQRT1_2, 0], [0, Math.SQRT1_2]], r: [0, 1, 0] },
+    dmi: { label: "|−i⟩", psi: [[Math.SQRT1_2, 0], [0, -Math.SQRT1_2]], r: [0, -1, 0] },
+  };
 
   // A "nice" tick spacing near x: 1, 2 or 5 times a power of ten.
   const niceStep = (x) => {
@@ -2209,7 +2233,7 @@
   class DriveMode extends Mode {
     static id = "drive";
     static label = "Drive";
-    static sub = "Ω, δ and the cone";
+    static sub = "lab and rotating frames";
 
     constructor(api) {
       super(api);
@@ -2225,6 +2249,9 @@
       this.run = null; // { T, rate } while a solved pulse is running
       this.landed = null; // errors after it lands
       this.lastSolve = "";
+      this.initial = "d0";
+      this.psi0 = DRIVE_STATES.d0.psi.map((z) => z.slice());
+      this.r0 = DRIVE_STATES.d0.r.slice();
       // An upright world frame keeps the starting cat readable; the drive
       // rotates this frame rigidly along with its unit position.
       this.f0 = [0, 0, 1];
@@ -2239,11 +2266,32 @@
     }
 
     a() { return driveVector(this.omega, this.delta, this.phase); }
-    r() { return act(evolve(this.a(), this.t), ZHAT); }
+    carrier() { return DRIVE_W0 - this.delta; }
+    rotRotor(t = this.t) { return evolve(this.a(), t); }
+    labRotor(t = this.t) { return mul(rotor(this.carrier() * t, ZHAT), this.rotRotor(t)); }
+    r(t = this.t) { return act(this.rotRotor(t), this.r0); }
+    labR(t = this.t) { return act(this.labRotor(t), this.r0); }
+    psi(t = this.t) { return m2apply(toSU2(this.rotRotor(t)), this.psi0); }
+    labPsi(t = this.t) { return m2apply(toSU2(this.labRotor(t)), this.psi0); }
+    p1(t = this.t) { return clamp((1 - this.r(t)[2]) / 2, 0, 1); }
+    populationRange() {
+      const a = this.a(), W = norm(a);
+      if (W < 1e-12) {
+        const p = clamp((1 - this.r0[2]) / 2, 0, 1);
+        return { min: p, max: p };
+      }
+      const n = scale(a, 1 / W), c = n[2] * dot(n, this.r0);
+      const amplitude = Math.hypot(this.r0[2] - c, cross(n, this.r0)[2]);
+      return { min: clamp((1 - c - amplitude) / 2, 0, 1), max: clamp((1 - c + amplitude) / 2, 0, 1) };
+    }
     solution() { return solveDrive(this.target.angle, this.target.n, this.omega); }
 
     controls() {
       return `
+        <div class="controls" role="group" aria-label="Starting state">
+          <span class="lab">Start</span>
+          ${Object.entries(DRIVE_STATES).map(([key, state]) => btnHTML(key, `<span class="m">${state.label}</span>`, "", `Start in ${state.label}`)).join("")}
+        </div>
         <div class="controls">
           ${sliderHTML("omega", "Ω", 0, 3, 0.01, 1, "Rabi frequency Omega")}
           ${sliderHTML("delta", "δ", -3, 3, 0.01, 0.5, "Detuning delta")}
@@ -2258,7 +2306,7 @@
           ${btnHTML("res", `<span class="m">δ = 0</span>`, "", "Set detuning to zero (resonance)")}
         </div>
         <details class="sub">
-          <summary>Solve: which pulse makes R(θ, n̂)?</summary>
+          <summary>Solve a rotation in the rotating frame</summary>
           <div class="controls">
             ${sliderHTML("sangle", "θ", 0, TAU, "any", Math.PI / 2, "Target rotation angle, radians")}
           </div>
@@ -2291,6 +2339,10 @@
       this.setOut("t", Math.min(this.t, DRIVE_T_MAX), fmt(this.t, 2));
       const b = this.q('[data-act="play"]');
       if (b) b.textContent = reduced ? "Jump ½ period" : this.playing ? "Pause" : "Play";
+      for (const key of Object.keys(DRIVE_STATES)) {
+        const button = this.q(`[data-act="${key}"]`);
+        if (button) button.setAttribute("aria-pressed", String(key === this.initial));
+      }
       const { angle, n } = this.target;
       const a = angles(n);
       this.setOut("sangle", angle, fmtRad(angle));
@@ -2312,11 +2364,11 @@
       }
       if (!sol.ok) {
         return `<p>n̂ is along ${n[2] > 0 ? "+" : MINUS}z, so n<sub>ρ</sub> = 0 and δ = Ω n<sub>z</sub>/n<sub>ρ</sub> would be infinite.
-          With the drive on, â always leans off the z-axis. A z-rotation needs Ω = 0 and detuning alone for a time θ/|δ|,
-          or the three-pulse trick.</p>`;
+          With the drive on, â always leans off the z-axis. In the rotating frame, a z-rotation needs Ω = 0 and detuning alone for a time θ/|δ|.</p>`;
       }
       const big = Math.abs(sol.delta) > 3;
       let s = `
+        <p class="aside">Target: U<sub>rot</sub>(T) = R(θ, n̂), acting on ${DRIVE_STATES[this.initial].label}.</p>
         <p>φ<sub>d</sub> = atan2(n<sub>y</sub>, n<sub>x</sub>) = ${fmtRad(((sol.phase % TAU) + TAU) % TAU)}</p>
         <p>δ = Ω n<sub>z</sub>/n<sub>ρ</sub> = ${fmt(sol.delta)}${big ? ` <span class="lbl">(beyond the slider; the run uses the exact value)</span>` : ""}</p>
         <p>T = θ n<sub>ρ</sub>/Ω = ${fmt(sol.T)}</p>
@@ -2324,8 +2376,8 @@
       if (sol.nr < 0.15) s += `<p class="aside">Close to the pole: δ/Ω = n<sub>z</sub>/n<sub>ρ</sub> = ${fmt(n[2] / sol.nr, 1)}, and it diverges as n<sub>ρ</sub> → 0.</p>`;
       if (this.landed) {
         const L = this.landed;
-        s += `<p class="aside even">Landed at t = T. ‖U(T) ${MINUS} R(θ, n̂)‖ = ${fmtSci(L.uerr)},
-          |r(T) ${MINUS} R(θ, n̂)|0⟩| = ${fmtSci(L.rerr)}; ½ Tr(U(T)†R) = ${fmtC(L.tr)}: equal as matrices, global phase +1.</p>`;
+        s += `<p class="aside even">Landed at t = T. ‖U<sub>rot</sub>(T) ${MINUS} R(θ, n̂)‖ = ${fmtSci(L.uerr)},
+          ‖r<sub>rot</sub>(T) ${MINUS} R(θ, n̂)r₀‖ = ${fmtSci(L.rerr)}; ½ Tr(U<sub>rot</sub>(T)†R) = ${fmtC(L.tr)}: equal as matrices, global phase +1.</p>`;
       }
       return s;
     }
@@ -2352,13 +2404,20 @@
     solveSummary() {
       const sol = this.solution();
       if (!sol.ok) return sol.reason === "omega" ? "Drive off: no solution." : "Target axis on the z-axis: no drive solution.";
-      return `Target ${fmtRad(this.target.angle)}: drive phase ${fmtRad(((sol.phase % TAU) + TAU) % TAU)}, δ ${fmt(sol.delta, 2)}, T ${fmt(sol.T, 2)}.`;
+      return `Rotating-frame target ${fmtRad(this.target.angle)}: drive phase ${fmtRad(((sol.phase % TAU) + TAU) % TAU)}, δ ${fmt(sol.delta, 2)}, T ${fmt(sol.T, 2)}.`;
     }
 
     onAction(act) {
-      if (act === "play") { this.playing ? this.pause() : this.play(); }
-      else if (act === "reset") { this.t = 0; this.playing = false; this.changed(); this.api.announce("Back to |0⟩ at t = 0."); }
-      else if (act === "res") { this.delta = 0; this.changed(); this.api.announce(`On resonance: δ = 0, the axis lies in the equator and P₁ can reach 1.`); }
+      if (DRIVE_STATES[act]) {
+        const state = DRIVE_STATES[act];
+        this.initial = act;
+        this.psi0 = state.psi.map((z) => z.slice());
+        this.r0 = state.r.slice();
+        this.t = 0; this.playing = false; this.changed();
+        this.api.announce(`Start in ${state.label}, at t = 0 in both frames.`);
+      } else if (act === "play") { this.playing ? this.pause() : this.play(); }
+      else if (act === "reset") { this.t = 0; this.playing = false; this.changed(); this.api.announce(`Back to ${DRIVE_STATES[this.initial].label} at t = 0.`); }
+      else if (act === "res") { this.delta = 0; this.changed(); this.api.announce(`On resonance: δ = 0, so the rotating-frame axis lies in the equator.`); }
       else if (act === "run") this.startRun();
       this.sync();
     }
@@ -2405,11 +2464,11 @@
       const { angle, n } = this.target;
       const U = toSU2(evolve(this.a(), this.t)), W = su2(angle, n);
       const tr = cscale(m2trace(m2mul(m2dag(U), W)), 0.5);
-      const rerr = norm(sub(this.r(), act(rotor(angle, n), ZHAT)));
+      const rerr = norm(sub(this.r(), act(rotor(angle, n), this.r0)));
       this.landed = { T: this.t, uerr: m2dist(U, W), rerr, tr };
       this.run = null;
       this.sync();
-      this.api.announce(`Landed on R(θ, n̂)|0⟩. Matrix error ${this.landed.uerr.toExponential(1)}; global phase +1.`);
+      this.api.announce(`Landed on the rotating-frame target R(θ, n̂)${DRIVE_STATES[this.initial].label}. Matrix error ${this.landed.uerr.toExponential(1)}; global phase +1.`);
     }
 
     step(dt) {
@@ -2459,27 +2518,27 @@
         }
 
         // the cone: rim, faint base, and the part swept so far
-        let c = fillOrbit(ah, ZHAT, 0, TAU, 1, 96);
-        R.fill(SCRATCH, c, "even", 0.06, R.depth(scale(ah, ah[2])) - 0.01);
+        let c = fillOrbit(ah, this.r0, 0, TAU, 1, 96);
+        R.fill(SCRATCH, c, "even", 0.06, R.depth(scale(ah, dot(ah, this.r0))) - 0.01);
         R.curve(SCRATCH, c, "even", { width: 1, alpha: 0.45 });
         const sw = Math.min(W * this.t, TAU);
         if (sw > 1e-3) {
-          c = fillOrbit(ah, ZHAT, 0, sw, 1, Math.max(4, Math.ceil((96 * sw) / TAU)));
+          c = fillOrbit(ah, this.r0, 0, sw, 1, Math.max(4, Math.ceil((96 * sw) / TAU)));
           R.curve(SCRATCH, c, "even", { width: 2.4 });
         }
       }
-      R.dot(ZHAT, "even", 3.4, { ring: true });
+      R.dot(this.r0, "even", 3.4, { ring: true });
 
       // the homework target
       if (this.solveOpen) {
         const { angle, n } = this.target;
         const targetRotation = rotor(angle, n);
-        const goal = act(targetRotation, ZHAT);
+        const goal = act(targetRotation, this.r0);
         R.line([0, 0, 0], n, "arrow", { dash: [5, 4], alpha: 0.85, width: 1.4 });
         R.handle(n, "arrow", active === "n");
         R.text(scale(n, 1.15), "n̂", "ink", { italic: true, size: 14 });
         if (angle > 1e-3) {
-          const c = fillOrbit(n, ZHAT, 0, angle, 1, Math.max(4, Math.ceil((64 * angle) / Math.PI)));
+          const c = fillOrbit(n, this.r0, 0, angle, 1, Math.max(4, Math.ceil((64 * angle) / Math.PI)));
           R.curve(SCRATCH, c, "muted", { width: 1.2, dash: [2, 3], alpha: 0.9 });
         }
         R.arrow([0, 0, 0], goal, "muted", { width: 1.6, dash: [4, 3], alpha: 0.7 });
@@ -2487,7 +2546,42 @@
         R.text(scale(goal, 1.17), "target", "muted", { size: 11 });
       }
 
-      const evolution = evolve(a, this.t), r = act(evolution, ZHAT);
+      const evolution = this.rotRotor(), r = act(evolution, this.r0);
+      R.arrow([0, 0, 0], r, "even", { width: 2.2, head: 0.85 });
+      R.cat(r, act(evolution, this.f0), act(evolution, this.g0), "even");
+    }
+
+    drawLabStage(R) {
+      const wd = this.carrier(), phase = wd * this.t + this.phase;
+      const xp = [Math.cos(phase), Math.sin(phase), 0];
+      const b = [this.omega * xp[0], this.omega * xp[1], DRIVE_W0];
+      const bh = unit(b);
+      R.line(scale(xp, -1), xp, "muted", { dash: [4, 4], alpha: 0.7 });
+      R.text(scale(xp, 0.76), "x′(t)", "muted", { italic: true, size: 12, dy: -11 });
+      R.arrow([0, 0, 0], bh, "arrow", { width: 1.7, head: 0.8 });
+      R.text(scale(bh, 1.13), "b̂(t)", "ink", { italic: true, size: 13, dx: 18, dy: 4 });
+
+      // A short, time-sampled trail follows the actual lab evolution. It is
+      // not the rotating-frame cone; bounding the window keeps it legible.
+      const rate = Math.abs(wd) + norm(this.a());
+      const span = Math.min(this.t, 2 * TAU / Math.max(rate, 0.1));
+      if (span > 1e-6) {
+        const count = Math.min(CURVE_MAX, Math.max(24, Math.ceil(span * rate * 16) + 1));
+        const start = this.t - span;
+        for (let i = 0; i < count; i++) {
+          const r = this.labR(start + span * i / (count - 1));
+          SCRATCH[3 * i] = r[0]; SCRATCH[3 * i + 1] = r[1]; SCRATCH[3 * i + 2] = r[2];
+        }
+        R.curve(SCRATCH, count, "even", { width: 1.8, alpha: 0.65 });
+      }
+      R.dot(this.r0, "even", 3.4, { ring: true });
+      if (this.solveOpen) {
+        const targetRotation = mul(rotor(wd * this.t, ZHAT), rotor(this.target.angle, this.target.n));
+        const goal = act(targetRotation, this.r0);
+        R.arrow([0, 0, 0], goal, "muted", { width: 1.4, dash: [4, 3], alpha: 0.6 });
+        R.cat(goal, act(targetRotation, this.f0), act(targetRotation, this.g0), "muted", { alpha: 0.45 });
+      }
+      const evolution = this.labRotor(), r = act(evolution, this.r0);
       R.arrow([0, 0, 0], r, "even", { width: 2.2, head: 0.85 });
       R.cat(r, act(evolution, this.f0), act(evolution, this.g0), "even");
     }
@@ -2524,14 +2618,14 @@
       }
       g.textAlign = "right"; g.fillText("t", L + pw, Y(0) + 6 + 11);
 
-      // the ceiling Ω²/(Ω² + δ²)
-      const m = maxP1(this.omega, this.delta);
+      // The ceiling depends on the selected initial state.
+      const m = this.populationRange().max;
       g.strokeStyle = R.col("ink", 0.7); g.setLineDash([5, 4]); g.lineWidth = 1.2;
       g.beginPath(); g.moveTo(L, Y(m)); g.lineTo(L + pw, Y(m)); g.stroke();
       g.setLineDash([]);
       g.font = mathFont(R, 11.5); g.fillStyle = R.col("ink"); g.textAlign = "right";
       g.textBaseline = m > 0.8 ? "top" : "bottom";
-      g.fillText(`max = Ω²/(Ω² + δ²) = ${fmt(m, 3)}`, L + pw - 2, Y(m) + (m > 0.8 ? 3 : -3));
+      g.fillText(`max P₁ = ${fmt(m, 3)}`, L + pw - 2, Y(m) + (m > 0.8 ? 3 : -3));
 
       // the pulse length T, if a solved pulse ran or is running
       const T = this.run ? this.run.T : this.landed ? this.landed.T : null;
@@ -2550,38 +2644,42 @@
         g.beginPath();
         for (let i = 0; i <= N; i++) {
           const t = t0 + ((t1 - t0) * i) / N;
-          const y = Y(rabiP1(this.omega, this.delta, t));
+          const y = Y(this.p1(t));
           if (i) g.lineTo(X(t), y); else g.moveTo(X(t), y);
         }
         g.stroke();
       };
       curve(this.t, te, 0.3, 1.5);
       curve(ts, this.t, 1, 2.2);
-      const p1 = rabiP1(this.omega, this.delta, this.t);
+      const p1 = this.p1();
       g.fillStyle = R.col("even");
       g.beginPath(); g.arc(X(this.t), Y(p1), 4, 0, TAU); g.fill();
       g.restore();
     }
 
     legend() {
-      const l = [["even", "cat, Bloch vector, cone, <em>P</em>₁(<em>t</em>)"], ["arrow", "precession axis <em>â</em>"], ["muted", "drive axis <em>x′</em>", "bar"]];
-      if (this.solveOpen) l.push(["muted", "target, and its path", "ring"]);
+      const l = [["even", "same state in both frames; shared <em>P</em>₁(<em>t</em>)"], ["arrow", "lab axis <em>b̂</em>(<em>t</em>); rotating-frame axis <em>â</em>"], ["muted", "drive direction <em>x′</em>", "bar"]];
+      if (this.solveOpen) l.push(["muted", "rotating-frame target, shown in each frame", "ring"]);
       return l;
     }
     hint() {
-      return "Ω tilts the axis â toward x′, δ tilts it toward z. The cat and its state vector start at |0⟩ and rotate about â (dr/dt = a × r) around a cone; " +
-        "with detuning the cone misses |1⟩, so the inversion is never complete. Open Solve for the inverse problem.";
+      return "Choose a starting state, then press Play. The lab view includes the drive’s rotation about z; the rotating frame removes it, leaving precession about the fixed axis â. " +
+        "Both views have the same P₁. The lab trail shows the recent path. This models a circularly rotating drive exactly.";
     }
     glossary() {
       return [
+        ["ω₀, ω<sub>d</sub>", "basis-state splitting ω₀ = 4 and drive angular frequency ω_d = ω₀ − δ, in radians per unit time"],
         ["Ω", "Rabi frequency in radians per unit time: the drive strength, the in-plane part of a"],
-        ["δ", "detuning in radians per unit time between drive and qubit: the z part of a"],
+        ["δ", "detuning ω₀ − ω_d, in radians per unit time: the z part of the rotating-frame vector a"],
         ["φ<sub>d</sub>, x′", "drive phase in radians and the in-plane drive axis (cos φ<sub>d</sub>, sin φ<sub>d</sub>, 0)"],
-        ["a, â", "precession vector (Ω cos φ<sub>d</sub>, Ω sin φ<sub>d</sub>, δ) and its direction; H = (ħ/2) a·σ"],
+        ["a, â", "constant rotating-frame vector (Ω cos φ<sub>d</sub>, Ω sin φ<sub>d</sub>, δ) and its direction; H_rot = a·σ/2"],
+        ["b(t), b̂(t)", "lab vector (Ω cos(ω_d t + φ_d), Ω sin(ω_d t + φ_d), ω₀) and its instantaneous direction; H_lab(t) = b(t)·σ/2"],
+        ["D(t)", "exp(−iω_d t σ_z/2), the transformation from rotating-frame states to lab states: ψ_lab = D(t)ψ_rot"],
         ["Ω<sub>R</sub>", "generalised Rabi frequency |a| = √(Ω² + δ²)"],
-        ["ϑ", "cone half-angle in radians: from +z to â, arctan(Ω/δ)"],
-        ["P₁", "population of |1⟩, (1 − r<sub>z</sub>)/2"],
-        ["θ, n̂", "target rotation angle in radians and axis (Solve)"],
+        ["ϑ", "tilt of the rotating-frame axis from +z, atan2(Ω, δ); the state’s cone angle also depends on its starting point"],
+        ["α, β", "current rotating-frame amplitudes: ψ_rot = α|0⟩ + β|1⟩"],
+        ["P₁", "population of basis state |1⟩, |β|² = (1 − r_z)/2; identical in the two frames"],
+        ["θ, n̂", "target rotating-frame rotation angle in radians and axis (Solve)"],
         ["θ<sub>n</sub>, φ<sub>n</sub>", "polar angle and azimuth of n̂, in radians"],
         ["n<sub>ρ</sub>, n<sub>z</sub>", "in-plane and z parts of n̂, n<sub>ρ</sub> = √(n<sub>x</sub>² + n<sub>y</sub>²)"],
         ["T", "pulse duration"],
@@ -2591,26 +2689,32 @@
     describe() {
       const r = this.r();
       const phase = this.phase >= 0 && this.phase <= TAU ? this.phase : ((this.phase % TAU) + TAU) % TAU;
-      return `Drive with Ω ${fmt(this.omega, 2)}, δ ${fmt(this.delta, 2)}, phase ${fmtRad(phase)}; t ${fmt(this.t, 2)}, P₁ ${fmt((1 - r[2]) / 2, 2)}.`;
+      return `Rotating frame, starting in ${DRIVE_STATES[this.initial].label}. Ω ${fmt(this.omega, 2)}, δ ${fmt(this.delta, 2)}, phase ${fmtRad(phase)}; t ${fmt(this.t, 2)}, P₁ ${fmt(this.p1(), 2)}; r = (${r.map((x) => fmt(x, 2)).join(", ")}).`;
+    }
+    labDescribe() {
+      const r = this.labR();
+      return `Lab frame of the same state, starting in ${DRIVE_STATES[this.initial].label}. Drive angular frequency ${fmt(this.carrier(), 2)}, t ${fmt(this.t, 2)}, P₁ ${fmt(this.p1(), 2)}; r = (${r.map((x) => fmt(x, 2)).join(", ")}).`;
     }
     panelLabel() {
-      return `Plot of P₁ against time. Now ${fmt(rabiP1(this.omega, this.delta, this.t), 2)}; the maximum is ${fmt(maxP1(this.omega, this.delta), 2)}.`;
+      const range = this.populationRange();
+      return `Shared plot of P₁ against time in both frames, starting in ${DRIVE_STATES[this.initial].label}. Now ${fmt(this.p1(), 2)}; range ${fmt(range.min, 2)} to ${fmt(range.max, 2)}.`;
     }
     readout() {
-      const a = this.a(), W = rabi(this.omega, this.delta), r = this.r();
-      const m = maxP1(this.omega, this.delta);
+      const W = norm(this.a()), range = this.populationRange(), psi = this.psi();
       let note;
-      if (W === 0) note = `<div class="note">H = 0: nothing moves.</div>`;
-      else if (this.omega === 0) note = `<div class="note">Ω = 0: â = ${this.delta > 0 ? "+" : MINUS}ẑ. |0⟩ sits on the axis and only picks up a phase; the arrow never moves.</div>`;
-      else if (Math.abs(this.delta) < 5e-3) note = `<div class="note">On resonance: â lies in the equator, the cone opens into a great circle, and P₁ reaches 1 at t = π/Ω (a π pulse).</div>`;
-      else note = `<div class="note">Detuned: δ tilts â toward ${this.delta > 0 ? "+" : MINUS}z, the circle misses |1⟩, and P₁ never exceeds ${fmt(m, 3)}.</div>`;
+      if (W < 1e-12) note = `<div class="note">H<sub>rot</sub> = 0: the rotating-frame state is fixed. In the lab, a state away from the poles still precesses about z at ω₀. P₁ stays constant.</div>`;
+      else if (this.omega === 0) note = `<div class="note">The drive is off. The two views precess about z at δ and ω₀ respectively; basis-state populations stay constant.</div>`;
+      else if (range.max - range.min < 1e-9) note = `<div class="note">For this starting state, P₁ stays constant. The two frames can still show different motion.</div>`;
+      else if (this.initial === "d0" && Math.abs(this.delta) < 1e-9) note = `<div class="note">On resonance, starting from |0⟩, a π pulse reaches |1⟩ at t = π/Ω.</div>`;
+      else note = `<div class="note">This starting state gives ${fmt(range.min, 3)} ≤ P₁ ≤ ${fmt(range.max, 3)}. Detuning tilts the rotating-frame axis; the initial state sets its orbit.</div>`;
       return `
-        <p>H = (ħ/2)(Ω ${sig("x′")} + δ ${sig("z")}) = (ħ/2) a·σ</p>
-        <p>a = (Ω cos φ<sub>d</sub>, Ω sin φ<sub>d</sub>, δ) = ${vecHTML(a, 2)}</p>
-        <p>Ω<sub>R</sub> = √(Ω² + δ²) = <span class="even">${fmt(W)}</span></p>
-        <p>cone half-angle ϑ = arctan(Ω/δ) = <span class="even">${fmtRad(coneAngle(this.omega, this.delta))}</span></p>
-        <p>max P₁ = Ω²/(Ω² + δ²) = ${fmt(m)}</p>
-        <p>t = ${fmt(this.t, 2)}: P₁ = (1 ${MINUS} r<sub>z</sub>)/2 = <span class="even">${fmt((1 - r[2]) / 2)}</span></p>
+        <p>ω₀ = ${fmt(DRIVE_W0, 0)}, ω<sub>d</sub> = ${fmt(this.carrier())}; δ = ω₀ ${MINUS} ω<sub>d</sub> = ${fmt(this.delta)}</p>
+        <p>H<sub>lab</sub>(t) = ½[ω₀ ${sig("z")} + Ω cos(ω<sub>d</sub>t + φ<sub>d</sub>) ${sig("x")} + Ω sin(ω<sub>d</sub>t + φ<sub>d</sub>) ${sig("y")}]</p>
+        <p>H<sub>rot</sub> = ½[Ω cos φ<sub>d</sub> ${sig("x")} + Ω sin φ<sub>d</sub> ${sig("y")} + δ ${sig("z")}]</p>
+        <p class="aside">|ψ<sub>lab</sub>⟩ = D(t)|ψ<sub>rot</sub>⟩, D(t) = exp(${MINUS}iω<sub>d</sub>t ${sig("z")}/2).</p>
+        <p>|ψ<sub>rot</sub>(t)⟩ = <span class="amplitude-symbol">α</span>|0⟩ + <span class="amplitude-symbol">β</span>|1⟩</p>
+        <p><span class="amplitude-symbol">α</span> = ${fmtC(psi[0])}, <span class="amplitude-symbol">β</span> = ${fmtC(psi[1])}</p>
+        <p>Ω<sub>R</sub> = √(Ω² + δ²) = ${fmt(W)}; t = ${fmt(this.t, 2)}: P₁ = |β|² = <span class="even">${fmt(this.p1())}</span></p>
         ${note}`;
     }
   }
@@ -3353,6 +3457,7 @@
     #ready = false;
 
     #R = new Renderer();
+    #labR = new Renderer();
     #bg = null; // offscreen canvas: axes, plus the sphere in Bloch-state views
     #bgDirty = true;
     #yaw = VIEW.yaw;
@@ -3442,6 +3547,7 @@
       this.#viewTween.on = false;
       this.#drag = null;
       if (this.#el.stage) this.#el.stage.style.cursor = "";
+      if (this.#el.labStage) this.#el.labStage.style.cursor = "";
       this.#invalidate();
     }
 
@@ -3465,8 +3571,13 @@
       this.#el = {
         root: $(".bs"),
         tabs: $(".tabs"),
-        wrap: $(".stage-wrap"),
+        body: $(".body"),
+        wrap: $(".primary-wrap"),
         stage: $(".stage"),
+        labWrap: $(".lab-wrap"),
+        labStage: $(".lab-stage"),
+        rotatingTitle: $(".rotating-title"),
+        key: $(".symbol-key"),
         view: $(".view"),
         cameras: $(".camera-presets"),
         side: $(".side"),
@@ -3527,6 +3638,13 @@
       stage.addEventListener("dblclick", () => this.#resetView());
       stage.addEventListener("keydown", (e) => this.#onKey(e));
       stage.addEventListener("blur", () => { this.#keyboard = false; this.#invalidate(); });
+      const lab = this.#el.labStage;
+      lab.addEventListener("pointerdown", (e) => this.#onDown(e, true));
+      lab.addEventListener("pointermove", (e) => this.#onMove(e, true));
+      lab.addEventListener("pointerup", (e) => this.#onUp(e));
+      lab.addEventListener("pointercancel", () => this.#endDrag());
+      lab.addEventListener("dblclick", () => this.#resetView());
+      lab.addEventListener("keydown", (e) => this.#onKey(e, true));
       view.addEventListener("click", () => this.#resetView());
       // On touch screens, claim gestures in the mode's diagram or on a handle.
       // Leave a margin available for scrolling the page past the widget.
@@ -3540,6 +3658,12 @@
         },
         { passive: false },
       );
+      lab.addEventListener("touchstart", (e) => {
+        const t = e.touches[0];
+        if (!t || e.touches.length > 1) return;
+        const [x, y] = this.#local(t, lab);
+        if (this.#insideOrbit(x, y)) e.preventDefault();
+      }, { passive: false });
     }
 
     #configure() {
@@ -3583,6 +3707,11 @@
       this.#mode = m;
       this.#bgDirty = true;
       this.#drag = null;
+      const paired = typeof m.drawLabStage === "function";
+      this.#el.root.classList.toggle("drive-layout", paired);
+      this.#el.labWrap.hidden = !paired;
+      this.#el.rotatingTitle.hidden = !paired;
+      this.#el.root.insertBefore(this.#el.panels, paired ? this.#el.body : this.#el.key);
       this.#el.cameras.hidden = id !== "mirrors3d";
       for (const tab of this.#el.tabs.children) tab.setAttribute("aria-selected", String(tab.dataset.mode === id));
       for (const box of this.#el.panels.children) box.hidden = box.dataset.for !== id;
@@ -3631,8 +3760,8 @@
 
     // ── pointer and keys ──
 
-    #local(e) {
-      const r = this.#el.stage.getBoundingClientRect();
+    #local(e, canvas = this.#el.stage) {
+      const r = canvas.getBoundingClientRect();
       return [e.clientX - r.left, e.clientY - r.top];
     }
 
@@ -3659,13 +3788,14 @@
       return best;
     }
 
-    #onDown(e) {
+    #onDown(e, lab = false) {
       if (e.button > 0) return;
-      const [x, y] = this.#local(e);
+      const canvas = lab ? this.#el.labStage : this.#el.stage;
+      const [x, y] = this.#local(e, canvas);
       const touch = e.pointerType !== "mouse";
       this.#touched = true;
       this.#keyboard = false;
-      const hit = this.#hit(x, y, touch);
+      const hit = lab ? null : this.#hit(x, y, touch);
       if (hit) {
         this.#active = hit.h.id;
         this.#drag = { kind: "handle", h: hit.h, hemi: hit.front ? 1 : -1 };
@@ -3673,18 +3803,19 @@
         this.#viewTween.on = false;
         this.#drag = { kind: "orbit", yaw: this.#yaw, pitch: this.#pitch };
       } else return;
-      Object.assign(this.#drag, { x0: x, y0: y, t0: performance.now(), moved: false, id: e.pointerId });
-      this.#el.stage.setPointerCapture(e.pointerId);
-      this.#el.stage.style.cursor = "grabbing";
-      this.#el.stage.focus({ preventScroll: true });
+      Object.assign(this.#drag, { x0: x, y0: y, t0: performance.now(), moved: false, id: e.pointerId, canvas });
+      canvas.setPointerCapture(e.pointerId);
+      canvas.style.cursor = "grabbing";
+      canvas.focus({ preventScroll: true });
       this.#invalidate();
     }
 
-    #onMove(e) {
-      const [x, y] = this.#local(e);
+    #onMove(e, lab = false) {
+      const canvas = lab ? this.#el.labStage : this.#el.stage;
+      const [x, y] = this.#local(e, canvas);
       const drag = this.#drag;
       if (!drag) {
-        if (e.pointerType === "mouse") this.#el.stage.style.cursor = this.#hit(x, y) ? "pointer" : "grab";
+        if (e.pointerType === "mouse") canvas.style.cursor = !lab && this.#hit(x, y) ? "pointer" : "grab";
         return;
       }
       if (e.pointerId !== drag.id) return;
@@ -3716,13 +3847,14 @@
     #endDrag() {
       this.#drag = null;
       this.#el.stage.style.cursor = "";
+      this.#el.labStage.style.cursor = "";
       this.#invalidate();
     }
 
-    #onKey(e) {
+    #onKey(e, lab = false) {
       const m = this.#mode;
       if (!m) return;
-      const hs = m.handles();
+      const hs = lab ? [] : m.handles();
       const k = e.key;
       if (k === "v" || k === "V" || k === "0") {
         e.preventDefault();
@@ -3812,25 +3944,27 @@
       for (const [name, fallback] of Object.entries(DEFAULTS)) {
         rgb[name] = parseColor(cs.getPropertyValue(`--bs-${name}`).trim() || fallback, fallback);
       }
-      const R = this.#R;
-      R.rgb = rgb;
-      R.dark = luma(rgb.ink) > luma(rgb.paper);
-      R.math = cs.getPropertyValue("--bs-math-font").trim() || MATH_FONT;
-      R.ui = cs.fontFamily || "system-ui, sans-serif";
+      for (const R of [this.#R, this.#labR]) {
+        R.rgb = rgb;
+        R.dark = luma(rgb.ink) > luma(rgb.paper);
+        R.math = cs.getPropertyValue("--bs-math-font").trim() || MATH_FONT;
+        R.ui = cs.fontFamily || "system-ui, sans-serif";
+      }
       return (this.#colors = rgb);
     }
 
     #resize() {
-      const { root, wrap, side, stage, panel } = this.#el;
+      const { root, wrap, stage, labStage, panel } = this.#el;
       if (!root || !this.#mode) return;
       root.classList.toggle("wide", root.clientWidth >= WIDE);
       const dpr = Math.min(3, window.devicePixelRatio || 1);
       const S = Math.floor(wrap.clientWidth);
-      const W = Math.floor(side.clientWidth);
+      const W = Math.floor(panel.getBoundingClientRect().width);
       const H = Math.round(W * this.#mode.panelAspect());
       if (S === this.#S && W === this.#W && H === this.#H && dpr === this.#dpr) return;
       [this.#S, this.#W, this.#H, this.#dpr] = [S, W, H, dpr];
       stage.width = stage.height = this.#bg.width = this.#bg.height = Math.round(S * dpr);
+      labStage.width = labStage.height = Math.round(S * dpr);
       panel.width = Math.round(W * dpr);
       panel.height = Math.round(H * dpr);
       panel.style.height = `${H}px`;
@@ -3883,6 +4017,19 @@
       R.flush();
       R.labels(g, m.kets);
 
+      if (typeof m.drawLabStage === "function") {
+        const lab = this.#el.labStage, L = this.#labR, lg = lab.getContext("2d");
+        L.view(S, S, this.#yaw, this.#pitch);
+        lg.setTransform(1, 0, 0, 1, 0, 0);
+        lg.clearRect(0, 0, lab.width, lab.height);
+        lg.drawImage(this.#bg, 0, 0);
+        lg.setTransform(dpr, 0, 0, dpr, 0, 0);
+        L.begin(lg);
+        m.drawLabStage(L);
+        L.flush();
+        L.labels(lg, true);
+      }
+
       if (this.#W && this.#H) {
         const p = this.#el.panel.getContext("2d");
         p.setTransform(1, 0, 0, 1, 0, 0);
@@ -3912,7 +4059,9 @@
       }).join(""), (v) => { el.legend.innerHTML = v; });
       set("symbols", [...m.glossary(), KEYS_ROW].map(([s, meaning]) => `<div><dt>${s}</dt><dd>${meaning}</dd></div>`).join(""),
         (v) => { el.symbols.innerHTML = v; });
-      set("label", `${m.sphere ? "Bloch sphere" : "Three-dimensional space"}. ${m.describe()}`, (v) => el.stage.setAttribute("aria-label", v));
+      const stageName = typeof m.drawLabStage === "function" ? "Rotating-frame Bloch sphere" : m.sphere ? "Bloch sphere" : "Three-dimensional space";
+      set("label", `${stageName}. ${m.describe()}`, (v) => el.stage.setAttribute("aria-label", v));
+      if (typeof m.drawLabStage === "function") set("lab-label", `Lab-frame Bloch sphere. ${m.labDescribe()}`, (v) => el.labStage.setAttribute("aria-label", v));
       set("panel", m.panelLabel ? m.panelLabel() : "", (v) => el.panel.setAttribute("aria-label", v));
     }
   }
