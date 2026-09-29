@@ -30,7 +30,8 @@
     <main id="main" class="blog-page">
         <header class="blog-header">
             <div class="blog-header-inner">
-                <h1>Blog</h1>
+                <h1 data-edit-id="blog-title" data-edit-label="Page title" data-edit-group="Blog page" data-edit-multiline="false">Blog</h1>
+                <p class="blog-subtitle" data-edit-id="blog-subtitle" data-edit-label="Subtitle" data-edit-group="Blog page" data-edit-multiline="false">This blog is where I share topics I find interesting in math, science, and beyond. </p>
                 <img class="blog-banner" src="images/sperm-whale-banner-v1.png" width="2172" height="724" alt="An ivory sperm whale painted on textured sage-green paper" fetchpriority="high">
             </div>
         </header>
@@ -44,7 +45,7 @@
                         <li>math</li>
                         <li>interactive</li>
                     </ul>
-                    <h2 id="reflections-title">Reflections, Rotations, and Spinors</h2>
+                    <h2 id="reflections-title" data-edit-id="reflections-title" data-edit-label="Post title" data-edit-group="Reflections, Rotations, and Spinors" data-edit-multiline="false">Reflections, Rotations, and Spinors</h2>
                 </header>
 
                 <div class="post-text">
@@ -58,9 +59,9 @@
                     <details class="blog-demo" name="reflections-2d-demos">
                         <summary>Rotating with mirrors</summary>
                         <div class="post-text demo-intro">
-                            <p>Rotations about the origin and reflections across lines through it form a group called \(\mathrm{O}(2)\). The rotations, made from an even number of reflections, form \(\mathrm{SO}(2)\).</p>
-                            <p>The mirrors are described by their normal vectors: arrows at right angles to the mirrors. Flipping these arrows leaves the mirrors, and their effect on the cat, unchanged, so the result is the same element of \(\mathrm{O}(2)\).</p>
-                            <p>\(\operatorname{Pin}(2)\) elements are products of these normal vectors, including their sign. Each element in \(\mathrm{O}(2)\) has two representatives in \(\operatorname{Pin}(2)\), called \(g\) and \(-g\), differing only by sign. The even products form \(\operatorname{Spin}(2)\).</p>
+                            <p data-edit-id="mirrors-paragraph-1" data-edit-label="Paragraph 1" data-edit-group="2D · Rotating with mirrors" data-edit-multiline="true">An object living in a two dimensional plane can be reflected and rotated. In math language, these operations form a group  \(\mathrm{O}(2)\). The rotations, made from an even number of reflections, are called \(\mathrm{SO}(2)\).</p>
+                            <p data-edit-id="mirrors-paragraph-2" data-edit-label="Paragraph 2" data-edit-group="2D · Rotating with mirrors" data-edit-multiline="true">The mirrors are described by their normal vectors: arrows at right angles to the mirrors. Flipping these arrows leaves the mirrors, and their effect on the cat, unchanged, so the result is the same element of \(\mathrm{O}(2)\).</p>
+                            <p data-edit-id="mirrors-paragraph-3" data-edit-label="Paragraph 3" data-edit-group="2D · Rotating with mirrors" data-edit-multiline="true">\(\operatorname{Pin}(2)\) elements are products of these normal vectors, including their sign. Each element in \(\mathrm{O}(2)\) has two representatives in \(\operatorname{Pin}(2)\), called \(g\) and \(-g\), differing only by sign. The even products form \(\operatorname{Spin}(2)\).</p>
                         </div>
                         <template class="demo-template">
                             <pin-spin-cat class="blog-visualization" modes="mirrors" mode="mirrors" theme="light" aria-label="Rotating with mirrors demo"></pin-spin-cat>
@@ -74,9 +75,9 @@
                     <details class="blog-demo" name="reflections-2d-demos">
                         <summary>Loops of Rotations</summary>
                         <div class="post-text demo-intro">
-                            <p>Two reflections rotate the cat through twice the angle between the mirrors. Here, \(u\) stays fixed while \(w\), the other mirror’s normal arrow, turns.</p>
-                            <p>After the cat travels around 360°, the mirror lines are back where they started, the rotation is the same. But the \(w\) vector points the other way around, it is the negative of where it started. The group element in \(\mathrm{SO}(2)\) is the same \(1\), but in \(\operatorname{Spin}(2)\) the group element is \(-1\).</p>
-                            <p>To get the arrows back to normal, the cat has to go around twice, then the Spin element is back to the identity.</p>
+                            <p data-edit-id="loops-paragraph-1" data-edit-label="Paragraph 1" data-edit-group="2D · Loops of Rotations" data-edit-multiline="true">Two reflections rotate the cat through twice the angle between the mirrors. Here, \(u\) stays fixed while \(w\), the other mirror’s normal arrow, turns.</p>
+                            <p data-edit-id="loops-paragraph-2" data-edit-label="Paragraph 2" data-edit-group="2D · Loops of Rotations" data-edit-multiline="true">After the cat travels around 360°, the mirror lines are back where they started, the rotation is the same. But the \(w\) vector points the other way around, it is the negative of where it started. The group element in \(\mathrm{SO}(2)\) is the same \(1\), but in \(\operatorname{Spin}(2)\) the group element is \(-1\).</p>
+                            <p data-edit-id="loops-paragraph-3" data-edit-label="Paragraph 3" data-edit-group="2D · Loops of Rotations" data-edit-multiline="true">To get the arrows back to normal, the cat has to go around twice, then the Spin element is back to the identity.</p>
                         </div>
                         <template class="demo-template">
                             <pin-spin-cat class="blog-visualization" modes="spin" mode="spin" theme="light" aria-label="Loops of rotations demo"></pin-spin-cat>
@@ -144,10 +145,10 @@
                         <li>math</li>
                         <li>physics</li>
                     </ul>
-                    <h2 id="covariant-title">Covariant Derivatives</h2>
+                    <h2 id="covariant-title" data-edit-id="covariant-title" data-edit-label="Post title" data-edit-group="Covariant Derivatives" data-edit-multiline="false">Covariant Derivatives</h2>
                 </header>
                 <div class="post-text">
-                    <p class="placeholder-note">Coming soon.</p>
+                    <p class="placeholder-note" data-edit-id="covariant-derivatives-intro" data-edit-label="Opening text" data-edit-group="Covariant Derivatives" data-edit-multiline="true">Coming soon.</p>
                     <!-- WRITE HERE: the Covariant Derivatives post. -->
                 </div>
             </article>
@@ -157,10 +158,10 @@
                     <ul class="post-tags" aria-label="Post categories">
                         <li>literature</li>
                     </ul>
-                    <h2 id="whales-title">Sperm Whales and Moby Dick</h2>
+                    <h2 id="whales-title" data-edit-id="whales-title" data-edit-label="Post title" data-edit-group="Sperm Whales and Moby Dick" data-edit-multiline="false">Sperm Whales and Moby Dick</h2>
                 </header>
                 <div class="post-text">
-                    <p class="placeholder-note">Coming soon.</p>
+                    <p class="placeholder-note" data-edit-id="sperm-whales-and-moby-dick-intro" data-edit-label="Opening text" data-edit-group="Sperm Whales and Moby Dick" data-edit-multiline="true">Coming soon.</p>
                     <!-- WRITE HERE: the Sperm Whales and Moby Dick post. -->
                 </div>
             </article>
@@ -170,22 +171,22 @@
                     <ul class="post-tags" aria-label="Post categories">
                         <li>literature</li>
                     </ul>
-                    <h2 id="books-title">My Favorite 10 Books of 2026</h2>
+                    <h2 id="books-title" data-edit-id="books-title" data-edit-label="Post title" data-edit-group="My Favorite 10 Books of 2026" data-edit-multiline="false">My Favorite 10 Books of 2026</h2>
                 </header>
                 <div class="post-text">
                     <!-- WRITE HERE: an introduction to the list. Replace each title, author,
                          and notes placeholder below with your own words. -->
                     <ol class="book-list">
-                        <li><h3>Book title</h3><p class="book-author">Author</p></li>
-                        <li><h3>Book title</h3><p class="book-author">Author</p></li>
-                        <li><h3>Book title</h3><p class="book-author">Author</p></li>
-                        <li><h3>Book title</h3><p class="book-author">Author</p></li>
-                        <li><h3>Book title</h3><p class="book-author">Author</p></li>
-                        <li><h3>Book title</h3><p class="book-author">Author</p></li>
-                        <li><h3>Book title</h3><p class="book-author">Author</p></li>
-                        <li><h3>Book title</h3><p class="book-author">Author</p></li>
-                        <li><h3>Book title</h3><p class="book-author">Author</p></li>
-                        <li><h3>Book title</h3><p class="book-author">Author</p></li>
+                        <li><h3 data-edit-id="book-1-title" data-edit-label="Book 1 title" data-edit-group="My Favorite 10 Books of 2026" data-edit-multiline="false">Book title</h3><p class="book-author" data-edit-id="book-1-author" data-edit-label="Book 1 author" data-edit-group="My Favorite 10 Books of 2026" data-edit-multiline="false">Author</p></li>
+                        <li><h3 data-edit-id="book-2-title" data-edit-label="Book 2 title" data-edit-group="My Favorite 10 Books of 2026" data-edit-multiline="false">Book title</h3><p class="book-author" data-edit-id="book-2-author" data-edit-label="Book 2 author" data-edit-group="My Favorite 10 Books of 2026" data-edit-multiline="false">Author</p></li>
+                        <li><h3 data-edit-id="book-3-title" data-edit-label="Book 3 title" data-edit-group="My Favorite 10 Books of 2026" data-edit-multiline="false">Book title</h3><p class="book-author" data-edit-id="book-3-author" data-edit-label="Book 3 author" data-edit-group="My Favorite 10 Books of 2026" data-edit-multiline="false">Author</p></li>
+                        <li><h3 data-edit-id="book-4-title" data-edit-label="Book 4 title" data-edit-group="My Favorite 10 Books of 2026" data-edit-multiline="false">Book title</h3><p class="book-author" data-edit-id="book-4-author" data-edit-label="Book 4 author" data-edit-group="My Favorite 10 Books of 2026" data-edit-multiline="false">Author</p></li>
+                        <li><h3 data-edit-id="book-5-title" data-edit-label="Book 5 title" data-edit-group="My Favorite 10 Books of 2026" data-edit-multiline="false">Book title</h3><p class="book-author" data-edit-id="book-5-author" data-edit-label="Book 5 author" data-edit-group="My Favorite 10 Books of 2026" data-edit-multiline="false">Author</p></li>
+                        <li><h3 data-edit-id="book-6-title" data-edit-label="Book 6 title" data-edit-group="My Favorite 10 Books of 2026" data-edit-multiline="false">Book title</h3><p class="book-author" data-edit-id="book-6-author" data-edit-label="Book 6 author" data-edit-group="My Favorite 10 Books of 2026" data-edit-multiline="false">Author</p></li>
+                        <li><h3 data-edit-id="book-7-title" data-edit-label="Book 7 title" data-edit-group="My Favorite 10 Books of 2026" data-edit-multiline="false">Book title</h3><p class="book-author" data-edit-id="book-7-author" data-edit-label="Book 7 author" data-edit-group="My Favorite 10 Books of 2026" data-edit-multiline="false">Author</p></li>
+                        <li><h3 data-edit-id="book-8-title" data-edit-label="Book 8 title" data-edit-group="My Favorite 10 Books of 2026" data-edit-multiline="false">Book title</h3><p class="book-author" data-edit-id="book-8-author" data-edit-label="Book 8 author" data-edit-group="My Favorite 10 Books of 2026" data-edit-multiline="false">Author</p></li>
+                        <li><h3 data-edit-id="book-9-title" data-edit-label="Book 9 title" data-edit-group="My Favorite 10 Books of 2026" data-edit-multiline="false">Book title</h3><p class="book-author" data-edit-id="book-9-author" data-edit-label="Book 9 author" data-edit-group="My Favorite 10 Books of 2026" data-edit-multiline="false">Author</p></li>
+                        <li><h3 data-edit-id="book-10-title" data-edit-label="Book 10 title" data-edit-group="My Favorite 10 Books of 2026" data-edit-multiline="false">Book title</h3><p class="book-author" data-edit-id="book-10-author" data-edit-label="Book 10 author" data-edit-group="My Favorite 10 Books of 2026" data-edit-multiline="false">Author</p></li>
                     </ol>
                 </div>
             </article>
