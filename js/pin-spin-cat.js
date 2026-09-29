@@ -599,8 +599,25 @@
     disconnectedCallback() {
       for (const o of this.#observers) o.disconnect();
       this.#observers = [];
+      this.pause();
+    }
+
+    // Hosts may pause a demo when an enclosing disclosure closes.
+    pause() {
       cancelAnimationFrame(this.#raf);
       this.#raf = 0;
+      this.#last = 0;
+      this.#playing = false;
+      this.#touched = true;
+      this.#tween = null;
+      this.#drag = null;
+      this.#pulses = [];
+      for (const mirror of this.#mirrors) mirror.flipAt = -Infinity;
+      if (this.#el.play) {
+        this.#el.play.textContent = "Play";
+        this.#el.play.setAttribute("aria-pressed", "false");
+      }
+      if (this.#el.stage) this.#el.stage.style.cursor = "";
     }
 
     attributeChangedCallback(name, _old, value) {

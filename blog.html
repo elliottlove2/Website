@@ -11,6 +11,7 @@
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.18.9/dist/katex.min.css" integrity="sha384-lPx0C4zIUZLpveABMwOFcFeGZwsvKBJfhJ85FN1PYOV7xApBcFMhcAEMVKF8loOI" crossorigin="anonymous">
     <script src="js/pin-spin-cat.js" defer></script>
+    <script src="js/bloch-sphere.js" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/katex@0.18.9/dist/katex.min.js" integrity="sha384-19KE2cFb3U+RUWmyhBz7aLOGDG8WrRC6hE3oY/HTZZlAAVWYTdmvLC//+TIV3zUx" crossorigin="anonymous" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/katex@0.18.9/dist/contrib/auto-render.min.js" integrity="sha384-bjyGPfbij8/NDKJhSGZNP/khQVgtHUE5exjm4Ydllo42FwIgYsdLO2lXGmRBf5Mz" crossorigin="anonymous" defer></script>
     <script src="js/blog.js" defer></script>
@@ -52,37 +53,83 @@
                          \( ... \) for inline math, and \[ ... \] for display math. -->
                 </div>
 
-                <details class="blog-demo" name="reflections-demos" open>
-                    <summary>Rotating with mirrors</summary>
-                    <div class="post-text demo-intro">
-                        <p>Rotations about the origin and reflections across lines through it form a group called \(\mathrm{O}(2)\). The rotations, made from an even number of reflections, form \(\mathrm{SO}(2)\).</p>
-                        <p>The mirrors are described by their normal vectors: arrows at right angles to the mirrors. Flipping these arrows leaves the mirrors, and their effect on the cat, unchanged, so the result is the same element of \(\mathrm{O}(2)\).</p>
-                        <p>\(\operatorname{Pin}(2)\) elements are products of these normal vectors, including their sign. Each element in \(\mathrm{O}(2)\) has two representatives in \(\operatorname{Pin}(2)\), called \(g\) and \(-g\), differing only by sign. The even products form \(\operatorname{Spin}(2)\).</p>
+                <details class="post-section" id="reflections-2d" name="reflections-dimensions">
+                    <summary><h3>2D</h3></summary>
+                    <details class="blog-demo" name="reflections-2d-demos">
+                        <summary>Rotating with mirrors</summary>
+                        <div class="post-text demo-intro">
+                            <p>Rotations about the origin and reflections across lines through it form a group called \(\mathrm{O}(2)\). The rotations, made from an even number of reflections, form \(\mathrm{SO}(2)\).</p>
+                            <p>The mirrors are described by their normal vectors: arrows at right angles to the mirrors. Flipping these arrows leaves the mirrors, and their effect on the cat, unchanged, so the result is the same element of \(\mathrm{O}(2)\).</p>
+                            <p>\(\operatorname{Pin}(2)\) elements are products of these normal vectors, including their sign. Each element in \(\mathrm{O}(2)\) has two representatives in \(\operatorname{Pin}(2)\), called \(g\) and \(-g\), differing only by sign. The even products form \(\operatorname{Spin}(2)\).</p>
+                        </div>
+                        <template class="demo-template">
+                            <pin-spin-cat class="blog-visualization" modes="mirrors" mode="mirrors" theme="light" aria-label="Rotating with mirrors demo"></pin-spin-cat>
+                        </template>
+                    </details>
+
+                    <div class="post-text">
+                        <!-- WRITE HERE: text between the mirrors and spin demos. -->
                     </div>
-                    <pin-spin-cat class="blog-visualization" modes="mirrors" mode="mirrors" theme="light" aria-label="Rotating with mirrors demo"></pin-spin-cat>
+
+                    <details class="blog-demo" name="reflections-2d-demos">
+                        <summary>Loops of Rotations</summary>
+                        <div class="post-text demo-intro">
+                            <p>Two reflections rotate the cat through twice the angle between the mirrors. Here, \(u\) stays fixed while \(w\), the other mirror’s normal arrow, turns.</p>
+                            <p>After the cat travels around 360°, the mirror lines are back where they started, the rotation is the same. But the \(w\) vector points the other way around, it is the negative of where it started. The group element in \(\mathrm{SO}(2)\) is the same \(1\), but in \(\operatorname{Spin}(2)\) the group element is \(-1\).</p>
+                            <p>To get the arrows back to normal, the cat has to go around twice, then the Spin element is back to the identity.</p>
+                        </div>
+                        <template class="demo-template">
+                            <pin-spin-cat class="blog-visualization" modes="spin" mode="spin" theme="light" aria-label="Loops of rotations demo"></pin-spin-cat>
+                        </template>
+                    </details>
+
+                    <div class="post-text">
+                        <!-- WRITE HERE: text between the spin and kaleidoscope demos. -->
+                    </div>
+
+                    <details class="blog-demo" name="reflections-2d-demos">
+                        <summary>Kaleidoscope</summary>
+                        <template class="demo-template">
+                            <pin-spin-cat class="blog-visualization" modes="kaleido" mode="kaleido" theme="light" aria-label="Interactive kaleidoscope demo"></pin-spin-cat>
+                        </template>
+                    </details>
                 </details>
 
-                <div class="post-text">
-                    <!-- WRITE HERE: text between the mirrors and spin demos. -->
-                </div>
-
-                <details class="blog-demo" name="reflections-demos">
-                    <summary>Loops of Rotations</summary>
-                    <div class="post-text demo-intro">
-                        <p>Two reflections rotate the cat through twice the angle between the mirrors. Here, \(u\) stays fixed while \(w\), the other mirror’s normal arrow, turns.</p>
-                        <p>After the cat travels around 360°, the mirror lines are back where they started, the rotation is the same. But the \(w\) vector points the other way around, it is the negative of where it started. The group element in \(\mathrm{SO}(2)\) is the same \(1\), but in \(\operatorname{Spin}(2)\) the group element is \(-1\).</p>
-                        <p>To get the arrows back to normal, the cat has to go around twice, then the Spin element is back to the identity.</p>
+                <details class="post-section" id="reflections-3d" name="reflections-dimensions">
+                    <summary><h3>3D</h3></summary>
+                    <div class="post-text">
+                        <!-- WRITE HERE: introduce the 3D section. Add paragraphs between demos as needed. -->
                     </div>
-                    <pin-spin-cat class="blog-visualization" modes="spin" mode="spin" theme="light" aria-label="Loops of rotations demo"></pin-spin-cat>
-                </details>
-
-                <div class="post-text">
-                    <!-- WRITE HERE: text between the spin and kaleidoscope demos. -->
-                </div>
-
-                <details class="blog-demo" name="reflections-demos">
-                    <summary>Kaleidoscope</summary>
-                    <pin-spin-cat class="blog-visualization" modes="kaleido" mode="kaleido" theme="light" aria-label="Interactive kaleidoscope demo"></pin-spin-cat>
+                    <details class="blog-demo" name="reflections-3d-demos">
+                        <summary>Mirrors in 3D</summary>
+                        <template class="demo-template">
+                            <bloch-sphere class="blog-visualization" modes="mirrors3d" mode="mirrors3d" theme="light" aria-label="Mirrors in 3D demo"></bloch-sphere>
+                        </template>
+                    </details>
+                    <details class="blog-demo" name="reflections-3d-demos">
+                        <summary>The Bloch sphere</summary>
+                        <template class="demo-template">
+                            <bloch-sphere class="blog-visualization" modes="state" mode="state" theme="light" aria-label="The Bloch sphere demo"></bloch-sphere>
+                        </template>
+                    </details>
+                    <details class="blog-demo" name="reflections-3d-demos">
+                        <summary>Spinors and rotations</summary>
+                        <template class="demo-template">
+                            <bloch-sphere class="blog-visualization" modes="rotate" mode="rotate" theme="light" aria-label="Spinors and rotations demo"></bloch-sphere>
+                        </template>
+                    </details>
+                    <details class="blog-demo" name="reflections-3d-demos">
+                        <summary>Three pulses</summary>
+                        <template class="demo-template">
+                            <bloch-sphere class="blog-visualization" modes="pulses" mode="pulses" theme="light" aria-label="Three pulses demo"></bloch-sphere>
+                        </template>
+                    </details>
+                    <details class="blog-demo" name="reflections-3d-demos">
+                        <summary>Driven rotations</summary>
+                        <template class="demo-template">
+                            <bloch-sphere class="blog-visualization" modes="drive" mode="drive" theme="light" aria-label="Driven rotations demo"></bloch-sphere>
+                        </template>
+                    </details>
                 </details>
 
                 <div class="post-text">

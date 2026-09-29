@@ -322,7 +322,48 @@ main.blog-page {
     font-size: 17px;
 }
 
-/* Each expandable section contains one visualization, with no mode tabs. */
+/* Choose a dimension, then open one visualization within it. */
+.post-section {
+    width: min(960px, calc(100% - 3rem));
+    margin: 16px auto;
+}
+
+.post-section > summary {
+    padding: 16px 22px;
+    border: 1px solid #dbe1d7;
+    border-radius: 4px;
+    background: #f3f5ef;
+    color: #3f503f;
+    cursor: pointer;
+}
+
+.post-section > summary h3 {
+    display: inline;
+    margin-left: 8px;
+    font-size: 30px;
+    font-weight: 600;
+    line-height: 1.2;
+}
+
+.post-section > summary:hover {
+    background: #eaf0e5;
+}
+
+.post-section > summary:focus-visible {
+    outline: 2px solid var(--text-secondary);
+    outline-offset: 4px;
+}
+
+.post-section > .post-text {
+    width: min(680px, 100%);
+}
+
+.post-section > .blog-demo {
+    width: 100%;
+    margin-block: 18px;
+}
+
+/* Each expandable demo contains one visualization, with no mode tabs. */
 .blog-demo {
     width: min(960px, calc(100% - 3rem));
     margin: 26px auto 34px;
@@ -330,13 +371,13 @@ main.blog-page {
     border-bottom: 1px solid var(--border);
 }
 
-.blog-demo summary {
+.blog-demo > summary {
     padding: 17px 0;
     font-size: 18px;
     cursor: pointer;
 }
 
-.blog-demo summary:focus-visible {
+.blog-demo > summary:focus-visible {
     outline: 2px solid var(--text-secondary);
     outline-offset: 4px;
 }
@@ -364,6 +405,13 @@ main.blog-page {
     --psc-line: rgba(62, 59, 57, 0.16);
     --psc-faint: rgba(62, 59, 57, 0.07);
     --psc-radius: 8px;
+    --bs-paper: var(--psc-paper);
+    --bs-stage: var(--psc-stage);
+    --bs-ink: var(--psc-ink);
+    --bs-muted: var(--psc-muted);
+    --bs-line: var(--psc-line);
+    --bs-faint: var(--psc-faint);
+    --bs-radius: var(--psc-radius);
 }
 
 @media (max-width: 768px) {
