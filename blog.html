@@ -42,6 +42,84 @@
         }
         .math-details > .post-text > :last-child { margin-bottom: 0; }
         .demo-outro { margin-top: 30px; }
+
+        /* Post titles stay visible; each article opens independently. */
+        .blog-posts { padding-bottom: 48px; }
+        .blog-post {
+            border-top: 0;
+            padding-bottom: 0;
+            min-height: 0;
+            scroll-margin-top: 24px;
+        }
+        .blog-post::before {
+            content: "";
+            display: block;
+            width: min(960px, calc(100% - 3rem));
+            height: 1px;
+            margin-inline: auto;
+            background: var(--border);
+        }
+        .post-disclosure > .post-header {
+            position: relative;
+            width: min(960px, calc(100% - 3rem));
+            margin: 0 auto;
+            padding: 25px 68px 28px 16px;
+            border-radius: 6px;
+            list-style: none;
+            cursor: pointer;
+        }
+        .post-disclosure > .post-header::-webkit-details-marker { display: none; }
+        .post-disclosure > .post-header:hover { background: #faf8f4; }
+        .post-disclosure > .post-header:focus-visible {
+            outline: 2px solid var(--accent);
+            outline-offset: 3px;
+        }
+        .post-disclosure > .post-header::before,
+        .post-disclosure > .post-header::after {
+            content: "";
+            position: absolute;
+            top: 50%;
+        }
+        .post-disclosure > .post-header::before {
+            right: 12px;
+            width: 36px;
+            height: 36px;
+            border: 1px solid var(--border);
+            border-radius: 50%;
+            transform: translateY(-50%);
+        }
+        .post-disclosure > .post-header::after {
+            right: 26px;
+            width: 8px;
+            height: 8px;
+            border-right: 1.5px solid var(--accent);
+            border-bottom: 1.5px solid var(--accent);
+            transform: translateY(-70%) rotate(45deg);
+        }
+        .post-disclosure[open] > .post-header::after {
+            transform: translateY(-25%) rotate(225deg);
+        }
+        .post-disclosure > .post-header h2 {
+            font-size: clamp(28px, 3.4vw, 38px);
+            line-height: 1.18;
+        }
+        .post-title { display: block; }
+        .post-disclosure .post-tags { margin-bottom: 10px; }
+        .post-disclosure .post-tags > span {
+            padding: 4px 10px;
+            border: 1px solid #dbe1d7;
+            border-radius: 20px;
+            background: #f3f5ef;
+        }
+        .post-body {
+            display: flow-root;
+            padding-block: 12px 40px;
+        }
+        @media (max-width: 600px) {
+            .post-disclosure > .post-header { padding: 22px 52px 24px 0; }
+            .post-disclosure > .post-header::before { right: 0; width: 32px; height: 32px; }
+            .post-disclosure > .post-header::after { right: 12px; }
+        }
     </style>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.18.9/dist/katex.min.css" integrity="sha384-lPx0C4zIUZLpveABMwOFcFeGZwsvKBJfhJ85FN1PYOV7xApBcFMhcAEMVKF8loOI" crossorigin="anonymous">
     <script src="js/pin-spin-cat.js?v=20260929-radian-cats" defer></script>
@@ -74,13 +152,17 @@
                  Categories: math, interactive, physics, literature, research, fitness.
                  Add as many category tags as a post needs. -->
             <article class="blog-post" id="reflections-rotations-and-spinors" aria-labelledby="reflections-title">
-                <header class="post-header">
-                    <ul class="post-tags" aria-label="Post categories">
-                        <li>math</li>
-                        <li>interactive</li>
-                    </ul>
-                    <h2 id="reflections-title" data-edit-id="reflections-title" data-edit-label="Post title" data-edit-group="Reflections, Rotations, and Spinors" data-edit-multiline="false">Reflections, Rotations, and Spinors</h2>
-                </header>
+                <details class="post-disclosure">
+                    <summary class="post-header" aria-labelledby="reflections-title">
+                        <h2 aria-labelledby="reflections-title">
+                            <span class="post-tags">
+                                <span>math</span>
+                                <span>interactive</span>
+                            </span>
+                            <span class="post-title" id="reflections-title" data-edit-id="reflections-title" data-edit-label="Post title" data-edit-group="Reflections, Rotations, and Spinors" data-edit-multiline="false">Reflections, Rotations, and Spinors</span>
+                        </h2>
+                    </summary>
+                    <div class="post-body">
 
                 <div class="post-text">
                     <p data-edit-id="reflections-intro" data-edit-label="Post introduction · before 2D" data-edit-group="Reflections, Rotations, and Spinors" data-edit-multiline="true">This post is about the math of rotations. The 2D warmup interactively demonstrates how composing an even number of reflections creates rotations and how the angle doubling leads to spin. The 3D section extends this, along with a detour on the Bloch sphere and single qubit operations. After this I include a little bit of the math behind this. This includes how these animations were generated, and hopefully the general theory makes more sense after playing with the demos. </p>
@@ -220,15 +302,21 @@ As a preview for the next section, another, compact way to represent a rotation 
                     <!-- WRITE HERE: closing paragraphs. -->
                     <noscript><p>Enable JavaScript to use the interactive demos and typeset equations.</p></noscript>
                 </div>
+                    </div>
+                </details>
             </article>
 
             <article class="blog-post" id="jaynes-cummings-model" aria-labelledby="jaynes-cummings-title">
-                <header class="post-header">
-                    <ul class="post-tags" aria-label="Post categories">
-                        <li>physics</li>
-                    </ul>
-                    <h2 id="jaynes-cummings-title" data-edit-id="jaynes-cummings-title" data-edit-label="Post title" data-edit-group="The Jaynes Cummings Model" data-edit-multiline="false">The Jaynes Cummings Model</h2>
-                </header>
+                <details class="post-disclosure">
+                    <summary class="post-header" aria-labelledby="jaynes-cummings-title">
+                        <h2 aria-labelledby="jaynes-cummings-title">
+                            <span class="post-tags">
+                                <span>physics</span>
+                            </span>
+                            <span class="post-title" id="jaynes-cummings-title" data-edit-id="jaynes-cummings-title" data-edit-label="Post title" data-edit-group="The Jaynes Cummings Model" data-edit-multiline="false">The Jaynes Cummings Model</span>
+                        </h2>
+                    </summary>
+                    <div class="post-body">
 
                 <div class="post-text">
                     <!-- WRITE HERE: opening paragraphs for The Jaynes Cummings Model.
@@ -287,42 +375,60 @@ This post will explore the ways in which this model beats a classical descriptio
                         <p data-edit-id="jc-collapses-and-revivals-text" data-edit-label="Section text" data-edit-group="Jaynes Cummings · Collapses and revivals" data-edit-multiline="true"></p>
                     </div>
                 </details>
+                    </div>
+                </details>
             </article>
 
             <article class="blog-post post-placeholder" id="covariant-derivatives" aria-labelledby="covariant-title">
-                <header class="post-header">
-                    <ul class="post-tags" aria-label="Post categories">
-                        <li>math</li>
-                        <li>physics</li>
-                    </ul>
-                    <h2 id="covariant-title" data-edit-id="covariant-title" data-edit-label="Post title" data-edit-group="Covariant Derivatives" data-edit-multiline="false">Covariant Derivatives</h2>
-                </header>
+                <details class="post-disclosure">
+                    <summary class="post-header" aria-labelledby="covariant-title">
+                        <h2 aria-labelledby="covariant-title">
+                            <span class="post-tags">
+                                <span>math</span>
+                                <span>physics</span>
+                            </span>
+                            <span class="post-title" id="covariant-title" data-edit-id="covariant-title" data-edit-label="Post title" data-edit-group="Covariant Derivatives" data-edit-multiline="false">Covariant Derivatives</span>
+                        </h2>
+                    </summary>
+                    <div class="post-body">
                 <div class="post-text">
                     <p class="placeholder-note" data-edit-id="covariant-derivatives-intro" data-edit-label="Opening text" data-edit-group="Covariant Derivatives" data-edit-multiline="true">Coming soon.</p>
                     <!-- WRITE HERE: the Covariant Derivatives post. -->
                 </div>
+                    </div>
+                </details>
             </article>
 
             <article class="blog-post post-placeholder" id="sperm-whales-and-moby-dick" aria-labelledby="whales-title">
-                <header class="post-header">
-                    <ul class="post-tags" aria-label="Post categories">
-                        <li>literature</li>
-                    </ul>
-                    <h2 id="whales-title" data-edit-id="whales-title" data-edit-label="Post title" data-edit-group="Sperm Whales and Moby Dick" data-edit-multiline="false">Sperm Whales and Moby Dick</h2>
-                </header>
+                <details class="post-disclosure">
+                    <summary class="post-header" aria-labelledby="whales-title">
+                        <h2 aria-labelledby="whales-title">
+                            <span class="post-tags">
+                                <span>literature</span>
+                            </span>
+                            <span class="post-title" id="whales-title" data-edit-id="whales-title" data-edit-label="Post title" data-edit-group="Sperm Whales and Moby Dick" data-edit-multiline="false">Sperm Whales and Moby Dick</span>
+                        </h2>
+                    </summary>
+                    <div class="post-body">
                 <div class="post-text">
                     <p class="placeholder-note" data-edit-id="sperm-whales-and-moby-dick-intro" data-edit-label="Opening text" data-edit-group="Sperm Whales and Moby Dick" data-edit-multiline="true">Coming soon.</p>
                     <!-- WRITE HERE: the Sperm Whales and Moby Dick post. -->
                 </div>
+                    </div>
+                </details>
             </article>
 
             <article class="blog-post" id="top-10-books-of-2026" aria-labelledby="books-title">
-                <header class="post-header">
-                    <ul class="post-tags" aria-label="Post categories">
-                        <li>literature</li>
-                    </ul>
-                    <h2 id="books-title" data-edit-id="books-title" data-edit-label="Post title" data-edit-group="My 5 Favorite Books of 2026" data-edit-multiline="false">My 5 Favorite Books of 2026</h2>
-                </header>
+                <details class="post-disclosure">
+                    <summary class="post-header" aria-labelledby="books-title">
+                        <h2 aria-labelledby="books-title">
+                            <span class="post-tags">
+                                <span>literature</span>
+                            </span>
+                            <span class="post-title" id="books-title" data-edit-id="books-title" data-edit-label="Post title" data-edit-group="My 5 Favorite Books of 2026" data-edit-multiline="false">My 5 Favorite Books of 2026</span>
+                        </h2>
+                    </summary>
+                    <div class="post-body">
                 <div class="post-text">
                     <!-- WRITE HERE: an introduction to the list. Replace each title, author,
                          and notes placeholder below with your own words. -->
@@ -334,8 +440,46 @@ This post will explore the ways in which this model beats a classical descriptio
                         <li><h3 data-edit-id="book-5-title" data-edit-label="Book 5 title" data-edit-group="My 5 Favorite Books of 2026" data-edit-multiline="false">Book title</h3><p class="book-author" data-edit-id="book-5-author" data-edit-label="Book 5 author" data-edit-group="My 5 Favorite Books of 2026" data-edit-multiline="false">Author</p></li>
                     </ol>
                 </div>
+                    </div>
+                </details>
             </article>
         </div>
     </main>
+    <script>
+        // Initialize after the existing demo lifecycle script has loaded.
+        document.addEventListener("DOMContentLoaded", () => {
+            const posts = [...document.querySelectorAll(".post-disclosure")];
+            posts.forEach(post => {
+                post.addEventListener("toggle", () => {
+                    if (post.open) return;
+                    post.querySelectorAll("details[open]").forEach(detail => { detail.open = false; });
+                    window.pauseDemos?.(post);
+                });
+            });
+
+            function revealLinkedPost() {
+                let id;
+                try { id = decodeURIComponent(location.hash.slice(1)); } catch { return; }
+                const target = document.getElementById(id);
+                const article = target?.closest(".blog-post");
+                if (!article) return;
+
+                const ancestors = [];
+                for (let element = target; element && element !== article; element = element.parentElement) {
+                    if (element.tagName === "DETAILS") ancestors.unshift(element);
+                }
+                if (target === article) ancestors.push(article.querySelector(".post-disclosure"));
+                ancestors.forEach(detail => { detail.open = true; });
+                requestAnimationFrame(() => target.scrollIntoView({ block: "start" }));
+            }
+
+            // Start compact on arrival or Back, while honoring links to a post or section.
+            window.addEventListener("pageshow", () => {
+                posts.forEach(post => { post.open = false; });
+                revealLinkedPost();
+            });
+            window.addEventListener("hashchange", revealLinkedPost);
+        });
+    </script>
 </body>
 </html>
