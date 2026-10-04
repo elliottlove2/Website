@@ -82,6 +82,10 @@
                     <h2 id="reflections-title" data-edit-id="reflections-title" data-edit-label="Post title" data-edit-group="Reflections, Rotations, and Spinors" data-edit-multiline="false">Reflections, Rotations, and Spinors</h2>
                 </header>
 
+                <div class="post-text">
+                    <p data-edit-id="reflections-intro" data-edit-label="Post introduction · before 2D" data-edit-group="Reflections, Rotations, and Spinors" data-edit-multiline="true">This post is about the math of rotations. The 2D warmup interactively demonstrates how composing an even number of reflections creates rotations and how the angle doubling leads to spin. The 3D section extends this, along with a detour on the Bloch sphere and single qubit operations. After this I include a little bit of the math behind this. This includes how these animations were generated, and hopefully the general theory makes more sense after playing with the demos. </p>
+                </div>
+
                 <details class="post-section" id="reflections-2d" name="reflections-dimensions">
                     <summary><h3>2D</h3></summary>
                     <div class="post-text">
@@ -99,18 +103,40 @@ Two things to look out for: first, when the normal vectors are flipped, the mirr
                         <template class="demo-template">
                             <pin-spin-cat class="blog-visualization" modes="mirrors" mode="mirrors" theme="light" aria-label="Rotating with mirrors demo"></pin-spin-cat>
                         </template>
-                        <details class="math-details" id="mirrors-math-details">
+                    </details>
+
+                    <details class="blog-demo" name="reflections-2d-demos">
+                        <summary>Loops of Rotations</summary>
+                        <div class="post-text demo-intro">
+                            <p data-edit-id="loops-paragraph-1" data-edit-label="Paragraph 1" data-edit-group="2D · Loops of Rotations" data-edit-multiline="true">Two reflections rotate the cat through twice the angle between the mirrors. Here, \(u\) stays fixed while \(w\), the other mirror’s normal arrow, turns.</p>
+                            <p data-edit-id="loops-paragraph-2" data-edit-label="Paragraph 2" data-edit-group="2D · Loops of Rotations" data-edit-multiline="true">After the cat travels around \(2\pi\) radians, the mirror lines are back where they started, the rotation is the same. But the \(w\) vector points the other way around, it is the negative of where it started. The group element in \(\mathrm{SO}(2)\) is the same \(1\), but in \(\operatorname{Spin}(2)\) the group element is \(-1\).</p>
+                            <p data-edit-id="loops-paragraph-3" data-edit-label="Paragraph 3" data-edit-group="2D · Loops of Rotations" data-edit-multiline="true">To get the arrows back to normal, the cat has to go around twice, then the Spin element is back to the identity.</p>
+                        </div>
+                        <template class="demo-template">
+                            <pin-spin-cat class="blog-visualization" modes="spin" mode="spin" theme="light" aria-label="Loops of rotations demo"></pin-spin-cat>
+                        </template>
+                    </details>
+
+
+                    <details class="blog-demo" name="reflections-2d-demos">
+                        <summary>Kaleidoscope</summary>
+                        <template class="demo-template">
+                            <pin-spin-cat class="blog-visualization" modes="kaleido" mode="kaleido" theme="light" aria-label="Interactive kaleidoscope demo"></pin-spin-cat>
+                        </template>
+                    </details>
+
+                    <details class="math-details" id="mirrors-math-details">
                             <summary>Math details</summary>
                             <div class="post-text">
-                                <p data-edit-id="mirrors-paragraph-2" data-edit-label="Reflection formula and explanation" data-edit-group="2D · Rotating with mirrors" data-edit-multiline="true">To describe a reflection in 2D, let \(u\) be a unit normal vector to the axis of reflection through the origin. Notice that in the above animation (with 1 mirror only) the cat moves in the direction \(u\) or \(-u\). When \(u\) is more lined up with the starting point the distance it travels is greater. This makes the formula \[v\mapsto v-2(v\cdot u)u\] natural. To check that this makes sense, a reflection should:</p>
+                                <p data-edit-id="mirrors-paragraph-2" data-edit-label="Reflection formula and explanation" data-edit-group="2D · Math details" data-edit-multiline="true">To describe a reflection in 2D, let \(u\) be a unit normal vector to the axis of reflection through the origin. Notice that in the above animation (with 1 mirror only) the cat moves in the direction \(u\) or \(-u\). When \(u\) is more lined up with the starting point the distance it travels is greater. This makes the formula \[v\mapsto v-2(v\cdot u)u\] natural. To check that this makes sense, a reflection should:</p>
                                 <ul>
-                                    <li data-edit-id="mirrors-property-fixed" data-edit-label="Reflection property · fixed points" data-edit-group="2D · Rotating with mirrors" data-edit-multiline="true">Leave points on the mirror fixed: if \(v\cdot u=0\), the reflected point is \(v\).</li>
-                                    <li data-edit-id="mirrors-property-normal" data-edit-label="Reflection property · normal direction" data-edit-group="2D · Rotating with mirrors" data-edit-multiline="true">Reverse the normal direction: \(u\) maps to \(-u\).</li>
-                                    <li data-edit-id="mirrors-property-distances" data-edit-label="Reflection property · distances and angles" data-edit-group="2D · Rotating with mirrors" data-edit-multiline="true">Preserve distances and angles, so the reflected cat keeps its shape and size.</li>
-                                    <li data-edit-id="mirrors-property-involution" data-edit-label="Reflection property · reflecting twice" data-edit-group="2D · Rotating with mirrors" data-edit-multiline="true">Return each point to where it started after two reflections.</li>
-                                    <li data-edit-id="mirrors-property-sign" data-edit-label="Reflection property · flipping the normal" data-edit-group="2D · Rotating with mirrors" data-edit-multiline="true">Give the same reflection when the normal \(u\) is replaced by \(-u\).</li>
+                                    <li data-edit-id="mirrors-property-fixed" data-edit-label="Reflection property · fixed points" data-edit-group="2D · Math details" data-edit-multiline="true">Leave points on the mirror fixed: if \(v\cdot u=0\), the reflected point is \(v\).</li>
+                                    <li data-edit-id="mirrors-property-normal" data-edit-label="Reflection property · normal direction" data-edit-group="2D · Math details" data-edit-multiline="true">Reverse the normal direction: \(u\) maps to \(-u\).</li>
+                                    <li data-edit-id="mirrors-property-distances" data-edit-label="Reflection property · distances and angles" data-edit-group="2D · Math details" data-edit-multiline="true">Preserve distances and angles, so the reflected cat keeps its shape and size.</li>
+                                    <li data-edit-id="mirrors-property-involution" data-edit-label="Reflection property · reflecting twice" data-edit-group="2D · Math details" data-edit-multiline="true">Return each point to where it started after two reflections.</li>
+                                    <li data-edit-id="mirrors-property-sign" data-edit-label="Reflection property · flipping the normal" data-edit-group="2D · Math details" data-edit-multiline="true">Give the same reflection when the normal \(u\) is replaced by \(-u\).</li>
                                 </ul>
-                                <p data-edit-id="mirrors-matrix" data-edit-label="Reflection matrix" data-edit-group="2D · Rotating with mirrors" data-edit-multiline="true">The formula above satisfies all of these properties, so it is a reflection over the mirror with normal vector u.
+                                <p data-edit-id="mirrors-matrix" data-edit-label="Reflection matrix" data-edit-group="2D · Math details" data-edit-multiline="true">The formula above satisfies all of these properties, so it is a reflection over the mirror with normal vector u.
 
 If the normal vector u has coordinates $u=(\cos\theta,\sin\theta)$, then the reflection matrix is \[M(\theta)=
 \begin{pmatrix}
@@ -133,34 +159,13 @@ This is a rotation with angle $2(\phi-\theta)$, which is twice the angle between
 
 As a preview for the next section, another, compact way to represent a rotation is as $e^{2i(\phi-\theta)}$. Set $\delta=(\phi-\theta)$, another way to represent this rotation $M(\phi)M(\theta)$ is with the complex number $e^{2i\delta}$. These matrices $e^{2i\delta}$ are $SO(2)$. The $\mathrm{Spin}(2)$ representation of this rotation is with $e^{i\delta}$. The map from $\mathrm{Spin}(2)$ to $SO(2)$ squares the complex number, which means  $e^{i\delta}$ and $-e^{i\delta}$ produce the same rotation $e^{2i\delta}$. In the cat animation, \(e^{i\delta}\) describes the direction of the second normal arrow relative to the first. Moving the $\mathrm{Spin}(2)$ element in a loop leads to a rotation of $4\pi$, so the cat goes around twice. </p>
                             </div>
-                        </details>
-                    </details>
-
-                    <details class="blog-demo" name="reflections-2d-demos">
-                        <summary>Loops of Rotations</summary>
-                        <div class="post-text demo-intro">
-                            <p data-edit-id="loops-paragraph-1" data-edit-label="Paragraph 1" data-edit-group="2D · Loops of Rotations" data-edit-multiline="true">Two reflections rotate the cat through twice the angle between the mirrors. Here, \(u\) stays fixed while \(w\), the other mirror’s normal arrow, turns.</p>
-                            <p data-edit-id="loops-paragraph-2" data-edit-label="Paragraph 2" data-edit-group="2D · Loops of Rotations" data-edit-multiline="true">After the cat travels around \(2\pi\) radians, the mirror lines are back where they started, the rotation is the same. But the \(w\) vector points the other way around, it is the negative of where it started. The group element in \(\mathrm{SO}(2)\) is the same \(1\), but in \(\operatorname{Spin}(2)\) the group element is \(-1\).</p>
-                            <p data-edit-id="loops-paragraph-3" data-edit-label="Paragraph 3" data-edit-group="2D · Loops of Rotations" data-edit-multiline="true">To get the arrows back to normal, the cat has to go around twice, then the Spin element is back to the identity.</p>
-                        </div>
-                        <template class="demo-template">
-                            <pin-spin-cat class="blog-visualization" modes="spin" mode="spin" theme="light" aria-label="Loops of rotations demo"></pin-spin-cat>
-                        </template>
-                    </details>
-
-
-                    <details class="blog-demo" name="reflections-2d-demos">
-                        <summary>Kaleidoscope</summary>
-                        <template class="demo-template">
-                            <pin-spin-cat class="blog-visualization" modes="kaleido" mode="kaleido" theme="light" aria-label="Interactive kaleidoscope demo"></pin-spin-cat>
-                        </template>
                     </details>
                 </details>
 
                 <details class="post-section" id="reflections-3d" name="reflections-dimensions">
                     <summary><h3>3D</h3></summary>
                     <div class="post-text">
-                        <p class="post-explanation" data-edit-id="mirrors3d-intro" data-edit-label="Text above Mirrors in 3D" data-edit-group="3D · Mirrors in 3D" data-edit-multiline="true">This section extends the 2D reflections and rotations to 3D. One application is understanding operations on a two level system in physics, also known as a qubit. First off, see how normal vectors create 2D hyperplanes in 3D. Reflecting over two of these creates a rotation, and the angle is doubled, just like in 2D. </p>
+                        <p class="post-explanation" data-edit-id="mirrors3d-intro" data-edit-label="3D introduction" data-edit-group="3D · Introduction" data-edit-multiline="true">This section extends the 2D reflections and rotations to 3D. One application is understanding operations on a two level system in physics, also known as a qubit. First off, see how normal vectors create 2D hyperplanes in 3D. Reflecting over two of these creates a rotation, and the angle is doubled, just like in 2D. </p>
                     </div>
                     <details class="blog-demo" name="reflections-3d-demos">
                         <summary>Mirrors in 3D</summary>
@@ -168,33 +173,47 @@ As a preview for the next section, another, compact way to represent a rotation 
                             <bloch-sphere class="blog-visualization" modes="mirrors3d" mode="mirrors3d" theme="light" aria-label="Mirrors in 3D demo"></bloch-sphere>
                         </template>
                     </details>
-                    <div class="post-text">
-                        <p class="post-explanation" data-edit-id="rotations3d-intro" data-edit-label="Text above Spinors and rotations" data-edit-group="3D · Spinors and rotations" data-edit-multiline="true"></p>
-                    </div>
                     <details class="blog-demo" name="reflections-3d-demos">
                         <summary>Spinors and rotations</summary>
+                        <div class="post-text demo-intro">
+                            <p class="post-explanation" data-edit-id="rotations3d-intro" data-edit-label="Section introduction" data-edit-group="3D · Spinors and rotations" data-edit-multiline="true"></p>
+                        </div>
                         <template class="demo-template">
                             <bloch-sphere class="blog-visualization" modes="rotate" mode="rotate" theme="light" aria-label="Spinors and rotations demo"></bloch-sphere>
                         </template>
                     </details>
-                    <div class="post-text">
-                        <p class="post-explanation" data-edit-id="bloch-sphere-intro" data-edit-label="Text above The Bloch sphere" data-edit-group="3D · The Bloch sphere" data-edit-multiline="true">The Bloch sphere is a tool to visualize a two level system. A state of the two level system is in the complex vector space with orthonormal basis $\{\ket 0,\ket1\}$. For quantum states, the vectors $\ket\psi$ and $e^{i\varphi}\ket\psi$ are indistinguishable, so the qubit state really lives in projective space. The qubit  </p>
-                    </div>
                     <details class="blog-demo" name="reflections-3d-demos">
                         <summary>The Bloch sphere</summary>
+                        <div class="post-text demo-intro">
+                            <p class="post-explanation" data-edit-id="bloch-sphere-intro" data-edit-label="Section introduction" data-edit-group="3D · The Bloch sphere" data-edit-multiline="true">The Bloch sphere is a tool to visualize a two level system. A state of the two level system is in the complex vector space with orthonormal basis $\{\ket 0,\ket1\}$. For quantum states, the vectors $\ket\psi$ and $e^{i\varphi}\ket\psi$ are indistinguishable, so the qubit state really lives in projective space. The qubit  </p>
+                        </div>
                         <template class="demo-template">
                             <bloch-sphere class="blog-visualization" modes="state" mode="state" theme="light" aria-label="The Bloch sphere demo"></bloch-sphere>
                         </template>
                     </details>
-                    <div class="post-text">
-                        <p class="post-explanation" data-edit-id="rabi-drive-intro" data-edit-label="Text above Rabi drive" data-edit-group="3D · Rabi drive" data-edit-multiline="true"></p>
-                    </div>
                     <details class="blog-demo" name="reflections-3d-demos">
-                        <summary>Rabi drive: lab and rotating frames</summary>
+                        <summary>Driving a two level system</summary>
+                        <div class="post-text demo-intro">
+                            <p class="post-explanation" data-edit-id="rabi-drive-intro" data-edit-label="Section introduction" data-edit-group="3D · Driving a two level system" data-edit-multiline="true"></p>
+                        </div>
                         <template class="demo-template">
-                            <bloch-sphere class="blog-visualization" modes="drive" mode="drive" theme="light" aria-label="Rabi drive in lab and rotating frames"></bloch-sphere>
+                            <bloch-sphere class="blog-visualization" modes="drive" mode="drive" theme="light" aria-label="Driving a two level system demo"></bloch-sphere>
                         </template>
                     </details>
+
+                    <details class="math-details" id="reflections-3d-math-details">
+                        <summary>Math details</summary>
+                        <div class="post-text">
+                            <p data-edit-id="reflections-3d-math-text" data-edit-label="Math details" data-edit-group="3D · Math details" data-edit-multiline="true"></p>
+                        </div>
+                    </details>
+                </details>
+
+                <details class="post-section" id="reflections-more-math-details" name="reflections-dimensions">
+                    <summary><h3>More math details</h3></summary>
+                    <div class="post-text">
+                        <p data-edit-id="reflections-more-math-text" data-edit-label="Section text" data-edit-group="More math details" data-edit-multiline="true"></p>
+                    </div>
                 </details>
 
                 <div class="post-text">
@@ -215,7 +234,8 @@ As a preview for the next section, another, compact way to represent a rotation 
                     <!-- WRITE HERE: opening paragraphs for The Jaynes Cummings Model.
                          Use <p> for paragraphs, \( ... \) for inline math,
                          and \[ ... \] for display math. -->
-                    <p data-edit-id="jc-intro" data-edit-label="Introduction · above Derivation" data-edit-group="The Jaynes Cummings Model" data-edit-multiline="true"></p>
+                    <p data-edit-id="jc-intro" data-edit-label="Introduction · above Derivation" data-edit-group="The Jaynes Cummings Model" data-edit-multiline="true">The Jaynes Cummings model describes a two level system interacting with a single mode of an electromagnetic field. The Hamiltonian is \[H=\frac{\omega_q}{2}\sigma_z+\omega_ca^\dagger a+g(\sigma_+a+\sigma_-a^\dagger).\]
+This post will explore the ways in which this model beats a classical description, and what the dynamics look like. </p>
                 </div>
 
                 <details class="post-section" id="jc-derivation" name="jaynes-cummings-sections">
@@ -260,7 +280,7 @@ As a preview for the next section, another, compact way to represent a rotation 
                 </details>
 
                 <details class="post-section" id="jc-collapses-and-revivals" name="jaynes-cummings-sections">
-                    <summary><h3 data-edit-id="jc-collapses-and-revivals-title" data-edit-label="Section title" data-edit-group="Jaynes Cummings · Collapses and revivals" data-edit-multiline="false"></h3></summary>
+                    <summary><h3 data-edit-id="jc-collapses-and-revivals-title" data-edit-label="Section title" data-edit-group="Jaynes Cummings · Collapses and revivals" data-edit-multiline="false">Section 6.</h3></summary>
                     <div class="post-text">
                         <p data-edit-id="jc-initial-state" data-edit-label="Initial state" data-edit-group="Jaynes Cummings · Collapses and revivals" data-edit-multiline="true"></p>
                         <!-- WRITE HERE: collapse and revival calculations, code, and plots. -->
@@ -308,7 +328,7 @@ As a preview for the next section, another, compact way to represent a rotation 
                          and notes placeholder below with your own words. -->
                     <ol class="book-list">
                         <li><h3 data-edit-id="book-1-title" data-edit-label="Book 1 title" data-edit-group="My 5 Favorite Books of 2026" data-edit-multiline="false">Moby Dick </h3><p class="book-author" data-edit-id="book-1-author" data-edit-label="Book 1 author" data-edit-group="My 5 Favorite Books of 2026" data-edit-multiline="false">Herman Melville</p></li>
-                        <li><h3 data-edit-id="book-2-title" data-edit-label="Book 2 title" data-edit-group="My 5 Favorite Books of 2026" data-edit-multiline="false">Book title</h3><p class="book-author" data-edit-id="book-2-author" data-edit-label="Book 2 author" data-edit-group="My 5 Favorite Books of 2026" data-edit-multiline="false">Author</p></li>
+                        <li><h3 data-edit-id="book-2-title" data-edit-label="Book 2 title" data-edit-group="My 5 Favorite Books of 2026" data-edit-multiline="false">Crime and Punishment</h3><p class="book-author" data-edit-id="book-2-author" data-edit-label="Book 2 author" data-edit-group="My 5 Favorite Books of 2026" data-edit-multiline="false">Fyodor Dostoevsky</p></li>
                         <li><h3 data-edit-id="book-3-title" data-edit-label="Book 3 title" data-edit-group="My 5 Favorite Books of 2026" data-edit-multiline="false">Book title</h3><p class="book-author" data-edit-id="book-3-author" data-edit-label="Book 3 author" data-edit-group="My 5 Favorite Books of 2026" data-edit-multiline="false">Author</p></li>
                         <li><h3 data-edit-id="book-4-title" data-edit-label="Book 4 title" data-edit-group="My 5 Favorite Books of 2026" data-edit-multiline="false">Book title</h3><p class="book-author" data-edit-id="book-4-author" data-edit-label="Book 4 author" data-edit-group="My 5 Favorite Books of 2026" data-edit-multiline="false">Author</p></li>
                         <li><h3 data-edit-id="book-5-title" data-edit-label="Book 5 title" data-edit-group="My 5 Favorite Books of 2026" data-edit-multiline="false">Book title</h3><p class="book-author" data-edit-id="book-5-author" data-edit-label="Book 5 author" data-edit-group="My 5 Favorite Books of 2026" data-edit-multiline="false">Author</p></li>
