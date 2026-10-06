@@ -21,11 +21,22 @@
             border-top: 1px solid var(--border);
         }
         .resources-library > .post-text { max-width: 680px; }
+        .resources-library:has(> .resource-demo) { margin-top: 36px; padding-top: 0; border-top: 0; }
+        .resource-demo { width: 100%; margin: 24px 0 0; }
+        .resource-demo > summary h2 {
+            display: inline;
+            margin-left: 8px;
+            font-size: 30px;
+            font-weight: 600;
+            line-height: 1.2;
+        }
+        .resource-demo > .blog-visualization { margin-top: 20px; }
     </style>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.18.9/dist/katex.min.css" integrity="sha384-lPx0C4zIUZLpveABMwOFcFeGZwsvKBJfhJ85FN1PYOV7xApBcFMhcAEMVKF8loOI" crossorigin="anonymous">
     <script src="https://cdn.jsdelivr.net/npm/katex@0.18.9/dist/katex.min.js" integrity="sha384-19KE2cFb3U+RUWmyhBz7aLOGDG8WrRC6hE3oY/HTZZlAAVWYTdmvLC//+TIV3zUx" crossorigin="anonymous" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/katex@0.18.9/dist/contrib/auto-render.min.js" integrity="sha384-bjyGPfbij8/NDKJhSGZNP/khQVgtHUE5exjm4Ydllo42FwIgYsdLO2lXGmRBf5Mz" crossorigin="anonymous" defer></script>
-    <script src="js/blog.js" defer></script>
+    <script src="js/ode-demos.js?v=20261006-euler" defer></script>
+    <script src="js/blog.js?v=20261006-euler" defer></script>
 </head>
 <body class="resources">
     <a class="skip-link" href="#main">Skip to content</a>
@@ -48,7 +59,12 @@
             <div class="post-text">
                 <p data-edit-id="calculus-content" data-edit-label="Page text" data-edit-group="Calculus Resources" data-edit-multiline="true"></p>
             </div>
-            <!-- Add interactive resources here as they become available. -->
+            <details class="post-section resource-demo" id="eulers-method" name="calculus-resources">
+                <summary><h2 data-edit-id="calculus-euler-title" data-edit-label="Resource title" data-edit-group="Euler’s Method" data-edit-multiline="false">Euler’s Method</h2></summary>
+                <template class="demo-template">
+                    <euler-method class="blog-visualization" theme="light" aria-label="Euler’s method simulation"></euler-method>
+                </template>
+            </details>
         </section>
     </main>
 </body>

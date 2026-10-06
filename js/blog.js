@@ -17,7 +17,7 @@ if (typeof window.renderMathInElement === "function") {
 const disclosures = [...document.querySelectorAll(".post-section, .blog-demo")];
 
 function pauseDemos(container) {
-    container.querySelectorAll("pin-spin-cat, bloch-sphere").forEach(demo => {
+    container.querySelectorAll("pin-spin-cat, bloch-sphere, euler-method").forEach(demo => {
         demo.pause?.();
         demo.shadowRoot?.querySelectorAll("details[open]").forEach(detail => {
             detail.open = false;
