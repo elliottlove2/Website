@@ -9,6 +9,23 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,400&family=Lato:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css?v=20261006-calculus-resources">
+    <style>
+        .resources .post-text { width: 100%; margin-inline: 0; }
+        .resources [data-edit-multiline="true"] { white-space: pre-line; }
+        .resources [data-edit-multiline="true"]:empty:not([data-editor-empty]) { display: none; }
+        .resources .katex { white-space: normal; }
+        .resources-library { margin-top: 0; padding-top: 0; border-top: 0; }
+        .resources-library:has([data-edit-id]:not(:empty), [data-editor-empty]) {
+            margin-top: 48px;
+            padding-top: 28px;
+            border-top: 1px solid var(--border);
+        }
+        .resources-library > .post-text { max-width: 680px; }
+    </style>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.18.9/dist/katex.min.css" integrity="sha384-lPx0C4zIUZLpveABMwOFcFeGZwsvKBJfhJ85FN1PYOV7xApBcFMhcAEMVKF8loOI" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.18.9/dist/katex.min.js" integrity="sha384-19KE2cFb3U+RUWmyhBz7aLOGDG8WrRC6hE3oY/HTZZlAAVWYTdmvLC//+TIV3zUx" crossorigin="anonymous" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.18.9/dist/contrib/auto-render.min.js" integrity="sha384-bjyGPfbij8/NDKJhSGZNP/khQVgtHUE5exjm4Ydllo42FwIgYsdLO2lXGmRBf5Mz" crossorigin="anonymous" defer></script>
+    <script src="js/blog.js" defer></script>
 </head>
 <body class="resources">
     <a class="skip-link" href="#main">Skip to content</a>
@@ -24,11 +41,13 @@
 
     <main id="main">
         <header>
-            <h1>Calculus Resources</h1>
-            <p class="resources-intro">Interactive animations and visual explanations for calculus students.</p>
+            <h1 data-edit-id="calculus-title" data-edit-label="Page title" data-edit-group="Calculus Resources" data-edit-multiline="false">Calculus Resources</h1>
+            <p class="post-text resources-intro" data-edit-id="calculus-intro" data-edit-label="Introduction" data-edit-group="Calculus Resources" data-edit-multiline="true"></p>
         </header>
         <section class="resources-library" aria-label="Interactive calculus resources">
-            <p class="placeholder-note">Resources coming soon.</p>
+            <div class="post-text">
+                <p data-edit-id="calculus-content" data-edit-label="Page text" data-edit-group="Calculus Resources" data-edit-multiline="true"></p>
+            </div>
             <!-- Add interactive resources here as they become available. -->
         </section>
     </main>
