@@ -259,7 +259,9 @@ As a preview for the next section, another, compact way to represent a rotation 
                     <details class="blog-demo" name="reflections-3d-demos">
                         <summary>Spinors and rotations</summary>
                         <div class="post-text demo-intro">
-                            <p class="post-explanation" data-edit-id="rotations3d-intro" data-edit-label="Section introduction" data-edit-group="3D · Spinors and rotations" data-edit-multiline="true"></p>
+                            <p class="post-explanation" data-edit-id="rotations3d-intro" data-edit-label="Section introduction" data-edit-group="3D · Spinors and rotations" data-edit-multiline="true">The group of these rotations in 3D is called ${SO}(3)$. In the 2D case we saw that we could represent the rotations with $SO(2)$ elements, or $\mathrm{spin}(2)$ elements, and there are two spin group elements for each $SO(3)$ element. In math terms, $\mathrm{spin}(3)$ is a double cover for $SO(3)$. 
+
+In three dimensions, the spin group is the same as the group of $2\times 2$ unitary matrices with determinant 1. Each $SO(3)$ rotation has two representatives in the spin group, in the animation you can increase the angle to perform a loop in the spin group, and see what happens on the $SO(3)$ and $\mathrm{spin}(3)$ layers. You can see the double cover in action by dragging the parameter theta around, notice that when the cat goes in a circle, the spin group element is equal to negative I, and to get the spin group element back to the start the cat goes around twice. </p>
                         </div>
                         <template class="demo-template">
                             <bloch-sphere class="blog-visualization" modes="rotate" mode="rotate" theme="light" aria-label="Spinors and rotations demo"></bloch-sphere>
@@ -268,7 +270,13 @@ As a preview for the next section, another, compact way to represent a rotation 
                     <details class="blog-demo" name="reflections-3d-demos">
                         <summary>The Bloch sphere</summary>
                         <div class="post-text demo-intro">
-                            <p class="post-explanation" data-edit-id="bloch-sphere-intro" data-edit-label="Section introduction" data-edit-group="3D · The Bloch sphere" data-edit-multiline="true">The Bloch sphere is a tool to visualize a two level system. A state of the two level system is in the complex vector space with orthonormal basis $\{\ket 0,\ket1\}$. For quantum states, the vectors $\ket\psi$ and $e^{i\varphi}\ket\psi$ are indistinguishable, so the qubit state really lives in projective space. The qubit  </p>
+                            <p class="post-explanation" data-edit-id="bloch-sphere-intro" data-edit-label="Section introduction" data-edit-group="3D · The Bloch sphere" data-edit-multiline="true">The Bloch sphere is a tool to visualize a two level system. A state of the two level system is in the complex vector space with orthonormal basis $\{\ket 0,\ket1\}$. For quantum states, the vectors $\ket\psi$ and $e^{i\varphi}\ket\psi$ are indistinguishable, so the qubit state really lives in projective space. An arbitrary state is a superposition \[\alpha\ket 0 + \beta\ket 1\] and by factoring out a global phase $\alpha$ can be taken to be real, and we write the state as \[\ket\psi = \cos(\theta/2)\ket 0+i\sin(\theta/2)e^{i\varphi}\ket 1.\] The qubit state is visualized as living on the surface of a sphere with north pole $\ket0 $ and south pole $\ket 1$. 
+
+The expectation values of the Pauli matrices $\sigma_x,\sigma_y,$ and $\sigma_z$ provide the coordinate projections of the state $\ket\psi$ onto the $x,y,$ and $z$ axes of the Bloch sphere. By setting $r_j = \bra \psi\sigma_j \ket\psi$ for $j=x,y,z$, the point on the sphere is \[(r_x,r_y,r_z) = (\sin\theta\cos\phi, \, \sin\theta\sin\phi, \, \cos\theta).\] 
+
+The angle is halved to $\theta/2$ in $\ket\psi$ is so that these spherical coordinates look nice, because the coordinates involve $\ket \psi$ twice. Since the coordinates are quadratic in $\ket\psi$ the double angle identity means the Bloch sphere coordinates involve $\theta$, not $\theta/2$. Even easier to remember why the angle is halved, is that rotating $\pi$ over the x or y axes on the Bloch sphere should switch $\ket 0$ to $\ket 1$. 
+
+Move the cat around the Bloch sphere by dragging it, and visit the preset conditions to see the landmark states (the eigenstates of the Pauli operators). </p>
                         </div>
                         <template class="demo-template">
                             <bloch-sphere class="blog-visualization" modes="state" mode="state" theme="light" aria-label="The Bloch sphere demo"></bloch-sphere>
@@ -277,7 +285,15 @@ As a preview for the next section, another, compact way to represent a rotation 
                     <details class="blog-demo" name="reflections-3d-demos">
                         <summary>Driving a two level system</summary>
                         <div class="post-text demo-intro">
-                            <p class="post-explanation" data-edit-id="rabi-drive-intro" data-edit-label="Section introduction" data-edit-group="3D · Driving a two level system" data-edit-multiline="true"></p>
+                            <p class="post-explanation" data-edit-id="rabi-drive-intro" data-edit-label="Section introduction" data-edit-group="3D · Driving a two level system" data-edit-multiline="true">How do we control a 2 level system in practice? What are the dynamics of the two level system? 
+
+A two level system has two energy levels, so the Hamiltonian is $E_0\ket 0 \bra 0 -E_1\ket 1\bra 1$. If the gap between the energy levels is $\omega$ then by subtracting a constant multiple of the identity, \[H= \frac{\omega}{2}\sigma_z\ .\] According to the Schrodinger equation, the time evolution operator is \[U(t)=e^{-i\frac{\omega}{2}\sigma_z t}\ . \]
+
+This familiar operator is exactly $R(n,\omega t)$ for the axis $n=(0,0,1)$, the z axis. 
+
+
+
+</p>
                         </div>
                         <template class="demo-template">
                             <bloch-sphere class="blog-visualization" modes="drive" mode="drive" theme="light" aria-label="Driving a two level system demo"></bloch-sphere>
