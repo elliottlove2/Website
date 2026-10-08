@@ -126,7 +126,8 @@
     <script src="js/bloch-sphere.js?v=20260929-rabi-frames" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/katex@0.18.9/dist/katex.min.js" integrity="sha384-19KE2cFb3U+RUWmyhBz7aLOGDG8WrRC6hE3oY/HTZZlAAVWYTdmvLC//+TIV3zUx" crossorigin="anonymous" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/katex@0.18.9/dist/contrib/auto-render.min.js" integrity="sha384-bjyGPfbij8/NDKJhSGZNP/khQVgtHUE5exjm4Ydllo42FwIgYsdLO2lXGmRBf5Mz" crossorigin="anonymous" defer></script>
-    <script src="js/blog.js" defer></script>
+    <script src="js/vector-calculus.js?v=20261008-vector-calculus" defer></script>
+    <script src="js/blog.js?v=20261008-vector-calculus" defer></script>
 </head>
 <body class="blog">
     <a class="skip-link" href="#main">Skip to content</a>
@@ -159,6 +160,7 @@
                             <span class="post-tags">
                                 <span>math</span>
                                 <span>physics</span>
+                                <span>interactive</span>
                             </span>
                             <span class="post-title" id="maxwells-equations-title" data-edit-id="maxwells-equations-title" data-edit-label="Post title" data-edit-group="Maxwell's Equations" data-edit-multiline="false">Maxwell's Equations</span>
                         </h2>
@@ -166,10 +168,37 @@
                     <div class="post-body">
                         <div class="post-text">
                             <!-- WRITE HERE: introduce the directed reading on electromagnetism for mathematicians. -->
-                            <p data-edit-id="maxwells-equations-intro" data-edit-label="Post introduction" data-edit-group="Maxwell's Equations" data-edit-multiline="true"></p>
+                            <p data-edit-id="maxwells-equations-intro" data-edit-label="Post introduction" data-edit-group="Maxwell's Equations" data-edit-multiline="true">At the time of writing this, I am leading an undergraduate in a directed reading on the book "Electricity and Magnetism for Mathematicians" by Walter Garrity. The book is really good. 
+
+This post includes all of the simulations that I am creating to help supplement the math.  </p>
                         </div>
 
-                        <!-- Add the directed reading's animations below the introduction as they are uploaded. -->
+                        <details class="post-section" id="maxwell-vector-calculus" name="maxwell-sections">
+                            <summary><h3 id="maxwell-vector-calculus-title" data-edit-id="maxwell-vector-calculus-title" data-edit-label="Section title" data-edit-group="Maxwell's Equations · Vector Calculus" data-edit-multiline="false">Vector Calculus</h3></summary>
+                            <div class="post-text">
+                                <p data-edit-id="maxwell-vector-calculus-intro" data-edit-label="Section introduction" data-edit-group="Maxwell's Equations · Vector Calculus" data-edit-multiline="true"></p>
+                            </div>
+
+                            <details class="blog-demo" id="maxwell-divergence" name="maxwell-vector-calculus-demos">
+                                <summary>Divergence</summary>
+                                <div class="post-text demo-intro">
+                                    <p data-edit-id="maxwell-divergence-intro" data-edit-label="Simulation introduction" data-edit-group="Vector Calculus · Divergence" data-edit-multiline="true"></p>
+                                </div>
+                                <template class="demo-template">
+                                    <divergence-probe class="blog-visualization" aria-label="Interactive divergence probe"></divergence-probe>
+                                </template>
+                            </details>
+
+                            <details class="blog-demo" id="maxwell-curl" name="maxwell-vector-calculus-demos">
+                                <summary>Curl</summary>
+                                <div class="post-text demo-intro">
+                                    <p data-edit-id="maxwell-curl-intro" data-edit-label="Simulation introduction" data-edit-group="Vector Calculus · Curl" data-edit-multiline="true"></p>
+                                </div>
+                                <template class="demo-template">
+                                    <curl-paddle-wheel class="blog-visualization" aria-label="Interactive curl paddle wheel"></curl-paddle-wheel>
+                                </template>
+                            </details>
+                        </details>
                     </div>
                 </details>
             </article>

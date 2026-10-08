@@ -17,7 +17,7 @@ if (typeof window.renderMathInElement === "function") {
 const disclosures = [...document.querySelectorAll(".post-section, .blog-demo")];
 
 function pauseDemos(container) {
-    container.querySelectorAll("pin-spin-cat, bloch-sphere, euler-method").forEach(demo => {
+    container.querySelectorAll("pin-spin-cat, bloch-sphere, euler-method, divergence-probe, curl-paddle-wheel").forEach(demo => {
         demo.pause?.();
         demo.shadowRoot?.querySelectorAll("details[open]").forEach(detail => {
             detail.open = false;
@@ -55,5 +55,6 @@ disclosures.forEach(detail => {
         if (section && !section.open) return;
         const template = detail.querySelector(":scope > .demo-template");
         if (template) template.replaceWith(template.content.cloneNode(true));
+        detail.querySelectorAll("divergence-probe, curl-paddle-wheel").forEach(demo => demo.resume?.());
     });
 });
