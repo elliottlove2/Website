@@ -64,7 +64,7 @@
 
   const divergenceFields = {
     charge: { label: 'Smooth radial source', field: (x, y) => { const d = x * x + y * y + 0.16; return [x / d, y / d]; }, local: (x, y) => 0.32 / (x * x + y * y + 0.16) ** 2 },
-    magnet: { label: 'Dipole-like field', field: (x, y) => { const d = x * x + y * y + 0.25; return [x * y / (d * d), (d - 2 * x * x) / (2 * d * d)]; }, local: () => 0 },
+    magnet: { label: 'Bar magnet', field: (x, y) => { const d = x * x + y * y + 0.25; return [x * y / (d * d), (d - 2 * x * x) / (2 * d * d)]; }, local: () => 0 },
     uniform: { label: 'Uniform field', field: () => [1, 0], local: () => 0 },
     expand: { label: 'Expanding field', field: (x, y) => [0.6 * x, 0.6 * y], local: () => 1.2 }
   };
@@ -159,8 +159,8 @@
       this.shadowRoot.innerHTML = `
         <style>${styles}</style>
         <section class="demo" aria-labelledby="title">
-          <h4 id="title" class="title">${isCurl ? 'Curl paddle wheel' : 'Divergence probe'}</h4>
-          <p class="instructions" id="instructions">Move or tap the field. You can also focus it and use the arrow keys.${isCurl ? ' Resize the loop to compare the average and local curl.' : ''}</p>
+          <h4 id="title" class="title">${isCurl ? 'Curl demonstration' : 'Divergence demonstration'}</h4>
+          <p class="instructions" id="instructions">Move the circle with mouse or arrow keys</p>
           <div class="controls" role="group" aria-label="Choose a vector field">
             ${Object.entries(this._fields).map(([key, entry]) => `<button type="button" data-field="${key}" data-f="${key}" aria-pressed="${key === this._fieldKey}">${entry.label}</button>`).join('')}
           </div>
