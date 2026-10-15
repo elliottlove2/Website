@@ -128,8 +128,8 @@
     <script src="js/bloch-sphere.js?v=20260929-rabi-frames" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/katex@0.18.9/dist/katex.min.js" integrity="sha384-19KE2cFb3U+RUWmyhBz7aLOGDG8WrRC6hE3oY/HTZZlAAVWYTdmvLC//+TIV3zUx" crossorigin="anonymous" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/katex@0.18.9/dist/contrib/auto-render.min.js" integrity="sha384-bjyGPfbij8/NDKJhSGZNP/khQVgtHUE5exjm4Ydllo42FwIgYsdLO2lXGmRBf5Mz" crossorigin="anonymous" defer></script>
-    <script src="js/vector-calculus.js?v=20261009-vector-wording" defer></script>
-    <script src="js/gradient-potentials.js?v=20261015-maxwell-flow" defer></script>
+    <script src="js/vector-calculus.js?v=20261015-maxwell-cleanup" defer></script>
+    <script src="js/gradient-potentials.js?v=20261015-maxwell-cleanup" defer></script>
     <script src="js/blog.js?v=20261015-maxwell-flow" defer></script>
 </head>
 <body class="blog">
@@ -171,7 +171,7 @@
                     <div class="post-body">
                         <div class="post-text">
                             <!-- WRITE HERE: introduce the directed reading on electromagnetism for mathematicians. -->
-                            <p data-edit-id="maxwells-equations-intro" data-edit-label="Post introduction" data-edit-group="Maxwell's Equations" data-edit-multiline="true">At the time of writing this, I am leading an undergraduate in a directed reading on the book "Electricity and Magnetism for Mathematicians" by Walter Garrity. The book is really good. 
+                            <p data-edit-id="maxwells-equations-intro" data-edit-label="Post introduction" data-edit-group="Maxwell's Equations" data-edit-multiline="true">At the time of writing this, I am leading an undergraduate in a directed reading on the book "Electricity and Magnetism for Mathematicians" by Walter Garrity. The book is really good and I highly recommend it to anybody interested in math or physics. 
 
 This post includes all of the simulations that I am creating to help supplement the math.  </p>
                         </div>
@@ -179,13 +179,22 @@ This post includes all of the simulations that I am creating to help supplement 
                         <details class="post-section" id="maxwell-vector-calculus" name="maxwell-sections">
                             <summary><h3 id="maxwell-vector-calculus-title" data-edit-id="maxwell-vector-calculus-title" data-edit-label="Section title" data-edit-group="Maxwell's Equations · Vector Calculus" data-edit-multiline="false">Vector Calculus</h3></summary>
                             <div class="post-text">
-                                <p data-edit-id="maxwell-vector-calculus-intro" data-edit-label="Section introduction" data-edit-group="Maxwell's Equations · Vector Calculus" data-edit-multiline="true">Divergence describes outward flow, the gradient comes from a scalar potential, and curl describes local circulation. The three demonstrations below connect these derivatives with quantities measured along paths and around boundaries.</p>
+                                <p data-edit-id="maxwell-vector-calculus-intro" data-edit-label="Section introduction" data-edit-group="Maxwell's Equations · Vector Calculus" data-edit-multiline="true">A vector field $F$ on $\R^n$ assigns to each point $\mathbf x\in \R^n$, a vector $F(\mathbf x)\in \R^n$. For a a point $\mathbf x$ the divergence of $F$ is a number that tells us how much the vector field is pointing out away from $\mathbf x$.  If we the region of radius $r$ around  around a point $\mathbf x$ is $B_r$, the divergence is  \[ \operatorname{div}F(\mathbf x)=\;\lim_{r\to 0}\;\frac{1}{\operatorname{area}(B_r)}\oint_{\partial B_r} F\cdot\mathbf n\,ds .\]
+The integral on the right side is measuring the flow of $F$ out of the region, and the dividing by the area accounts for the shrinking of the region. 
+
+Te definition above is informative, but the definition that is easier to work with is \[
+\operatorname{div} F = \nabla \cdot F
+= \sum_{i=1}^n \frac{\partial F^i}{\partial x^i}.
+\]
+where \[
+\nabla
+= \left(\frac{\partial}{\partial x^1}, \dots, \frac{\partial}{\partial x^n}\right).
+\]
+
+In summary, the divergence of a vector field in $\R^n$ assigns to each point in $\R^n$ a number which measures the inward/outward flow of the vector field at that point. More flow out is positive, more flow in is negative, which you can see below for $\R^2$. </p>
                             </div>
 
                             <div class="vector-demo" id="maxwell-divergence">
-                                <div class="post-text demo-intro">
-                                    <p data-edit-id="maxwell-divergence-intro" data-edit-label="Divergence explanation" data-edit-group="Vector Calculus · Divergence" data-edit-multiline="true">Divergence measures how much more of a field leaves a small region than enters it. The net outward flux through the circle, divided by its area, gives the average divergence inside. Compare that average with the divergence at the center.</p>
-                                </div>
                                 <template class="demo-template">
                                     <divergence-probe class="blog-visualization" aria-label="Interactive divergence demonstration"></divergence-probe>
                                 </template>

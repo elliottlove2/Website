@@ -29,7 +29,6 @@
     *, *::before, *::after { box-sizing: border-box; }
     .demo { padding: 16px; background: var(--surface); border: 1px solid #dcd7cb; border-radius: 8px; }
     .title { font: inherit; font-size: 18px; font-weight: 700; margin: 0 0 8px; }
-    .instructions { color: var(--secondary); font-size: 13px; margin: 0 0 12px; }
     .controls { display: flex; flex-wrap: wrap; gap: 7px; margin: 0 0 12px; }
     button {
       appearance: none; font: inherit; font-size: 13px; line-height: 1.35;
@@ -159,12 +158,11 @@
       this.shadowRoot.innerHTML = `
         <style>${styles}</style>
         <section class="demo" aria-labelledby="title">
-          <h4 id="title" class="title">${isCurl ? 'Curl demonstration' : 'Divergence demonstration'}</h4>
-          <p class="instructions" id="instructions">Move the circle with mouse or arrow keys</p>
+          <h4 id="title" class="title">${isCurl ? 'Curl demonstration' : 'Divergence'}</h4>
           <div class="controls" role="group" aria-label="Choose a vector field">
             ${Object.entries(this._fields).map(([key, entry]) => `<button type="button" data-field="${key}" data-f="${key}" aria-pressed="${key === this._fieldKey}">${entry.label}</button>`).join('')}
           </div>
-          <svg class="board" id="field" viewBox="0 0 680 400" preserveAspectRatio="xMidYMid meet" role="img" tabindex="0" aria-label="${isCurl ? 'Vector field with a movable circulation loop and rotation indicator' : 'Vector field with a movable circular flux probe'}" aria-describedby="instructions">
+          <svg class="board" id="field" viewBox="0 0 680 400" preserveAspectRatio="xMidYMid meet" role="img" tabindex="0" aria-label="${isCurl ? 'Vector field with a movable circulation loop and rotation indicator' : 'Vector field with a movable circular flux probe'}">
             <defs><marker id="${this._id}-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></marker></defs>
             <g id="field-origin"></g><g id="field-arrows"></g>
             <circle id="probe" r="45" ${isCurl ? 'fill="none" stroke="#5f5e5a" stroke-width="1.5" stroke-dasharray="4 4"' : 'stroke-width="2" fill-opacity="0.14"'}/>

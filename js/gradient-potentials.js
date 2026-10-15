@@ -28,7 +28,6 @@
     *, *::before, *::after { box-sizing: border-box; }
     .demo { padding: 16px; background: #faf9f5; border: 1px solid #dcd7cb; border-radius: 8px; }
     .title { font: inherit; font-size: 18px; font-weight: 700; margin: 0 0 8px; }
-    .instructions { color: #5f5e5a; font-size: 13px; margin: 0 0 12px; }
     .controls { display: flex; flex-wrap: wrap; align-items: center; gap: 7px; margin: 0 0 9px; }
     .group-label { color: #5f5e5a; font-size: 12px; margin-right: 2px; }
     button { appearance: none; font: inherit; font-size: 13px; line-height: 1.35; padding: 7px 10px; border: 1px solid #bcb7ab; border-radius: 5px; color: #26241f; background: #fffefa; cursor: pointer; min-height: 34px; }
@@ -131,7 +130,6 @@
         <style>${styles}</style>
         <section class="demo" aria-labelledby="title">
           <h4 class="title" id="title">Gradient and potentials</h4>
-          <p class="instructions" id="instructions">Compare routes. Play, scrub progress, or use the arrow keys on the picture.</p>
           <div class="controls" role="group" aria-label="Choose a vector field">
             <button type="button" data-field="hill" aria-pressed="true">Uphill gradient ∇f</button>
             <button type="button" data-field="rotation" aria-pressed="false">Rotation field</button>
@@ -144,7 +142,7 @@
             <button type="button" data-route="loop" aria-pressed="false">Closed loop</button>
           </div>
           <p class="formula" id="formula"></p>
-          <svg id="sv" class="board" viewBox="0 0 680 400" preserveAspectRatio="xMidYMid meet" tabindex="0" role="img" aria-label="A walker follows a route through a vector field" aria-describedby="instructions keyboard-instructions">
+          <svg id="sv" class="board" viewBox="0 0 680 400" preserveAspectRatio="xMidYMid meet" tabindex="0" role="img" aria-label="A walker follows a route through a vector field" aria-describedby="keyboard-instructions">
             <defs><marker id="${this._id}-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></marker></defs>
             <g id="contours"></g><g id="field-arrows"></g>
             <path id="route-path" fill="none" stroke="#D85A30" stroke-opacity="0.3" stroke-width="4" stroke-linecap="round"/>
