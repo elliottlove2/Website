@@ -120,6 +120,8 @@
             .post-disclosure > .post-header::before { right: 0; width: 32px; height: 32px; }
             .post-disclosure > .post-header::after { right: 12px; }
         }
+        #maxwell-vector-calculus .vector-demo { width: 100%; margin-block: 26px 40px; scroll-margin-top: 24px; }
+        #maxwell-vector-calculus .vector-demo > .post-text { width: min(680px, 100%); }
     </style>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.18.9/dist/katex.min.css" integrity="sha384-lPx0C4zIUZLpveABMwOFcFeGZwsvKBJfhJ85FN1PYOV7xApBcFMhcAEMVKF8loOI" crossorigin="anonymous">
     <script src="js/pin-spin-cat.js?v=20260929-radian-cats" defer></script>
@@ -127,7 +129,8 @@
     <script src="https://cdn.jsdelivr.net/npm/katex@0.18.9/dist/katex.min.js" integrity="sha384-19KE2cFb3U+RUWmyhBz7aLOGDG8WrRC6hE3oY/HTZZlAAVWYTdmvLC//+TIV3zUx" crossorigin="anonymous" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/katex@0.18.9/dist/contrib/auto-render.min.js" integrity="sha384-bjyGPfbij8/NDKJhSGZNP/khQVgtHUE5exjm4Ydllo42FwIgYsdLO2lXGmRBf5Mz" crossorigin="anonymous" defer></script>
     <script src="js/vector-calculus.js?v=20261009-vector-wording" defer></script>
-    <script src="js/blog.js?v=20261008-vector-calculus" defer></script>
+    <script src="js/gradient-potentials.js?v=20261015-maxwell-flow" defer></script>
+    <script src="js/blog.js?v=20261015-maxwell-flow" defer></script>
 </head>
 <body class="blog">
     <a class="skip-link" href="#main">Skip to content</a>
@@ -176,28 +179,42 @@ This post includes all of the simulations that I am creating to help supplement 
                         <details class="post-section" id="maxwell-vector-calculus" name="maxwell-sections">
                             <summary><h3 id="maxwell-vector-calculus-title" data-edit-id="maxwell-vector-calculus-title" data-edit-label="Section title" data-edit-group="Maxwell's Equations · Vector Calculus" data-edit-multiline="false">Vector Calculus</h3></summary>
                             <div class="post-text">
-                                <p data-edit-id="maxwell-vector-calculus-intro" data-edit-label="Section introduction" data-edit-group="Maxwell's Equations · Vector Calculus" data-edit-multiline="true"></p>
+                                <p data-edit-id="maxwell-vector-calculus-intro" data-edit-label="Section introduction" data-edit-group="Maxwell's Equations · Vector Calculus" data-edit-multiline="true">Divergence describes outward flow, the gradient comes from a scalar potential, and curl describes local circulation. The three demonstrations below connect these derivatives with quantities measured along paths and around boundaries.</p>
                             </div>
 
-                            <details class="blog-demo" id="maxwell-divergence" name="maxwell-vector-calculus-demos">
-                                <summary>Divergence</summary>
+                            <div class="vector-demo" id="maxwell-divergence">
                                 <div class="post-text demo-intro">
-                                    <p data-edit-id="maxwell-divergence-intro" data-edit-label="Simulation introduction" data-edit-group="Vector Calculus · Divergence" data-edit-multiline="true"></p>
+                                    <p data-edit-id="maxwell-divergence-intro" data-edit-label="Divergence explanation" data-edit-group="Vector Calculus · Divergence" data-edit-multiline="true">Divergence measures how much more of a field leaves a small region than enters it. The net outward flux through the circle, divided by its area, gives the average divergence inside. Compare that average with the divergence at the center.</p>
                                 </div>
                                 <template class="demo-template">
-                                    <divergence-probe class="blog-visualization" aria-label="Interactive divergence probe"></divergence-probe>
+                                    <divergence-probe class="blog-visualization" aria-label="Interactive divergence demonstration"></divergence-probe>
                                 </template>
-                            </details>
+                            </div>
 
-                            <details class="blog-demo" id="maxwell-curl" name="maxwell-vector-calculus-demos">
-                                <summary>Curl</summary>
+                            <div class="vector-demo" id="maxwell-gradient">
                                 <div class="post-text demo-intro">
-                                    <p data-edit-id="maxwell-curl-intro" data-edit-label="Simulation introduction" data-edit-group="Vector Calculus · Curl" data-edit-multiline="true"></p>
+                                    <p data-edit-id="maxwell-gradient-intro" data-edit-label="Gradient explanation" data-edit-group="Vector Calculus · Gradient" data-edit-multiline="true">A scalar potential assigns a value to each point, and its gradient points uphill. For a gradient field, the work along a path depends only on its endpoints: \(\int_\gamma \nabla f\cdot d\mathbf r=f(B)-f(A)\). Try different routes between the same two points, then switch to the rotation field and compare closed loops.</p>
                                 </div>
                                 <template class="demo-template">
-                                    <curl-paddle-wheel class="blog-visualization" aria-label="Interactive curl paddle wheel"></curl-paddle-wheel>
+                                    <gradient-potentials class="blog-visualization" aria-label="Gradient and potentials demonstration"></gradient-potentials>
                                 </template>
-                            </details>
+                            </div>
+
+                            <div class="vector-demo" id="maxwell-curl">
+                                <div class="post-text demo-intro">
+                                    <p data-edit-id="maxwell-curl-intro" data-edit-label="Curl explanation" data-edit-group="Vector Calculus · Curl" data-edit-multiline="true">Curl measures local circulation. For these planar fields, counterclockwise circulation corresponds to positive curl pointing out of the screen. Circulation around the loop divided by its area gives the average curl over the disk; as the loop shrinks, that average approaches the curl at its center.</p>
+                                </div>
+                                <template class="demo-template">
+                                    <curl-paddle-wheel class="blog-visualization" aria-label="Interactive curl demonstration"></curl-paddle-wheel>
+                                </template>
+                            </div>
+                        </details>
+
+                        <details class="post-section" id="maxwell-differential-forms" name="maxwell-sections">
+                            <summary><h3 id="maxwell-differential-forms-title" data-edit-id="maxwell-differential-forms-title" data-edit-label="Section title" data-edit-group="Maxwell's Equations · Differential Forms" data-edit-multiline="false">Differential Forms</h3></summary>
+                            <div class="post-text">
+                                <p data-edit-id="maxwell-differential-forms-intro" data-edit-label="Section introduction" data-edit-group="Maxwell's Equations · Differential Forms" data-edit-multiline="true"></p>
+                            </div>
                         </details>
                     </div>
                 </details>
