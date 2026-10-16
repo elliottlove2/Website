@@ -45,14 +45,11 @@
     .metric { margin: 0; min-width: 0; padding: 10px 12px; background: var(--panel); border-radius: 5px; }
     .metric dt { color: var(--secondary); font-size: 12px; line-height: 1.35; }
     .metric dd { font-size: 23px; font-weight: 700; line-height: 1.35; margin: 4px 0 0; font-variant-numeric: tabular-nums; }
-    .metric small { display: block; font-size: 11px; margin-top: 2px; }
-    .message { font-size: 13px; color: var(--secondary); margin: 10px 0 0; }
     .radius { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 12px 0 0; }
     .radius label { font-size: 13px; color: var(--secondary); }
     .radius input { min-width: 90px; flex: 1; accent-color: var(--accent); margin: 0; }
     .radius output { min-width: 35px; font-size: 13px; font-variant-numeric: tabular-nums; }
     .transport { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 12px 0 0; }
-    .transport span { font-size: 12px; color: var(--secondary); }
     .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
     @media (max-width: 400px) {
       .demo { padding: 11px; }
@@ -156,7 +153,7 @@
         rotor: 'sp', 'spoke-a': 's1', 'spoke-b': 's2'
       };
       if (isCurl) { this._x = 0.9; this._y = 0.5; }
-      const metric = (id, label, detail) => `<dl class="metric"><dt>${label}${detail ? `<small>${detail}</small>` : ''}</dt><dd id="${id}">0.00</dd></dl>`;
+      const metric = (id, label) => `<dl class="metric"><dt>${label}</dt><dd id="${id}">0.00</dd></dl>`;
       this.shadowRoot.innerHTML = `
         <style>${styles}</style>
         <section class="demo" aria-labelledby="title">
@@ -172,13 +169,12 @@
             ${isCurl ? '<g id="rotor" stroke="#26241f" stroke-width="2.5" stroke-linecap="round"><line id="spoke-a"/><line id="spoke-b"/></g><circle id="hub" r="4" fill="#26241f"/>' : ''}
             <g id="boundary"></g>
           </svg>
-          ${isCurl ? '<div class="radius"><label for="radius">Loop radius</label><input id="radius" type="range" min="0.2" max="1.6" step="0.05" value="0.45"><output id="radius-value" for="radius">0.45</output></div><div class="transport"><button type="button" id="play">Pause animation</button><span>Illustrative rotation indicator</span></div>' : ''}
+          ${isCurl ? '<div class="radius"><label for="radius">Loop radius</label><input id="radius" type="range" min="0.2" max="1.6" step="0.05" value="0.45"><output id="radius-value" for="radius">0.45</output></div><div class="transport"><button type="button" id="play">Pause animation</button></div>' : ''}
           <div class="metrics" aria-label="Probe measurements">
-            ${metric('integral', isCurl ? 'Circulation around loop' : 'Net outward flux', isCurl ? 'Counterclockwise is positive' : 'Outward is positive')}
-            ${metric('average', isCurl ? 'Average curl over disc' : 'Average divergence over disc', isCurl ? 'Circulation per area' : 'Flux per area')}
+            ${metric('integral', isCurl ? 'Circulation around loop' : 'Net outward flux')}
+            ${metric('average', isCurl ? 'Average curl over disc' : 'Average divergence over disc')}
             ${metric('local', isCurl ? 'Curl at the center' : 'Divergence at the center')}
           </div>
-          ${isCurl ? '' : '<p id="message" class="message"></p>'}
           <span id="announcement" class="sr-only" role="status" aria-live="polite"></span>
         </section>`;
       Object.entries(this._ids).forEach(([id, original]) => {
@@ -312,9 +308,6 @@
         b.setAttribute('x1', x); b.setAttribute('x2', x); b.setAttribute('y1', y - r); b.setAttribute('y2', y + r);
         this._get('hub').setAttribute('cx', x); this._get('hub').setAttribute('cy', y);
         this._drawRotor(); this._syncAnimation();
-      } else {
-        const status = Math.abs(average) < 0.005 ? 'Inward and outward flux balance.' : average > 0 ? 'More field leaves than enters: positive average divergence.' : 'More field enters than leaves: negative average divergence.';
-        this._get('message').textContent = `${status} Red dots show outward flow; blue dots show inward flow.`;
       }
     }
 
