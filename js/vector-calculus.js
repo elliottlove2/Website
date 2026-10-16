@@ -176,7 +176,7 @@
           <div class="metrics" aria-label="Probe measurements">
             ${metric('integral', isCurl ? 'Circulation around loop' : 'Net outward flux', isCurl ? 'Counterclockwise is positive' : 'Outward is positive')}
             ${metric('average', isCurl ? 'Average curl over disc' : 'Average divergence over disc', isCurl ? 'Circulation per area' : 'Flux per area')}
-            ${metric('local', isCurl ? 'Curl at the center' : 'Divergence at the center', isCurl ? '' : '∂Fₓ/∂x + ∂Fᵧ/∂y')}
+            ${metric('local', isCurl ? 'Curl at the center' : 'Divergence at the center')}
           </div>
           ${isCurl ? '' : '<p id="message" class="message"></p>'}
           <span id="announcement" class="sr-only" role="status" aria-live="polite"></span>
