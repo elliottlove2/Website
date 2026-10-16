@@ -337,10 +337,7 @@
     spin: {
       tab: "Spin",
       sub: "the 4π trick",
-      hint:
-        "The light grey cat is the starting point. " +
-        "Drag the cat around the ball of yarn, or press play. " +
-        "The second mirror always sits at half the angle.",
+      hint: "",
     },
     kaleido: {
       tab: "Kaleidoscope",
@@ -350,27 +347,6 @@
         "and point at any cat to light up its two sign choices.",
     },
   };
-
-  // Fixed, trusted definitions for the labels used by each view.
-  const SYMBOLS = {
-    common: [
-      ["O(2)", "Rotations and reflections in 2 dimensions"],
-      ["SO(2)", "Just the rotations, which are composed of an even number of reflections"],
-      ["Pin(2)", "The combined mirror steps, keeping track of the signs of the arrows"],
-      ["Spin(2)", "The even / rotation part of Pin(2)"],
-    ],
-    mirrors: [],
-    spin: [],
-    kaleido: [],
-  };
-  const SYMBOL_KEYS = Object.fromEntries(
-    Object.keys(MODES).map((mode) => [
-      mode,
-      [...SYMBOLS.common, ...SYMBOLS[mode]]
-        .map(([symbol, meaning]) => `<div><dt>${symbol}</dt><dd>${meaning}</dd></div>`)
-        .join(""),
-    ]),
-  );
 
   const LIGHT = `
     --psc-paper: #f6f8fa;  --psc-stage: #e9eef2;  --psc-ink: #1b2533;  --psc-muted: #5d6978;
@@ -471,16 +447,6 @@
     output { min-width: 6.5em; font-family: var(--psc-math-font); font-variant-numeric: tabular-nums; }
     .presets { display: inline-flex; gap: 6px; }
     .lab { font-size: 0.88em; color: var(--psc-muted); }
-    .symbol-key {
-      border-top: 1px solid var(--psc-line); padding-top: 10px;
-      font-size: max(14px, 0.9em); line-height: 1.5;
-    }
-    .symbol-key summary { cursor: pointer; font-weight: 600; padding: 3px 0; }
-    .symbol-key dl { display: grid; grid-template-columns: minmax(0, 1fr); gap: 14px 24px; margin: 16px 0 2px; }
-    .wide .symbol-key dl { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-    .symbol-key dl > div { min-width: 0; }
-    .symbol-key dt { font-weight: 600; }
-    .symbol-key dd { margin: 3px 0 0; color: var(--psc-muted); }
     .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
   `;
 
@@ -496,7 +462,6 @@
             <span><i class="sw odd"></i>odd</span>
             <span><i class="sw dot"></i><em>g</em></span>
             <span><i class="sw ring"></i><em>−g</em></span>
-            <span>curves: two choices, one move</span>
           </div>
           <div class="readout"></div>
         </div>
@@ -525,10 +490,6 @@
         <input type="range" min="2" max="8" step="1" value="4" data-act="k" aria-label="Kaleidoscope order k">
         <output data-out="k"></output>
       </div>
-      <details class="symbol-key">
-        <summary>What the symbols mean</summary>
-        <dl></dl>
-      </details>
       <div class="sr" aria-live="polite"></div>
     </div>`;
 
@@ -648,7 +609,6 @@
         groups: $(".groups"),
         readout: $(".readout"),
         hint: $(".hint"),
-        symbols: $(".symbol-key dl"),
         chips: $(".chips"),
         add: $('[data-act="add"]'),
         remove: $('[data-act="remove"]'),
@@ -781,7 +741,9 @@
       }
       for (const panel of this.#el.panels) panel.hidden = panel.dataset.for !== mode;
       this.#el.hint.textContent = MODES[mode].hint;
-      this.#el.symbols.innerHTML = SYMBOL_KEYS[mode];
+      this.#el.hint.hidden = !MODES[mode].hint;
+      // Keep the generated description for the canvas's accessible label.
+      this.#el.readout.hidden = mode === "spin";
       if (mode === "spin") this.#maybeAutoplay();
       else this.#setPlaying(false);
       if (!quiet) this.#announce(`${MODES[mode].tab} view.`);

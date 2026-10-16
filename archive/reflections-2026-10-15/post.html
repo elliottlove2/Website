@@ -1,0 +1,165 @@
+<!-- Archived 2026-10-15 before rotation-post cleanup. Inert source for later reuse. -->
+<template id="archived-reflections-post">
+            <article class="blog-post" id="reflections-rotations-and-spinors" aria-labelledby="reflections-title">
+                <details class="post-disclosure">
+                    <summary class="post-header" aria-labelledby="reflections-title">
+                        <h2 aria-labelledby="reflections-title">
+                            <span class="post-tags">
+                                <span>math</span>
+                                <span>interactive</span>
+                            </span>
+                            <span class="post-title" id="reflections-title" data-edit-id="reflections-title" data-edit-label="Post title" data-edit-group="Reflections, Rotations, Spinors, and the Bloch Sphere" data-edit-multiline="false">Reflections and Rotations.</span>
+                        </h2>
+                    </summary>
+                    <div class="post-body">
+
+                <div class="post-text">
+                    <p data-edit-id="reflections-intro" data-edit-label="Post introduction · before 2D" data-edit-group="Reflections, Rotations, Spinors, and the Bloch Sphere" data-edit-multiline="true">This post is about the math of rotations. The 2D warmup interactively demonstrates how composing an even number of reflections creates rotations and how angles double when you do this. The 3D section extends this, the key is that after picking a 2D rotation plane within $\R^3$ we just perform a 2D rotation. After this I include a little bit of the math behind this all, and how Clifford algebras were used to generate the animations. </p>
+                </div>
+
+                <details class="post-section" id="reflections-2d" name="reflections-dimensions">
+                    <summary><h3>2D</h3></summary>
+                    <div class="post-text">
+                        <p class="post-explanation" data-edit-id="mirrors-intro" data-edit-label="Introduction to reflections" data-edit-group="2D · Rotating with mirrors" data-edit-multiline="true">Reflections in 2D provide a simple starting point for this post. In two dimensions, a mirror is a line called the \(\textit{axis of reflection}\). An object on one side of the axis gets flipped to the other side. A vector 
+
+But how do we go from reflections to rotations? In the simulation below, you can see how two reflections combine to form a single rotation.</p>
+                    </div>
+                    <details class="blog-demo" name="reflections-2d-demos">
+                        <summary>Rotating with mirrors</summary>
+                        <div class="post-text demo-intro">
+                            <p data-edit-id="mirrors-paragraph-1" data-edit-label="Simulation explanation" data-edit-group="2D · Rotating with mirrors" data-edit-multiline="true">The mirrors are described by their normal vectors: arrows at right angles to the mirrors. Move the mirrors around by moving the normal vectors, and notice how changing the angle between them changes the rotation.
+
+Two things to look out for: first, when the normal vectors are flipped, the mirrors stay the same. Second, the rotation angle is twice the angle between the mirrors.</p>
+                        </div>
+                        <template class="demo-template">
+                            <pin-spin-cat class="blog-visualization" modes="mirrors" mode="mirrors" theme="light" aria-label="Rotating with mirrors demo"></pin-spin-cat>
+                        </template>
+                    </details>
+
+                    <details class="blog-demo" name="reflections-2d-demos">
+                        <summary>Loops of rotations</summary>
+                        <div class="post-text demo-intro">
+                            <p data-edit-id="loops-paragraph-1" data-edit-label="Paragraph 1" data-edit-group="2D · Loops of rotations" data-edit-multiline="true">Two reflections rotate the cat through twice the angle between the mirrors. Here, \(u\) stays fixed while \(w\), the other mirror’s normal arrow, turns.</p>
+                            <p data-edit-id="loops-paragraph-2" data-edit-label="Paragraph 2" data-edit-group="2D · Loops of rotations" data-edit-multiline="true">After the cat travels around \(2\pi\) radians, the mirror lines are back where they started, the rotation is the same. But the \(w\) vector points the other way around, it is the negative of where it started. The group element in \(\mathrm{SO}(2)\) is the same \(1\), but in \(\operatorname{Spin}(2)\) the group element is \(-1\).</p>
+                            <p data-edit-id="loops-paragraph-3" data-edit-label="Paragraph 3" data-edit-group="2D · Loops of rotations" data-edit-multiline="true">To get the arrows back to normal, the cat has to go around twice, then the Spin element is back to the identity.</p>
+                        </div>
+                        <template class="demo-template">
+                            <pin-spin-cat class="blog-visualization" modes="spin" mode="spin" theme="light" aria-label="Loops of rotations demo"></pin-spin-cat>
+                        </template>
+                    </details>
+
+
+                    <details class="blog-demo" name="reflections-2d-demos">
+                        <summary>Kaleidoscope</summary>
+                        <template class="demo-template">
+                            <pin-spin-cat class="blog-visualization" modes="kaleido" mode="kaleido" theme="light" aria-label="Interactive kaleidoscope demo"></pin-spin-cat>
+                        </template>
+                    </details>
+
+                    <details class="math-details" id="mirrors-math-details">
+                            <summary>Math details</summary>
+                            <div class="post-text">
+                                <p data-edit-id="mirrors-paragraph-2" data-edit-label="Reflection formula and explanation" data-edit-group="2D · Math details" data-edit-multiline="true">To describe a reflection in 2D, let \(u\) be a unit normal vector to the axis of reflection through the origin. Notice that in the above animation (with 1 mirror only) the cat moves in the direction \(u\) or \(-u\). When \(u\) is more lined up with the starting point the distance it travels is greater. This makes the formula \[v\mapsto v-2(v\cdot u)u\] natural. To check that this makes sense, a reflection should:</p>
+                                <ul>
+                                    <li data-edit-id="mirrors-property-fixed" data-edit-label="Reflection property · fixed points" data-edit-group="2D · Math details" data-edit-multiline="true">Leave points on the mirror fixed: if \(v\cdot u=0\), the reflected point is \(v\).</li>
+                                    <li data-edit-id="mirrors-property-normal" data-edit-label="Reflection property · normal direction" data-edit-group="2D · Math details" data-edit-multiline="true">Reverse the normal direction: \(u\) maps to \(-u\).</li>
+                                    <li data-edit-id="mirrors-property-distances" data-edit-label="Reflection property · distances and angles" data-edit-group="2D · Math details" data-edit-multiline="true">Preserve distances and angles, so the reflected cat keeps its shape and size.</li>
+                                    <li data-edit-id="mirrors-property-involution" data-edit-label="Reflection property · reflecting twice" data-edit-group="2D · Math details" data-edit-multiline="true">Return each point to where it started after two reflections.</li>
+                                    <li data-edit-id="mirrors-property-sign" data-edit-label="Reflection property · flipping the normal" data-edit-group="2D · Math details" data-edit-multiline="true">Give the same reflection when the normal \(u\) is replaced by \(-u\).</li>
+                                </ul>
+                                <p data-edit-id="mirrors-matrix" data-edit-label="Reflection matrix" data-edit-group="2D · Math details" data-edit-multiline="true">The formula above satisfies all of these properties, so it is a reflection over the mirror with normal vector u.
+
+If the normal vector u has coordinates $u=(\cos\theta,\sin\theta)$, then the reflection matrix is \[M(\theta)=
+\begin{pmatrix}
+-\cos 2\theta &amp; -\sin 2\theta\\
+-\sin 2\theta &amp; \cos 2\theta
+\end{pmatrix}.\]
+Combing two reflections leads to the matrix product \[M(\phi)M(\theta) = \begin{pmatrix}
+-\cos 2\phi &amp; -\sin 2\phi\\
+-\sin 2\phi &amp; \cos 2\phi
+\end{pmatrix}\begin{pmatrix}
+-\cos 2\theta &amp; -\sin 2\theta\\
+-\sin 2\theta &amp; \cos 2\theta
+\end{pmatrix}\]
+which after applying the double angle identity leads to \[M(\phi)M(\theta)=
+\begin{pmatrix}
+\cos\bigl(2(\phi-\theta)\bigr) &amp; -\sin\bigl(2(\phi-\theta)\bigr)\\
+\sin\bigl(2(\phi-\theta)\bigr) &amp; \cos\bigl(2(\phi-\theta)\bigr)
+\end{pmatrix}. \]
+This is a rotation with angle $2(\phi-\theta)$, which is twice the angle between the two axes of reflection. This angle doubling is illustrated in the next section on loop of rotations. </p>
+                            </div>
+                    </details>
+                </details>
+
+                <details class="post-section" id="reflections-3d" name="reflections-dimensions">
+                    <summary><h3>3D</h3></summary>
+                    <div class="post-text">
+                        <p class="post-explanation" data-edit-id="mirrors3d-intro" data-edit-label="3D introduction" data-edit-group="3D · Introduction" data-edit-multiline="true">This section extends the 2D reflections and rotations to 3D. One application is understanding operations on a two level system in physics, also known as a qubit. First off, see how normal vectors create 2D hyperplanes in 3D. Reflecting over two of these creates a rotation, and the angle is doubled, just like in 2D. </p>
+                    </div>
+                    <details class="blog-demo" name="reflections-3d-demos">
+                        <summary>Mirrors in 3D</summary>
+                        <template class="demo-template">
+                            <bloch-sphere class="blog-visualization" modes="mirrors3d" mode="mirrors3d" theme="light" aria-label="Mirrors in 3D demo"></bloch-sphere>
+                        </template>
+                    </details>
+                    <details class="blog-demo" name="reflections-3d-demos">
+                        <summary>Spinors and rotations</summary>
+                        <div class="post-text demo-intro">
+                            <p class="post-explanation" data-edit-id="rotations3d-intro" data-edit-label="Section introduction" data-edit-group="3D · Spinors and rotations" data-edit-multiline="true">The group of these rotations in 3D is called ${SO}(3)$. In the 2D case we saw that we could represent the rotations with $SO(2)$ elements, or $\mathrm{spin}(2)$ elements, and there are two spin group elements for each $SO(3)$ element. In math terms, $\mathrm{spin}(3)$ is a double cover for $SO(3)$. 
+
+In three dimensions, the spin group is the same as the group of $2\times 2$ unitary matrices with determinant 1. Each $SO(3)$ rotation has two representatives in the spin group, in the animation you can increase the angle to perform a loop in the spin group, and see what happens on the $SO(3)$ and $\mathrm{spin}(3)$ layers. You can see the double cover in action by dragging the parameter theta around, notice that when the cat goes in a circle, the spin group element is equal to negative I, and to get the spin group element back to the start the cat goes around twice. </p>
+                        </div>
+                        <template class="demo-template">
+                            <bloch-sphere class="blog-visualization" modes="rotate" mode="rotate" theme="light" aria-label="Spinors and rotations demo"></bloch-sphere>
+                        </template>
+                    </details>
+                    <details class="blog-demo" name="reflections-3d-demos">
+                        <summary>The Bloch sphere</summary>
+                        <div class="post-text demo-intro">
+                            <p class="post-explanation" data-edit-id="bloch-sphere-intro" data-edit-label="Section introduction" data-edit-group="3D · The Bloch sphere" data-edit-multiline="true">The Bloch sphere is a tool to visualize a two level system. A state of the two level system is in the complex vector space with orthonormal basis $\{\ket 0,\ket1\}$. For quantum states, the vectors $\ket\psi$ and $e^{i\varphi}\ket\psi$ are indistinguishable, so the qubit state really lives in projective space. An arbitrary state is a superposition \[\alpha\ket 0 + \beta\ket 1\] and by factoring out a global phase $\alpha$ can be taken to be real, and we write the state as \[\ket\psi = \cos(\theta/2)\ket 0+i\sin(\theta/2)e^{i\varphi}\ket 1.\] The qubit state is visualized as living on the surface of a sphere with north pole $\ket0 $ and south pole $\ket 1$. 
+
+The expectation values of the Pauli matrices $\sigma_x,\sigma_y,$ and $\sigma_z$ provide the coordinate projections of the state $\ket\psi$ onto the $x,y,$ and $z$ axes of the Bloch sphere. By setting $r_j = \bra \psi\sigma_j \ket\psi$ for $j=x,y,z$, the point on the sphere is \[(r_x,r_y,r_z) = (\sin\theta\cos\phi, \, \sin\theta\sin\phi, \, \cos\theta).\] 
+
+The angle is halved to $\theta/2$ in $\ket\psi$ is so that these spherical coordinates look nice, because the coordinates involve $\ket \psi$ twice. Since the coordinates are quadratic in $\ket\psi$ the double angle identity means the Bloch sphere coordinates involve $\theta$, not $\theta/2$. Even easier to remember why the angle is halved, is that rotating $\pi$ over the x or y axes on the Bloch sphere should switch $\ket 0$ to $\ket 1$. 
+
+Move the cat around the Bloch sphere by dragging it, and visit the preset conditions to see the landmark states (the eigenstates of the Pauli operators). </p>
+                        </div>
+                        <template class="demo-template">
+                            <bloch-sphere class="blog-visualization" modes="state" mode="state" theme="light" aria-label="The Bloch sphere demo"></bloch-sphere>
+                        </template>
+                    </details>
+                    <details class="blog-demo" name="reflections-3d-demos">
+                        <summary>Driving a two level system</summary>
+                        <div class="post-text demo-intro">
+                            <p class="post-explanation" data-edit-id="rabi-drive-intro" data-edit-label="Section introduction" data-edit-group="3D · Driving a two level system" data-edit-multiline="true">How do we control a 2 level system in practice? What are the dynamics of the two level system? 
+
+A two level system has two energy levels, so the Hamiltonian is $E_0\ket 0 \bra 0 -E_1\ket 1\bra 1$. If the gap between the energy levels is $\omega$ then by subtracting a constant multiple of the identity, \[H= \frac{\omega}{2}\sigma_z\ .\] According to the Schrodinger equation, the time evolution operator is \[U(t)=e^{-i\frac{\omega}{2}\sigma_z t}\ . \]
+
+This familiar operator is exactly $R(n,\omega t)$ for the axis $n=(0,0,1)$, the z axis. 
+
+
+
+</p>
+                        </div>
+                        <template class="demo-template">
+                            <bloch-sphere class="blog-visualization" modes="drive" mode="drive" theme="light" aria-label="Driving a two level system demo"></bloch-sphere>
+                        </template>
+                    </details>
+
+                </details>
+
+                <details class="post-section" id="reflections-more-math-details" name="reflections-dimensions">
+                    <summary><h3>More Math Details</h3></summary>
+                    <div class="post-text">
+                        <p data-edit-id="reflections-more-math-text" data-edit-label="Section text" data-edit-group="More Math Details" data-edit-multiline="true">One way to unify this all is through Clifford algebras and the spin group. Before the general theory, let's revisit 2 and 3 dimension rotations with complex numbers and quaternions respectively. </p>
+                    </div>
+                </details>
+
+                <div class="post-text">
+                    <!-- WRITE HERE: closing paragraphs. -->
+                    <noscript><p>Enable JavaScript to use the interactive demos and typeset equations.</p></noscript>
+                </div>
+                    </div>
+                </details>
+            </article>
+</template>

@@ -765,6 +765,30 @@
     .mat td { text-align: right; white-space: nowrap; }
     .hint { margin: 0; font-size: 0.84em; color: var(--bs-muted); }
 
+    .rotation-readout { display: grid; gap: 14px; min-width: 0; }
+    .rotation-operators {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr));
+      gap: 14px 24px;
+    }
+    .rotation-operator { display: grid; align-content: start; gap: 7px; min-width: 0; }
+    .rotation-operator p { margin: 0; }
+    .rotation-membership { font-weight: 600; }
+    .rotation-formula { color: var(--bs-muted); }
+    .rotation-matrix {
+      display: flex; align-items: center; gap: 8px; min-width: 0; max-width: 100%;
+      overflow-x: auto; padding-block: 2px; font-family: var(--bs-math-font);
+    }
+    .rotation-matrix > span, .rotation-matrix > .mat { flex-shrink: 0; }
+    .rotation-matrix > .mat { border-spacing: 7px 1px; }
+    .rotation-parameters {
+      display: flex; flex-wrap: wrap; gap: 4px 16px; color: var(--bs-muted);
+      font-family: var(--bs-math-font); font-size: 0.95em;
+    }
+    .rotation-parameters > span { white-space: nowrap; }
+    .rotation-readout .note { margin: 0; }
+    .rotation-operator-view { padding-top: 12px; border-top: 1px solid var(--bs-line); }
+    .rotation-operator-view > :last-child { margin-bottom: 0; }
+
     .mode-controls { display: grid; gap: 8px; }
     .controls { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; }
     .btn {
@@ -813,16 +837,6 @@
     .axis-error { margin: 6px 0 0; color: var(--bs-odd); font-size: 0.84em; }
     .axis-error:empty { display: none; }
 
-    .symbol-key {
-      border-top: 1px solid var(--bs-line); padding-top: 10px;
-      font-size: max(14px, 0.9em); line-height: 1.5;
-    }
-    .symbol-key summary { cursor: pointer; font-weight: 600; padding: 3px 0; }
-    .symbol-key dl { display: grid; grid-template-columns: minmax(0, 1fr); gap: 14px 24px; margin: 16px 0 2px; }
-    .wide .symbol-key dl { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-    .symbol-key dl > div { min-width: 0; }
-    .symbol-key dt { font-weight: 600; font-family: var(--bs-math-font); }
-    .symbol-key dd { margin: 3px 0 0; color: var(--bs-muted); }
     .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
   `;
 
@@ -846,12 +860,8 @@
           <div class="readout"></div>
         </div>
       </div>
-      <p class="hint"></p>
+      <p class="hint" hidden></p>
       <div class="mode-panels"></div>
-      <details class="symbol-key">
-        <summary>What the symbols mean</summary>
-        <dl></dl>
-      </details>
       <p class="sr" id="bs-keys">Drag the diagram to turn the view. With the diagram focused, arrow keys move the highlighted handle
         (Shift for bigger steps), Enter picks the next handle, F flips a mirror normal, Alt with arrow keys turns the view,
         and V resets it.</p>
@@ -2136,7 +2146,6 @@
       g.strokeStyle = R.col("line"); g.lineWidth = 1;
       g.beginPath(); g.moveTo(12, gh); g.lineTo(w - 12, gh); g.stroke();
       g.font = uiFont(R, 11); g.fillStyle = R.col("muted"); g.textAlign = "left"; g.textBaseline = "middle";
-      g.fillText("amplitudes of Uψ₀ (dashed: ψ₀)", 12, gh + 12);
       for (const [i, name, x] of [[0, "α", w * 0.27], [1, "β", w * 0.73]]) {
         dial(g, R, x, y, rad, psi[i], name, { ghost: this.psi0[i], caption: false });
         const magnitude = Math.sqrt(cabs2(psi[i]));
@@ -2148,17 +2157,13 @@
     }
 
     legend() {
-      return [["even", "the cat’s collar"], ["even", "<em>U</em>"], ["even", `<em>${MINUS}U</em>`, "ring"], ["arrow", "axis <em>n̂</em>, amplitudes of <em>U</em>ψ₀"]];
-    }
-    hint() {
-      return "Drag the axis handle, set θ, or press Play. The cat moves and turns in space, so it can appear edge-on. " +
-        "It comes home at 2π radians, but U = −I there and both phasors point backwards (dashed: the start). Only at 4π is U = +I again.";
+      return [["even", "the cat’s collar"], ["even", "<em>U</em>"], ["even", `<em>${MINUS}U</em>`, "ring"], ["arrow", "axis <em>n̂</em>"]];
     }
     glossary() {
       return [
         ["n̂, θ", "rotation axis and angle in radians"],
-        ["U = R(θ, n̂)", "exp(−iθ/2 n̂·σ) = cos(θ/2) I − i sin(θ/2) n̂·σ, in SU(2)"],
-        ["R(θ, n̂)", "the 3×3 rotation of the cat’s position and orientation, in SO(3)"],
+        ["U ∈ SU(2)", "exp(−iθ/2 n̂·σ) = cos(θ/2) I − i sin(θ/2) n̂·σ"],
+        ["Rθ ∈ SO(3)", "the 3×3 rotation of the cat’s position and orientation"],
         ["I", "identity matrix"],
         ["U†", "conjugate transpose of U"],
         ["Ad", "the 2 : 1 map SU(2) → SO(3), U ↦ R with U(v·σ)U† = (Rv)·σ"],
@@ -2180,10 +2185,23 @@
       else if (near(Math.PI)) note = `<div class="note">Half turn: U = ${MINUS}i n̂·σ.</div>`;
       else if (near(3 * Math.PI)) note = `<div class="note">One and a half turns: U = +i n̂·σ, the negative of the half-turn operator.</div>`;
       else note = "";
-      let s = `
-        <div class="mat-row">U = cos(θ/2) I ${MINUS} i sin(θ/2) n̂·σ = ${mat2HTML(U)}</div>
-        <div class="mat-row">R(θ, n̂) = ${mat3HTML(M)}</div>
-        <p class="aside">n̂ = ${vecHTML(this.n, 2)}, θ = ${fmtRad(this.angle)}, θ/2 = ${fmtRad(this.angle / 2)}</p>
+      let s = `<div class="rotation-readout">
+        <div class="rotation-operators">
+          <section class="rotation-operator" aria-label="SU(2) element">
+            <p class="rotation-membership"><i>U</i> ∈ SU(2)</p>
+            <p class="rotation-formula"><i>U</i> = cos(θ/2) I ${MINUS} i sin(θ/2) n̂·σ</p>
+            <div class="rotation-matrix"><span><i>U</i> =</span>${mat2HTML(U)}</div>
+          </section>
+          <section class="rotation-operator" aria-label="SO(3) element">
+            <p class="rotation-membership"><i>R</i><sub>θ</sub> ∈ SO(3)</p>
+            <div class="rotation-matrix"><span><i>R</i><sub>θ</sub> =</span>${mat3HTML(M)}</div>
+          </section>
+        </div>
+        <div class="rotation-parameters" aria-label="Rotation parameters">
+          <span>n̂ = ${vecHTML(this.n, 2)}</span>
+          <span>θ = ${fmtRad(this.angle)}</span>
+          <span>θ/2 = ${fmtRad(this.angle / 2)}</span>
+        </div>
         ${note}`;
       if (this.opView) {
         // U†σᵢU = Σⱼ Rᵢⱼ σⱼ, row i of R
@@ -2191,16 +2209,17 @@
           const r = M[i];
           return `${fmt(r[0], 2)} ${sig("x")}${fmtSigned(r[1], 2)} ${sig("y")}${fmtSigned(r[2], 2)} ${sig("z")}`;
         };
-        s += `
+        s += `<div class="rotation-operator-view">
           <p>For n̂ = ẑ: U†${sig("x")}U = cos θ ${sig("x")} ${MINUS} sin θ ${sig("y")}</p>
           <p class="aside">Each U carries θ/2; the sandwich U†·U uses two of them, so the angle doubles.</p>
           <p>Here, U†${sig("i")}U = R<sub>ij</sub>${sig("j")}:</p>
           <p>U†${sig("x")}U = ${row(0)}</p>
           <p>U†${sig("y")}U = ${row(1)}</p>
           <p>U†${sig("z")}U = ${row(2)}</p>
-          <p class="aside">Rodrigues: R r = r∥ + cos θ r⊥ + sin θ (n̂ × r)</p>`;
+          <p class="aside">Rodrigues: R<sub>θ</sub> r = r∥ + cos θ r⊥ + sin θ (n̂ × r)</p>
+        </div>`;
       }
-      return s;
+      return s + "</div>";
     }
   }
 
@@ -3419,11 +3438,6 @@
   const MODES = [StateMode, RotateMode, DriveMode, PulsesMode, MirrorsMode];
   const MODE_BY_ID = Object.fromEntries(MODES.map((M) => [M.id, M]));
   const MODE_ATTRS = ["theta", "phi", "measure", "axis", "angle", "omega", "delta", "drive-phase", "mirrors"];
-  const KEYS_ROW = [
-    "Keys",
-    "With the diagram focused: arrow keys move the highlighted handle (Shift: π/12 rad steps), Enter picks the next handle, " +
-      "F flips a mirror normal, Alt + arrow keys turn the view, V resets it.",
-  ];
   const WIDE = 720; // px of container width for the side-by-side layout
 
   // Any CSS colour → [r, g, b, a], by painting one pixel. Works for every
@@ -3577,7 +3591,6 @@
         labWrap: $(".lab-wrap"),
         labStage: $(".lab-stage"),
         rotatingTitle: $(".rotating-title"),
-        key: $(".symbol-key"),
         view: $(".view"),
         cameras: $(".camera-presets"),
         side: $(".side"),
@@ -3586,7 +3599,6 @@
         readout: $(".readout"),
         hint: $(".hint"),
         panels: $(".mode-panels"),
-        symbols: $(".symbol-key dl"),
         live: $('[aria-live]'),
       };
       this.#bg = document.createElement("canvas");
@@ -3711,7 +3723,12 @@
       this.#el.root.classList.toggle("drive-layout", paired);
       this.#el.labWrap.hidden = !paired;
       this.#el.rotatingTitle.hidden = !paired;
-      this.#el.root.insertBefore(this.#el.panels, paired ? this.#el.body : this.#el.key);
+      // Rotation matrices use the full width beneath both diagrams.
+      // Other modes retain their original side-panel readout placement.
+      if (id === "rotate") this.#el.body.after(this.#el.readout);
+      else this.#el.side.append(this.#el.readout);
+      if (paired) this.#el.body.before(this.#el.panels);
+      else this.#el.hint.after(this.#el.panels);
       this.#el.cameras.hidden = id !== "mirrors3d";
       for (const tab of this.#el.tabs.children) tab.setAttribute("aria-selected", String(tab.dataset.mode === id));
       for (const box of this.#el.panels.children) box.hidden = box.dataset.for !== id;
@@ -4052,13 +4069,14 @@
         apply(value);
       };
       set("readout", m.readout(), (v) => { el.readout.innerHTML = v; });
-      set("hint", m.hint(), (v) => { el.hint.innerHTML = v; });
+      set("hint", m.hint(), (v) => {
+        el.hint.innerHTML = v;
+        el.hint.hidden = !v;
+      });
       set("legend", m.legend().map(([key, text, shape = "dot"]) => {
         const style = shape === "ring" ? `border-color: var(--bs-${key})` : `background: var(--bs-${key})`;
         return `<span><i class="sw ${shape === "dot" ? "" : shape}" style="${style}"></i><span>${text}</span></span>`;
       }).join(""), (v) => { el.legend.innerHTML = v; });
-      set("symbols", [...m.glossary(), KEYS_ROW].map(([s, meaning]) => `<div><dt>${s}</dt><dd>${meaning}</dd></div>`).join(""),
-        (v) => { el.symbols.innerHTML = v; });
       const stageName = typeof m.drawLabStage === "function" ? "Rotating-frame Bloch sphere" : m.sphere ? "Bloch sphere" : "Three-dimensional space";
       set("label", `${stageName}. ${m.describe()}`, (v) => el.stage.setAttribute("aria-label", v));
       if (typeof m.drawLabStage === "function") set("lab-label", `Lab-frame Bloch sphere. ${m.labDescribe()}`, (v) => el.labStage.setAttribute("aria-label", v));
