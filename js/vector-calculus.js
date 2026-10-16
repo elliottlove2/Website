@@ -160,12 +160,12 @@
       this.shadowRoot.innerHTML = `
         <style>${styles}</style>
         <section class="demo" aria-labelledby="title">
-          <h4 id="title" class="title">${isCurl ? 'Curl demonstration' : 'Divergence'}</h4>
-          ${isCurl ? '' : '<p class="explanation" id="divergence-explanation">Move the circle around, and see how it changes the flux (the integral of <span class="inline-math" role="math" aria-label="F dot n"><i>F</i> &middot; <i>n</i></span> over the boundary of the circle), the flux per area, and the divergence in the center of the circle.</p>'}
+          <h4 id="title" class="title">${isCurl ? 'Curl' : 'Divergence'}</h4>
+          ${isCurl ? '' : '<p class="explanation" id="divergence-explanation">Move the disc around, and see how it changes the flux (the integral of <span class="inline-math" role="math" aria-label="F dot n"><i>F</i> &middot; <i>n</i></span> over the boundary of the disc), the flux per area, and the divergence in the center of the disc.</p>'}
           <div class="controls" role="group" aria-label="Choose a vector field">
             ${Object.entries(this._fields).map(([key, entry]) => `<button type="button" data-field="${key}" data-f="${key}" aria-pressed="${key === this._fieldKey}">${entry.label}</button>`).join('')}
           </div>
-          <svg class="board" id="field" viewBox="0 0 680 400" preserveAspectRatio="xMidYMid meet" role="img" tabindex="0" aria-label="${isCurl ? 'Vector field with a movable circulation loop and rotation indicator' : 'Vector field with a movable circular flux probe'}" ${isCurl ? '' : 'aria-describedby="divergence-explanation"'}>
+          <svg class="board" id="field" viewBox="0 0 680 400" preserveAspectRatio="xMidYMid meet" role="img" tabindex="0" aria-label="${isCurl ? 'Vector field with a movable circulation loop and rotation indicator' : 'Vector field with a movable flux disc'}" ${isCurl ? '' : 'aria-describedby="divergence-explanation"'}>
             <defs><marker id="${this._id}-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></marker></defs>
             <g id="field-origin"></g><g id="field-arrows"></g>
             <circle id="probe" r="45" ${isCurl ? 'fill="none" stroke="#5f5e5a" stroke-width="1.5" stroke-dasharray="4 4"' : 'stroke-width="2" fill-opacity="0.14"'}/>
@@ -175,10 +175,10 @@
           ${isCurl ? '<div class="radius"><label for="radius">Loop radius</label><input id="radius" type="range" min="0.2" max="1.6" step="0.05" value="0.45"><output id="radius-value" for="radius">0.45</output></div><div class="transport"><button type="button" id="play">Pause animation</button><span>Illustrative rotation indicator</span></div>' : ''}
           <div class="metrics" aria-label="Probe measurements">
             ${metric('integral', isCurl ? 'Circulation around loop' : 'Net outward flux', isCurl ? 'Counterclockwise is positive' : 'Outward is positive')}
-            ${metric('average', isCurl ? 'Average curl over disk' : 'Average divergence over disk', isCurl ? 'Circulation per area' : 'Flux per area')}
-            ${metric('local', isCurl ? 'Curl at the center' : 'Divergence at the center', isCurl ? '∂Fᵧ/∂x − ∂Fₓ/∂y' : '∂Fₓ/∂x + ∂Fᵧ/∂y')}
+            ${metric('average', isCurl ? 'Average curl over disc' : 'Average divergence over disc', isCurl ? 'Circulation per area' : 'Flux per area')}
+            ${metric('local', isCurl ? 'Curl at the center' : 'Divergence at the center', isCurl ? '' : '∂Fₓ/∂x + ∂Fᵧ/∂y')}
           </div>
-          <p id="message" class="message"></p>
+          ${isCurl ? '' : '<p id="message" class="message"></p>'}
           <span id="announcement" class="sr-only" role="status" aria-live="polite"></span>
         </section>`;
       Object.entries(this._ids).forEach(([id, original]) => {
@@ -311,8 +311,6 @@
         a.setAttribute('x1', x - r); a.setAttribute('x2', x + r); a.setAttribute('y1', y); a.setAttribute('y2', y);
         b.setAttribute('x1', x); b.setAttribute('x2', x); b.setAttribute('y1', y - r); b.setAttribute('y2', y + r);
         this._get('hub').setAttribute('cx', x); this._get('hub').setAttribute('cy', y);
-        const status = Math.abs(average) < 0.005 ? 'Average curl is approximately zero.' : average > 0 ? 'Positive average curl: counterclockwise, pointing out of the screen.' : 'Negative average curl: clockwise, pointing into the screen.';
-        this._get('message').textContent = `${status} Orange arrows show counterclockwise contributions; blue arrows show clockwise contributions.`;
         this._drawRotor(); this._syncAnimation();
       } else {
         const status = Math.abs(average) < 0.005 ? 'Inward and outward flux balance.' : average > 0 ? 'More field leaves than enters: positive average divergence.' : 'More field enters than leaves: negative average divergence.';

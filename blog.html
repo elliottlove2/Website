@@ -122,15 +122,17 @@
         }
         #maxwell-vector-calculus .vector-demo { width: 100%; margin-block: 26px 40px; scroll-margin-top: 24px; }
         #maxwell-vector-calculus .vector-demo > .post-text { width: min(680px, 100%); }
+        .right-hand-rule { width: min(220px, calc(100% - 3rem)); margin: 20px auto 30px; text-align: center; }
+        .right-hand-rule img { display: block; width: 100%; height: auto; }
+        .right-hand-rule figcaption { margin-top: 5px; color: var(--text-secondary); font: 13px/1.4 var(--font-body); }
     </style>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.18.9/dist/katex.min.css" integrity="sha384-lPx0C4zIUZLpveABMwOFcFeGZwsvKBJfhJ85FN1PYOV7xApBcFMhcAEMVKF8loOI" crossorigin="anonymous">
     <script src="js/pin-spin-cat.js?v=20260929-radian-cats" defer></script>
     <script src="js/bloch-sphere.js?v=20260929-rabi-frames" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/katex@0.18.9/dist/katex.min.js" integrity="sha384-19KE2cFb3U+RUWmyhBz7aLOGDG8WrRC6hE3oY/HTZZlAAVWYTdmvLC//+TIV3zUx" crossorigin="anonymous" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/katex@0.18.9/dist/contrib/auto-render.min.js" integrity="sha384-bjyGPfbij8/NDKJhSGZNP/khQVgtHUE5exjm4Ydllo42FwIgYsdLO2lXGmRBf5Mz" crossorigin="anonymous" defer></script>
-    <script src="js/vector-calculus.js?v=20261015-divergence-explanation" defer></script>
-    <script src="js/gradient-potentials.js?v=20261015-maxwell-cleanup" defer></script>
-    <script src="js/blog.js?v=20261015-maxwell-flow" defer></script>
+    <script src="js/vector-calculus.js?v=20261015-curl-simple" defer></script>
+    <script src="js/blog.js?v=20261015-curl-simple" defer></script>
 </head>
 <body class="blog">
     <a class="skip-link" href="#main">Skip to content</a>
@@ -179,7 +181,7 @@ This post includes all of the simulations that I am creating to help supplement 
                         <details class="post-section" id="maxwell-vector-calculus" name="maxwell-sections">
                             <summary><h3 id="maxwell-vector-calculus-title" data-edit-id="maxwell-vector-calculus-title" data-edit-label="Section title" data-edit-group="Maxwell's Equations · Vector Calculus" data-edit-multiline="false">Vector Calculus</h3></summary>
                             <div class="post-text">
-                                <p data-edit-id="maxwell-vector-calculus-intro" data-edit-label="Section introduction" data-edit-group="Maxwell's Equations · Vector Calculus" data-edit-multiline="true">A vector field $F$ on $\R^n$ assigns to each point $\mathbf x\in \R^n$, a vector $F(\mathbf x)\in \R^n$. For a a point $\mathbf x$ the divergence of $F$ is a number that tells us how much the vector field is pointing out away from $\mathbf x$.  If we the region of radius $r$ around  around a point $\mathbf x$ is $B_r$, the divergence is  \[ \operatorname{div}F(\mathbf x)=\;\lim_{r\to 0}\;\frac{1}{\operatorname{area}(B_r)}\oint_{\partial B_r} F\cdot\mathbf n\,ds .\]
+                                <p data-edit-id="maxwell-vector-calculus-intro" data-edit-label="Section introduction" data-edit-group="Maxwell's Equations · Vector Calculus" data-edit-multiline="true">A vector field $F$ on $\R^n$ assigns to each point $\mathbf x\in \R^n$, a vector $F(\mathbf x)\in \R^n$. For a a point $\mathbf x$ the divergence of $F$ is a number that tells us how much the vector field is pointing out away from $\mathbf x$.  If we the region of radius $r$ around  around a point $\mathbf x$ is $D_r$, the divergence is  \[ \operatorname{div}F(\mathbf x)=\;\lim_{r\to 0}\;\frac{1}{\operatorname{area}(D_r)}\oint_{\partial D_r} F\cdot\mathbf n\,ds .\]
 The integral on the right side is measuring the flow of $F$ out of the region, and the dividing by the area accounts for the shrinking of the region. 
 
 Te definition above is informative, but the definition that is easier to work with is \[
@@ -200,18 +202,24 @@ In summary, the divergence of a vector field in $\R^n$ assigns to each point in 
                                 </template>
                             </div>
 
-                            <div class="vector-demo" id="maxwell-gradient">
-                                <div class="post-text demo-intro">
-                                    <p data-edit-id="maxwell-gradient-intro" data-edit-label="Gradient explanation" data-edit-group="Vector Calculus · Gradient" data-edit-multiline="true">A scalar potential assigns a value to each point, and its gradient points uphill. For a gradient field, the work along a path depends only on its endpoints: \(\int_\gamma \nabla f\cdot d\mathbf r=f(B)-f(A)\). Try different routes between the same two points, then switch to the rotation field and compare closed loops.</p>
-                                </div>
-                                <template class="demo-template">
-                                    <gradient-potentials class="blog-visualization" aria-label="Gradient and potentials demonstration"></gradient-potentials>
-                                </template>
+                            <div class="post-text" id="maxwell-curl-definition-text">
+                                <p data-edit-id="maxwell-curl-definition" data-edit-label="Curl definition" data-edit-group="Vector Calculus · Curl" data-edit-multiline="true">Divergence of a vector field assigns a scalar to each point. For vector fields $F$ on $\R^3$, there is an operation called $\operatorname{curl}$ which creates another vector field. It measures how much the vector field $F$ is curling, and assigns a vector orthogonal to the curling, according to the right hand rule. 
+
+The curl integral definition is similar to the divergence definition, the curl in the direction $\mathbf n$ measures how much $F$ is curling in a circle around in the plane orthogonal to $\mathbf n$, \[
+(\operatorname{curl} F)(\mathbf x)\cdot\mathbf n
+\;=\;
+\lim_{r\to 0}\;\frac{1}{\operatorname{area}(D_r)}\oint_{\partial D_r(\mathbf x,\mathbf n)} F\cdot\mathbf t\,ds .
+\]
+The dot product with $\mathbf t$ measures the tangent part of $F$ around the circle $\partial D_r$, so this integral is larger when more of $F$ is curling around the circle. </p>
                             </div>
+                            <figure class="right-hand-rule">
+                                <img src="images/curl-right-hand-rule.png" width="1169" height="1346" alt="Right hand with curled fingers following circulation and the thumb pointing along the curl" loading="lazy">
+                                <figcaption>Right-hand rule</figcaption>
+                            </figure>
 
                             <div class="vector-demo" id="maxwell-curl">
                                 <div class="post-text demo-intro">
-                                    <p data-edit-id="maxwell-curl-intro" data-edit-label="Curl explanation" data-edit-group="Vector Calculus · Curl" data-edit-multiline="true">Curl measures local circulation. For these planar fields, counterclockwise circulation corresponds to positive curl pointing out of the screen. Circulation around the loop divided by its area gives the average curl over the disk; as the loop shrinks, that average approaches the curl at its center.</p>
+                                    <p data-edit-id="maxwell-curl-intro" data-edit-label="Curl explanation" data-edit-group="Vector Calculus · Curl" data-edit-multiline="true">In this 2D slice, the curl points up out of the screen for counterclockwise rotation and into the screen for clockwise rotation. The faster the wheel spins, the more the vector field is curling. Move the wheel around in the different fields to see the curl of different vector fields. </p>
                                 </div>
                                 <template class="demo-template">
                                     <curl-paddle-wheel class="blog-visualization" aria-label="Interactive curl demonstration"></curl-paddle-wheel>
@@ -222,7 +230,7 @@ In summary, the divergence of a vector field in $\R^n$ assigns to each point in 
                         <details class="post-section" id="maxwell-differential-forms" name="maxwell-sections">
                             <summary><h3 id="maxwell-differential-forms-title" data-edit-id="maxwell-differential-forms-title" data-edit-label="Section title" data-edit-group="Maxwell's Equations · Differential Forms" data-edit-multiline="false">Differential Forms</h3></summary>
                             <div class="post-text">
-                                <p data-edit-id="maxwell-differential-forms-intro" data-edit-label="Section introduction" data-edit-group="Maxwell's Equations · Differential Forms" data-edit-multiline="true"></p>
+                                <p data-edit-id="maxwell-differential-forms-intro" data-edit-label="Section introduction" data-edit-group="Maxwell's Equations · Differential Forms" data-edit-multiline="true">Differential forms measure volume. The integral </p>
                             </div>
                         </details>
                     </div>
