@@ -3300,7 +3300,7 @@
       const N = this.normals, c = this.count;
       const parity = (j) => (j % 2 ? "odd" : "even");
 
-      for (let k = 0; k < c; k++) this.planeTangents[k] = R.plane(N[k], "glass", 0.16, this.planeTangents[k]);
+      for (let k = 0; k < c; k++) this.planeTangents[k] = R.plane(N[k], k === 1 ? MIRROR_COLORS[k] : "glass", 0.16, this.planeTangents[k]);
 
       // the line where the first two mirrors meet, and the angle between their normals
       if (c >= 2) {
