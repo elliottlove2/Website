@@ -128,7 +128,7 @@
     </style>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.18.9/dist/katex.min.css" integrity="sha384-lPx0C4zIUZLpveABMwOFcFeGZwsvKBJfhJ85FN1PYOV7xApBcFMhcAEMVKF8loOI" crossorigin="anonymous">
     <script src="js/pin-spin-cat.js?v=20261015-cleanup" defer></script>
-    <script src="js/bloch-sphere.js?v=20261018-blue-planes" defer></script>
+    <script src="js/bloch-sphere.js?v=20261018-mirrors" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/katex@0.18.9/dist/katex.min.js" integrity="sha384-19KE2cFb3U+RUWmyhBz7aLOGDG8WrRC6hE3oY/HTZZlAAVWYTdmvLC//+TIV3zUx" crossorigin="anonymous" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/katex@0.18.9/dist/contrib/auto-render.min.js" integrity="sha384-bjyGPfbij8/NDKJhSGZNP/khQVgtHUE5exjm4Ydllo42FwIgYsdLO2lXGmRBf5Mz" crossorigin="anonymous" defer></script>
     <script src="js/vector-calculus.js?v=20261015-no-subtext" defer></script>
@@ -173,9 +173,9 @@
                     <div class="post-body">
                         <div class="post-text">
                             <!-- WRITE HERE: introduce the directed reading on electromagnetism for mathematicians. -->
-                            <p data-edit-id="maxwells-equations-intro" data-edit-label="Post introduction" data-edit-group="Maxwell's Equations" data-edit-multiline="true">At the time of writing this, I am leading an undergraduate in a directed reading on the book "Electricity and Magnetism for Mathematicians" by Walter Garrity. The book is really good and I highly recommend it to anybody interested in math or physics. 
+                            <p data-edit-id="maxwells-equations-intro" data-edit-label="Post introduction" data-edit-group="Maxwell's Equations" data-edit-multiline="true">At the time of writing this, I am leading an undergraduate in a directed reading on the book "Electricity and Magnetism for Mathematicians" by Walter Garrity. The book is really good and I highly recommend it to anybody interested in math or physics. Another book that we're using is "A Visual Introduction to Differential Forms" by Jon Pierre Fortney, also very good. 
 
-This post includes all of the simulations that I am creating to help supplement the math.  </p>
+This post includes all of the simulations and figures that I am creating to help supplement the math.  </p>
                         </div>
 
                         <details class="post-section" id="maxwell-vector-calculus" name="maxwell-sections">
@@ -249,7 +249,9 @@ The dot product with $\mathbf t$ measures the tangent part of $F$ around the cir
                     </summary>
                     <div class="post-body">
                         <div class="post-text">
-                            <p data-edit-id="dissipation-engineering-intro" data-edit-label="Post introduction" data-edit-group="Dissipation Engineering" data-edit-multiline="true"></p>
+                            <p data-edit-id="dissipation-engineering-intro" data-edit-label="Post introduction" data-edit-group="Dissipation Engineering" data-edit-multiline="true">The definition of dissipation is "the process of scattering, wasting, or gradually disappearing". When a physical system interacts with its environment, the system undergoes dissipation.
+
+This post is about dissipation in quantum systems, and how to engineer dissipation to control and protect quantum states. </p>
                         </div>
 
                         <details class="post-section" id="dissipation-open-systems-basics" name="dissipation-engineering-sections">
@@ -260,7 +262,7 @@ The dot product with $\mathbf t$ measures the tangent part of $F$ around the cir
                         </details>
 
                         <details class="post-section" id="dissipation-preparing-states" name="dissipation-engineering-sections">
-                            <summary><h3 data-edit-id="dissipation-preparing-states-title" data-edit-label="Section title" data-edit-group="Dissipation Engineering · Preparing (steady) States" data-edit-multiline="false">Preparing (steady) States</h3></summary>
+                            <summary><h3 data-edit-id="dissipation-preparing-states-title" data-edit-label="Section title" data-edit-group="Dissipation Engineering · Preparing (steady) States" data-edit-multiline="false">Stabilizing States</h3></summary>
                             <div class="post-text">
                                 <p data-edit-id="dissipation-preparing-states-text" data-edit-label="Section text" data-edit-group="Dissipation Engineering · Preparing (steady) States" data-edit-multiline="true"></p>
                             </div>
@@ -456,7 +458,10 @@ This is a rotation with angle $2(\phi-\theta)$, which is twice the angle between
                 <details class="post-section" id="reflections-more-math-details" name="reflections-dimensions">
                     <summary><h3>More Math Details</h3></summary>
                     <div class="post-text">
-                        <p data-edit-id="reflections-more-math-text" data-edit-label="Section text" data-edit-group="More Math Details" data-edit-multiline="true">Rotations in 2D can be described easily with complex numbers. </p>
+                        <p data-edit-id="reflections-more-math-text" data-edit-label="Section text" data-edit-group="More Math Details" data-edit-multiline="true">In 2D, we can describe a rotation of $\theta$ as \[R(\theta)=\begin{pmatrix} \cos \theta &amp; -\sin\theta \\ \sin\theta &amp; \cos\theta  \end{pmatrix}.\]
+Another way to write this is with complex numbers \[e^{i\theta}=\cos\theta + i\sin\theta,\]
+so for any vector $\begin{pmatrix} a \\ b\end{pmatrix}\in \R^2$ the image under $R(\theta)$ is the same as the complex number \[e^{i\theta}(a+bi).\] 
+This makes it easy to represent rotations in 2D as complex numbers. To do something similar for 3D rotations there are quaternions. </p>
                     </div>
                 </details>
 
@@ -514,7 +519,7 @@ This is a rotation with angle $2(\phi-\theta)$, which is twice the angle between
                             <span class="post-tags">
                                 <span>literature</span>
                             </span>
-                            <span class="post-title" id="books-title" data-edit-id="books-title" data-edit-label="Post title" data-edit-group="My 5 Favorite Books of 2026" data-edit-multiline="false">My 5 Favorite Books of 2026</span>
+                            <span class="post-title" id="books-title" data-edit-id="books-title" data-edit-label="Post title" data-edit-group="My 5 Favorite Books of 2026" data-edit-multiline="false">My Favorite Books of 2026</span>
                         </h2>
                     </summary>
                     <div class="post-body">
