@@ -611,12 +611,14 @@
   const LIGHT = `
     --bs-paper: #f6f8fa;  --bs-stage: #e9eef2;  --bs-ink: #1b2533;  --bs-muted: #5d6978;
     --bs-line: rgba(27, 37, 51, 0.16);  --bs-faint: rgba(27, 37, 51, 0.07);
-    --bs-glass: #6f9cc0;  --bs-arrow: #2e4a6c;  --bs-even: #1b8478;  --bs-odd: #c0437c;`;
+    --bs-glass: #6f9cc0;  --bs-arrow: #2e4a6c;  --bs-even: #1b8478;  --bs-odd: #c0437c;
+    --bs-mirror-u: #39769e;  --bs-mirror-w: #a56b24;  --bs-mirror-v: #80649a;`;
 
   const DARK = `
     --bs-paper: #151a21;  --bs-stage: #1c232c;  --bs-ink: #e7ecf1;  --bs-muted: #9aa6b4;
     --bs-line: rgba(231, 236, 241, 0.16);  --bs-faint: rgba(231, 236, 241, 0.07);
-    --bs-glass: #8db8da;  --bs-arrow: #b9cce3;  --bs-even: #3cc2b2;  --bs-odd: #f071ac;`;
+    --bs-glass: #8db8da;  --bs-arrow: #b9cce3;  --bs-even: #3cc2b2;  --bs-odd: #f071ac;
+    --bs-mirror-u: #8dbde0;  --bs-mirror-w: #e0af65;  --bs-mirror-v: #b7a0cf;`;
 
   // Fallbacks if a custom property comes back empty (e.g. an override that
   // points at an undefined variable).
@@ -624,6 +626,7 @@
     paper: "#f6f8fa", stage: "#e9eef2", ink: "#1b2533", muted: "#5d6978",
     line: "rgba(27, 37, 51, 0.16)", faint: "rgba(27, 37, 51, 0.07)",
     glass: "#6f9cc0", arrow: "#2e4a6c", even: "#1b8478", odd: "#c0437c",
+    "mirror-u": "#39769e", "mirror-w": "#a56b24", "mirror-v": "#80649a",
   };
 
   const CAT_PALETTE = {
@@ -742,6 +745,10 @@
     .sw.ring { background: transparent !important; border: 2px solid; }
 
     .readout { font-size: 0.94em; min-height: 7.5em; overflow-x: auto; }
+    .readout.mirror-readout { min-height: 0; }
+    .mirror-angles { display: flex; flex-wrap: wrap; gap: 6px 20px; font-family: var(--bs-math-font); }
+    .mirror-angles > span { white-space: nowrap; }
+    .readout .mirror-count { margin: 0; }
     .readout p, .solve-out p { margin: 0 0 0.45em; font-family: var(--bs-math-font); font-size: 1.04em; }
     .readout p.aside, .solve-out p.aside { font-family: inherit; font-size: 0.93em; }
     .amplitude-symbol { font-family: system-ui, sans-serif; font-style: normal; }
@@ -811,6 +818,11 @@
       background: color-mix(in srgb, var(--bs-arrow) 10%, transparent);
     }
     .chip span { margin-left: 6px; font-variant-numeric: tabular-nums; color: var(--bs-muted); font-size: 0.9em; }
+    .chip.mirror-chip {
+      color: var(--mirror-color); border-color: var(--mirror-color);
+      background: transparent;
+      background: color-mix(in srgb, var(--mirror-color) 10%, transparent);
+    }
     .check { display: inline-flex; align-items: center; gap: 6px; font-size: 0.88em; color: var(--bs-muted); cursor: pointer; }
     .check input { accent-color: var(--bs-even); }
     .check .m { font-family: var(--bs-math-font); }
@@ -3126,6 +3138,7 @@
 
   const MIRROR_START = [[0, 1, 0], unit([1, 1, 0]), [0, 0, 1]];
   const MIRROR_NAMES = ["u", "w", "v"];
+  const MIRROR_COLORS = ["mirror-u", "mirror-w", "mirror-v"];
   const FLIP_MS = 320;
   const PULSE_MS = 650;
 
@@ -3201,7 +3214,7 @@
       if (chips) {
         if (chips.children.length !== this.count) {
           chips.innerHTML = MIRROR_NAMES.slice(0, this.count)
-            .map((nm, i) => `<button type="button" class="chip" data-act="f${i}" data-i="${i}"><i>${nm}</i><span></span></button>`)
+            .map((nm, i) => `<button type="button" class="chip mirror-chip" data-act="f${i}" data-i="${i}" style="--mirror-color: var(--bs-${MIRROR_COLORS[i]}, ${DEFAULTS[MIRROR_COLORS[i]]})"><i>${nm}</i><span></span></button>`)
             .join("");
           this.chipText = "";
         }
@@ -3275,7 +3288,7 @@
 
     handles() {
       return this.normals.slice(0, this.count).map((_, k) => ({
-        id: `n${k}`, label: `normal ${MIRROR_NAMES[k]}`, key: "arrow",
+        id: `n${k}`, label: `normal ${MIRROR_NAMES[k]}`, key: MIRROR_COLORS[k],
         get: () => this.normals[k],
         set: (v) => { this.normals[k] = v; this.sync(); },
         flip: () => this.flip(k),
@@ -3287,7 +3300,7 @@
       const N = this.normals, c = this.count;
       const parity = (j) => (j % 2 ? "odd" : "even");
 
-      for (let k = 0; k < c; k++) this.planeTangents[k] = R.plane(N[k], "glass", 0.16, this.planeTangents[k]);
+      for (let k = 0; k < c; k++) this.planeTangents[k] = R.plane(N[k], MIRROR_COLORS[k], 0.16, this.planeTangents[k]);
 
       // the line where the first two mirrors meet, and the angle between their normals
       if (c >= 2) {
@@ -3330,10 +3343,11 @@
       for (let k = 0; k < c; k++) {
         const t = clamp((now - this.flipAt[k]) / FLIP_MS, 0, 1);
         const s = -Math.cos(Math.PI * t);
-        R.arrow([0, 0, 0], scale(N[k], s), "arrow", { width: 2.2, head: 0.85 });
+        const color = MIRROR_COLORS[k];
+        R.arrow([0, 0, 0], scale(N[k], s), color, { width: 2.2, head: 0.85 });
         if (t >= 1) {
-          R.handle(N[k], "arrow", active === `n${k}`);
-          R.text(scale(N[k], 1.15), MIRROR_NAMES[k], "arrow", { italic: true, size: 16 });
+          R.handle(N[k], color, active === `n${k}`);
+          R.text(scale(N[k], 1.15), MIRROR_NAMES[k], color, { italic: true, size: 16 });
         }
       }
     }
@@ -3360,19 +3374,7 @@
     }
 
     legend() {
-      const k = this.count % 2 ? "odd" : "even";
-      return [
-        ["glass", "mirror", "bar"], ["arrow", "normal"],
-        ["even", "even collar"], ["odd", "odd collar"],
-        [k, "<em>g</em>"], [k, `<em>${MINUS}g</em>`, "ring"],
-      ];
-    }
-    hint() {
-      return (this.count === 1 ? "One mirror reflects the cat. Add a second mirror to make a rotation. " : "") +
-        "The light cat is the starting point; every cat stays one unit from the origin. Each rectangle marks a mirror plane through the origin. " +
-        "Drag the tip of a normal to turn its mirror. Tap a tip (or press its chip) " +
-        "to flip the normal: same mirror, same image, opposite sign in the upper diagram. Two mirrors, u then w, make the " +
-        "rotation by twice their angle about the line u × w where they meet. Cats turn with the transformation and can appear edge-on.";
+      return MIRROR_COLORS.slice(0, this.count).map((color, i) => [color, `mirror <em>${MIRROR_NAMES[i]}</em>`, "bar"]);
     }
     glossary() {
       return [
@@ -3403,33 +3405,14 @@
       return `The Pin(3) element g and −g upstairs, both landing on the same O(3) element downstairs. ${this.count % 2 ? "Odd" : "Even"}.`;
     }
     readout() {
-      const G = this.spin(), c = this.count, N = this.normals;
-      const M = o3(G);
-      let s = `<p>g = ${this.word()} = ${mvHTML(G)}</p>`;
-      if (c === 1) {
-        s += `<p class="aside">One mirror: x ↦ ${MINUS}u x u = x ${MINUS} 2(u·x)u, the reflection in the plane ⟂ u.
-          An odd element: in Pin(3) but not in Spin(3). Its action on space reverses handedness.</p>`;
-      } else if (c === 2) {
-        const al = Math.acos(clamp(dot(N[0], N[1]), -1, 1));
-        const x = cross(N[0], N[1]);
-        s += `
-          <p>∠(u, w) = α = ${fmtRad(al)}, so the rotation is by <b>2α = ${fmtRad(2 * al)}</b></p>
-          <p>about u × w = ${norm(x) > 1e-9 ? vecHTML(unit(x), 2) : "(the mirrors coincide)"}</p>
-          <p>w u = w·u + w∧u = cos α ${MINUS} sin α I n̂</p>
-          <p>quaternion: ${quatHTML(quat(G))}</p>
-          <div class="mat-row">(w·σ)(u·σ) = ${mat2HTML(toSU2(G))}</div>
-          <p class="aside">Two reflections (an even number) make a <b>rotation</b>: the cat’s position and orientation turn together. This g lies in Spin(3) = SU(2).</p>`;
-      } else {
-        const Rp = mul(G, I3).map((x) => -x);
-        const { angle, axis } = rotorAngleAxis(Rp);
-        s += `
-          <p>R′ = ${MINUS}g e₁e₂e₃ = ${mvHTML(Rp)}</p>
-          <p class="aside">Three reflections (odd again) make x ↦ ${MINUS}R′ x R̃′: the rotation by ${fmtRad(angle)} about ${vecHTML(axis, 2)},
-            then x ↦ ${MINUS}x. A rotoreflection, with determinant ${MINUS}1.</p>`;
+      if (this.count === 2) {
+        const al = Math.acos(clamp(dot(this.normals[0], this.normals[1]), -1, 1));
+        return `<div class="mirror-angles">
+          <span><span class="lbl">Normal angle</span> α = ${fmtRad(al)}</span>
+          <span><span class="lbl">Rotation</span> 2α = ${fmtRad(2 * al)}</span>
+        </div>`;
       }
-      s += `<div class="mat-row">x ↦ ${c % 2 ? "ĝ x g̃" : "g x g̃"} = ${mat3HTML(M, 2)} <span class="lbl">det = ${fmt(det3(M), 0).replace(/^(\d)/, "+$1")}</span></div>`;
-      s += `<p class="aside">${MINUS}g = ${mvHTML(G.map((x) => -x))} draws exactly the same cat. Flip any normal to swap the two.</p>`;
-      return s;
+      return `<p class="aside mirror-count">${this.count} mirror${this.count === 1 ? "" : "s"}</p>`;
     }
   }
 
@@ -3727,6 +3710,7 @@
       // Other modes retain their original side-panel readout placement.
       if (id === "rotate") this.#el.body.after(this.#el.readout);
       else this.#el.side.append(this.#el.readout);
+      this.#el.readout.classList.toggle("mirror-readout", id === "mirrors3d");
       if (paired) this.#el.body.before(this.#el.panels);
       else this.#el.hint.after(this.#el.panels);
       this.#el.cameras.hidden = id !== "mirrors3d";

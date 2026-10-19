@@ -128,7 +128,7 @@
     </style>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.18.9/dist/katex.min.css" integrity="sha384-lPx0C4zIUZLpveABMwOFcFeGZwsvKBJfhJ85FN1PYOV7xApBcFMhcAEMVKF8loOI" crossorigin="anonymous">
     <script src="js/pin-spin-cat.js?v=20261015-cleanup" defer></script>
-    <script src="js/bloch-sphere.js?v=20261015-cleanup" defer></script>
+    <script src="js/bloch-sphere.js?v=20261018-mirrors" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/katex@0.18.9/dist/katex.min.js" integrity="sha384-19KE2cFb3U+RUWmyhBz7aLOGDG8WrRC6hE3oY/HTZZlAAVWYTdmvLC//+TIV3zUx" crossorigin="anonymous" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/katex@0.18.9/dist/contrib/auto-render.min.js" integrity="sha384-bjyGPfbij8/NDKJhSGZNP/khQVgtHUE5exjm4Ydllo42FwIgYsdLO2lXGmRBf5Mz" crossorigin="anonymous" defer></script>
     <script src="js/vector-calculus.js?v=20261015-no-subtext" defer></script>
@@ -357,13 +357,13 @@ This post will explore the ways in which this model beats a classical descriptio
                                 <span>math</span>
                                 <span>interactive</span>
                             </span>
-                            <span class="post-title" id="reflections-title" data-edit-id="reflections-title" data-edit-label="Post title" data-edit-group="Reflections and Rotations" data-edit-multiline="false">Reflections and Rotations.</span>
+                            <span class="post-title" id="reflections-title" data-edit-id="reflections-title" data-edit-label="Post title" data-edit-group="Reflections and Rotations" data-edit-multiline="false">Reflections and Rotations</span>
                         </h2>
                     </summary>
                     <div class="post-body">
 
                 <div class="post-text">
-                    <p data-edit-id="reflections-intro" data-edit-label="Post introduction · before 2D" data-edit-group="Reflections and Rotations" data-edit-multiline="true">This post is about the math of rotations. The 2D warmup interactively demonstrates how composing an even number of reflections creates rotations and how angles double when you do this. The 3D section extends this, the key is that after picking a 2D rotation plane within $\R^3$ we just perform a 2D rotation. After this I include a little bit of the math behind this all, and how Clifford algebras were used to generate the animations. </p>
+                    <p data-edit-id="reflections-intro" data-edit-label="Post introduction · before 2D" data-edit-group="Reflections and Rotations" data-edit-multiline="true">This post is about the math of rotations. The 2D warmup interactively demonstrates how composing an even number of reflections creates rotations and how angles double when you do this. The 3D section is similar but in 3D, the key is that after picking a 2D rotation plane within $\R^3$ we just perform a 2D rotation. After this I include a little bit of the math behind this all, and how the animations are generated.</p>
                 </div>
 
                 <details class="post-section" id="reflections-2d" name="reflections-dimensions">
@@ -388,9 +388,7 @@ Two things to look out for: first, when the normal vectors are flipped, the mirr
                     <details class="blog-demo" name="reflections-2d-demos">
                         <summary>Loops of rotations</summary>
                         <div class="post-text demo-intro">
-                            <p data-edit-id="loops-paragraph-1" data-edit-label="Paragraph 1" data-edit-group="2D · Loops of rotations" data-edit-multiline="true">Two reflections rotate the cat through twice the angle between the mirrors. Here, \(u\) stays fixed while \(w\), the other mirror’s normal arrow, turns.</p>
-                            <p data-edit-id="loops-paragraph-2" data-edit-label="Paragraph 2" data-edit-group="2D · Loops of rotations" data-edit-multiline="true">After the cat travels around \(2\pi\) radians, the mirror lines are back where they started, the rotation is the same. But the \(w\) vector points the other way around, it is the negative of where it started. The group element in \(\mathrm{SO}(2)\) is the same \(1\), but in \(\operatorname{Spin}(2)\) the group element is \(-1\).</p>
-                            <p data-edit-id="loops-paragraph-3" data-edit-label="Paragraph 3" data-edit-group="2D · Loops of rotations" data-edit-multiline="true">To get the arrows back to normal, the cat has to go around twice, then the Spin element is back to the identity.</p>
+                            <p data-edit-id="loops-paragraph-2" data-edit-label="Paragraph 2" data-edit-group="2D · Loops of rotations" data-edit-multiline="true">Move the cat around by moving one of the normal vectors. When the cat travels around a full 360 degrees, the normal normal vector is flipped. To get the normal vector back to where it started, the cat goes around twice. </p>
                         </div>
                         <template class="demo-template">
                             <pin-spin-cat class="blog-visualization" modes="spin" mode="spin" theme="light" aria-label="Loops of rotations demo"></pin-spin-cat>
@@ -400,7 +398,7 @@ Two things to look out for: first, when the normal vectors are flipped, the mirr
                     <details class="math-details" id="mirrors-math-details">
                             <summary>Math details</summary>
                             <div class="post-text">
-                                <p data-edit-id="mirrors-paragraph-2" data-edit-label="Reflection formula and explanation" data-edit-group="2D · Math details" data-edit-multiline="true">To describe a reflection in 2D, let \(u\) be a unit normal vector to the axis of reflection through the origin. Notice that in the above animation (with 1 mirror only) the cat moves in the direction \(u\) or \(-u\). When \(u\) is more lined up with the starting point the distance it travels is greater. This makes the formula \[v\mapsto v-2(v\cdot u)u\] natural. To check that this makes sense, a reflection should:</p>
+                                <p data-edit-id="mirrors-paragraph-2" data-edit-label="Reflection formula and explanation" data-edit-group="2D · Math details" data-edit-multiline="true">To describe a reflection in 2D, let \(u\) be a unit normal vector to the reflection mirror. Notice that in the first animation (with 1 mirror only) the cat moves in the direction \(u\) or \(-u\). When \(u\) is more lined up with the starting point the distance it travels is greater. This makes the formula \[v\mapsto v-2(v\cdot u)u\] make sense. Some properties a reflection should satisfy are:</p>
                                 <ul>
                                     <li data-edit-id="mirrors-property-fixed" data-edit-label="Reflection property · fixed points" data-edit-group="2D · Math details" data-edit-multiline="true">Leave points on the mirror fixed: if \(v\cdot u=0\), the reflected point is \(v\).</li>
                                     <li data-edit-id="mirrors-property-normal" data-edit-label="Reflection property · normal direction" data-edit-group="2D · Math details" data-edit-multiline="true">Reverse the normal direction: \(u\) maps to \(-u\).</li>
@@ -444,14 +442,12 @@ This is a rotation with angle $2(\phi-\theta)$, which is twice the angle between
                         </template>
                     </details>
                     <details class="blog-demo" name="reflections-3d-demos">
-                        <summary>Spinors and rotations</summary>
+                        <summary>Rotations in 3D</summary>
                         <div class="post-text demo-intro">
-                            <p class="post-explanation" data-edit-id="rotations3d-intro" data-edit-label="Section introduction" data-edit-group="3D · Spinors and rotations" data-edit-multiline="true">The group of these rotations in 3D is called ${SO}(3)$. In the 2D case we saw that we could represent the rotations with $SO(2)$ elements, or $\mathrm{spin}(2)$ elements, and there are two spin group elements for each $SO(3)$ element. In math terms, $\mathrm{spin}(3)$ is a double cover for $SO(3)$. 
-
-In three dimensions, the spin group is the same as the group of $2\times 2$ unitary matrices with determinant 1. Each $SO(3)$ rotation has two representatives in the spin group, in the animation you can increase the angle to perform a loop in the spin group, and see what happens on the $SO(3)$ and $\mathrm{spin}(3)$ layers. You can see the double cover in action by dragging the parameter theta around, notice that when the cat goes in a circle, the spin group element is equal to negative I, and to get the spin group element back to the start the cat goes around twice. </p>
+                            <p class="post-explanation" data-edit-id="rotations3d-intro" data-edit-label="Section introduction" data-edit-group="3D · Rotations in 3D" data-edit-multiline="true">This is a rotation around the z axis. We can represent this rotation a a 3x3 matrix with real entries in $SO(3)$, or as a $2\times 2$ complex matrix  in $SU(2)=\operatorname{Spin}(3)$. Similar to the mirror situation in 2D, when we increase $\theta$ by $2\pi$ the $SO(3)$ element is back to where it started, but the $\operatorname{Spin}(3)$ element has to go around twice. </p>
                         </div>
                         <template class="demo-template">
-                            <bloch-sphere class="blog-visualization" modes="rotate" mode="rotate" theme="light" aria-label="Spinors and rotations demo"></bloch-sphere>
+                            <bloch-sphere class="blog-visualization" modes="rotate" mode="rotate" theme="light" aria-label="Rotations in 3D demo"></bloch-sphere>
                         </template>
                     </details>
 
@@ -460,7 +456,7 @@ In three dimensions, the spin group is the same as the group of $2\times 2$ unit
                 <details class="post-section" id="reflections-more-math-details" name="reflections-dimensions">
                     <summary><h3>More Math Details</h3></summary>
                     <div class="post-text">
-                        <p data-edit-id="reflections-more-math-text" data-edit-label="Section text" data-edit-group="More Math Details" data-edit-multiline="true">One way to unify this all is through Clifford algebras and the spin group. Before the general theory, let's revisit 2 and 3 dimension rotations with complex numbers and quaternions respectively. </p>
+                        <p data-edit-id="reflections-more-math-text" data-edit-label="Section text" data-edit-group="More Math Details" data-edit-multiline="true">Rotations in 2D can be described easily with complex numbers. </p>
                     </div>
                 </details>
 
