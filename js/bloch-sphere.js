@@ -3300,7 +3300,7 @@
       const N = this.normals, c = this.count;
       const parity = (j) => (j % 2 ? "odd" : "even");
 
-      for (let k = 0; k < c; k++) this.planeTangents[k] = R.plane(N[k], MIRROR_COLORS[k], 0.16, this.planeTangents[k]);
+      for (let k = 0; k < c; k++) this.planeTangents[k] = R.plane(N[k], "glass", 0.16, this.planeTangents[k]);
 
       // the line where the first two mirrors meet, and the angle between their normals
       if (c >= 2) {
@@ -3374,7 +3374,7 @@
     }
 
     legend() {
-      return MIRROR_COLORS.slice(0, this.count).map((color, i) => [color, `mirror <em>${MIRROR_NAMES[i]}</em>`, "bar"]);
+      return MIRROR_COLORS.slice(0, this.count).map((color, i) => [color, `normal <em>${MIRROR_NAMES[i]}</em>`, "bar"]);
     }
     glossary() {
       return [
