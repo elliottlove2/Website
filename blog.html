@@ -390,7 +390,7 @@ Two things to look out for: first, when the normal vectors are flipped, the mirr
                     <details class="blog-demo" name="reflections-2d-demos">
                         <summary>Loops of rotations</summary>
                         <div class="post-text demo-intro">
-                            <p data-edit-id="loops-paragraph-2" data-edit-label="Paragraph 2" data-edit-group="2D · Loops of rotations" data-edit-multiline="true">Move the cat around by moving one of the normal vectors. When the cat travels around a full 360 degrees, the normal normal vector is flipped. To get the normal vector back to where it started, the cat goes around twice. </p>
+                            <p data-edit-id="loops-paragraph-2" data-edit-label="Paragraph 2" data-edit-group="2D · Loops of rotations" data-edit-multiline="true">Move the cat around by moving one of the normal vectors. When the cat travels around a full 360 degrees, the normal vector is flipped. To get the normal vector back to where it started, the cat goes around twice. </p>
                         </div>
                         <template class="demo-template">
                             <pin-spin-cat class="blog-visualization" modes="spin" mode="spin" theme="light" aria-label="Loops of rotations demo"></pin-spin-cat>
@@ -415,7 +415,7 @@ If the normal vector u has coordinates $u=(\cos\theta,\sin\theta)$, then the ref
 -\cos 2\theta &amp; -\sin 2\theta\\
 -\sin 2\theta &amp; \cos 2\theta
 \end{pmatrix}.\]
-Combing two reflections leads to the matrix product \[M(\phi)M(\theta) = \begin{pmatrix}
+Combining two reflections leads to the matrix product \[M(\phi)M(\theta) = \begin{pmatrix}
 -\cos 2\phi &amp; -\sin 2\phi\\
 -\sin 2\phi &amp; \cos 2\phi
 \end{pmatrix}\begin{pmatrix}
@@ -427,7 +427,7 @@ which after applying the double angle identity leads to \[M(\phi)M(\theta)=
 \cos\bigl(2(\phi-\theta)\bigr) &amp; -\sin\bigl(2(\phi-\theta)\bigr)\\
 \sin\bigl(2(\phi-\theta)\bigr) &amp; \cos\bigl(2(\phi-\theta)\bigr)
 \end{pmatrix}. \]
-This is a rotation with angle $2(\phi-\theta)$, which is twice the angle between the two axes of reflection. This angle doubling is illustrated in the next section on loop of rotations. </p>
+This is a rotation with angle $2(\phi-\theta)$, which is twice the angle between the two axes of reflection. This angle doubling is illustrated in the next section on loops of rotations. </p>
                             </div>
                     </details>
                 </details>
@@ -446,7 +446,7 @@ This is a rotation with angle $2(\phi-\theta)$, which is twice the angle between
                     <details class="blog-demo" name="reflections-3d-demos">
                         <summary>Rotations in 3D</summary>
                         <div class="post-text demo-intro">
-                            <p class="post-explanation" data-edit-id="rotations3d-intro" data-edit-label="Section introduction" data-edit-group="3D · Rotations in 3D" data-edit-multiline="true">This is a rotation around the z axis. We can represent this rotation a a 3x3 matrix with real entries in $SO(3)$, or as a $2\times 2$ complex matrix  in $SU(2)=\operatorname{Spin}(3)$. Similar to the mirror situation in 2D, when we increase $\theta$ by $2\pi$ the $SO(3)$ element is back to where it started, but the $\operatorname{Spin}(3)$ element has to go around twice. </p>
+                            <p class="post-explanation" data-edit-id="rotations3d-intro" data-edit-label="Section introduction" data-edit-group="3D · Rotations in 3D" data-edit-multiline="true">This is a rotation around the z axis. We can represent this rotation as a 3x3 matrix with real entries in $SO(3)$, or as a $2\times 2$ complex matrix  in $SU(2)=\operatorname{Spin}(3)$. Similar to the mirror situation in 2D, when we increase $\theta$ by $2\pi$ the $SO(3)$ element is back to where it started, but the $\operatorname{Spin}(3)$ element has to go around twice. </p>
                         </div>
                         <template class="demo-template">
                             <bloch-sphere class="blog-visualization" modes="rotate" mode="rotate" theme="light" aria-label="Rotations in 3D demo"></bloch-sphere>
