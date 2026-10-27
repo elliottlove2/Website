@@ -141,7 +141,7 @@
     <script src="https://cdn.jsdelivr.net/npm/katex@0.18.9/dist/contrib/auto-render.min.js" integrity="sha384-bjyGPfbij8/NDKJhSGZNP/khQVgtHUE5exjm4Ydllo42FwIgYsdLO2lXGmRBf5Mz" crossorigin="anonymous" defer></script>
     <script src="js/vector-calculus.js?v=20261015-no-subtext" defer></script>
     <script src="js/ode-demos.js?v=20261006-euler" defer></script>
-    <script src="js/harmonic-oscillators.js?v=20261027-posts" defer></script>
+    <script src="js/harmonic-oscillators.js?v=20261027-circuit-layout" defer></script>
     <script src="js/blog.js?v=20261027-posts" defer></script>
 </head>
 <body class="blog">
@@ -240,6 +240,9 @@
 
                     <details class="post-section" id="osc-circuit" name="oscillator-sections">
                         <summary><h3 data-edit-id="osc-circuit-title" data-edit-label="Section title" data-edit-group="Harmonic Oscillators · LC circuit" data-edit-multiline="false">LC circuit</h3></summary>
+                        <template class="demo-template">
+                            <lc-circuit-lab class="blog-visualization" aria-label="LC circuit with resistance, source voltage and energy"></lc-circuit-lab>
+                        </template>
                         <div class="post-text">
                             <p data-edit-id="osc-circuit-text" data-edit-label="Text" data-edit-group="Harmonic Oscillators · LC circuit" data-edit-multiline="true"></p>
                             <p data-edit-id="osc-circuit-equation" data-edit-label="Equation" data-edit-group="Harmonic Oscillators · LC circuit" data-edit-multiline="true">\[ \underbrace{L\,q''}_{\text{inductor}} + \underbrace{R\,q'}_{\text{resistor}} + \underbrace{\tfrac{1}{C}\,q}_{\text{capacitor}} = \underbrace{V(t)}_{\text{source}}, \qquad I = q' \]</p>
@@ -257,9 +260,6 @@
                             <p data-edit-id="osc-circuit-amplitude" data-edit-label="Resonance amplitude" data-edit-group="Harmonic Oscillators · LC circuit" data-edit-multiline="true">\[ A(\omega) = \frac{V_0}{\sqrt{\big(\tfrac{1}{C} - L\,\omega^2\big)^2 + (R\,\omega)^2}}, \qquad \omega_0 = \frac{1}{\sqrt{LC}} \]</p>
                             <p data-edit-id="osc-circuit-pure" data-edit-label="Pure resonance" data-edit-group="Harmonic Oscillators · LC circuit" data-edit-multiline="true">\[ R = 0,\ \omega = \omega_0: \qquad q_p = \frac{V_0}{2L\,\omega_0}\; t\,\sin\omega_0 t \]</p>
                         </div>
-                        <template class="demo-template">
-                            <lc-circuit-lab class="blog-visualization" aria-label="LC circuit with resistance, source voltage and energy"></lc-circuit-lab>
-                        </template>
                     </details>
                 </details>
                     </div>

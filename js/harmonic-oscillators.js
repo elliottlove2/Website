@@ -1,7 +1,7 @@
 /*!
  * harmonic-oscillators.js — damped and driven oscillators, as a spring–mass system and as an RLC circuit.
  *   <damping-cases>    four springs (undamped, underdamped, critically damped, overdamped) released together
- *   <spring-mass-lab>  one spring–mass system: damping, forcing, energy, roots, phase plane, resonance
+ *   <spring-mass-lab>  one spring–mass system: damping, forcing, energy, roots, phase space, resonance
  *   <lc-circuit-lab>   the same equation as an LC circuit (with optional resistor and AC source)
  * Every curve is the exact solution from the auxiliary equation, not a numerical integration.
  * Plain JavaScript web components, no dependencies. KaTeX (already on the site) typesets the
@@ -638,7 +638,7 @@ button:focus-visible, input:focus-visible, [tabindex]:focus-visible {
 .problem .ic .katex { font-size: 1.04em; }
 
 /* ---------- main layout ---------- */
-.layout { display: grid; grid-template-columns: minmax(0, 1fr) 296px; gap: 18px; margin-top: 14px; align-items: start; }
+.layout { margin-top: 14px; }
 .figure { min-width: 0; }
 .fig { display: block; width: 100%; overflow: visible; user-select: none; -webkit-user-select: none; touch-action: pan-y pinch-zoom; }
 .fig text { pointer-events: none; }
@@ -679,8 +679,18 @@ input[type=range]::-moz-range-thumb { width: 12px; height: 12px; border-radius: 
 input[type=range]:focus-visible { outline: none; }
 input[type=range]:focus-visible::-webkit-slider-thumb { outline: 2px solid var(--text-secondary, #5d4037); outline-offset: 2px; }
 
-/* ---------- side panel ---------- */
-.side { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+/* ---------- optional mathematical views ---------- */
+.analysis-details { margin-top: 22px; border-top: 1px solid var(--_line); }
+.analysis-details > summary { padding: 14px 2px; color: var(--_muted); font-size: 14px; font-weight: 700; cursor: pointer; }
+.analysis-details > summary:hover { color: var(--_ink); }
+.analysis-details > summary:focus-visible { outline: 2px solid var(--text-secondary, #5d4037); outline-offset: 2px; }
+.analysis-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr); gap: 14px; align-items: start; }
+.analysis-grid .head { flex-wrap: wrap; }
+.analysis-grid .seg { display: flex; flex-wrap: wrap; width: 100%; border-radius: 6px; }
+.analysis-grid .seg button { flex: 1 1 auto; min-height: 38px; padding: 8px 10px; }
+.analysis-grid .mini { max-width: 380px; margin-inline: auto; }
+.analysis-grid .card { padding: 14px 16px; }
+
 .card { background: var(--_card); border: 1px solid var(--_line); border-radius: 6px; padding: 12px 14px 13px; min-width: 0; }
 .kicker { font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--_muted); }
 .head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 8px; }
@@ -773,9 +783,8 @@ input[type=range]:focus-visible::-webkit-slider-thumb { outline: 2px solid var(-
 .gain-fill { fill: rgba(62, 59, 57, .05); }
 .w-marker { stroke: var(--_sage); stroke-width: 1.5; }
 
-@container (max-width: 760px) {
-  .layout { grid-template-columns: minmax(0, 1fr); }
-  .side { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 10px; }
+@container (max-width: 640px) {
+  .analysis-grid { grid-template-columns: minmax(0, 1fr); }
 }
 @container (max-width: 560px) {
   .osc { padding: 14px 12px 14px; }
@@ -1140,7 +1149,7 @@ function hatchPattern(defs, id) {
 
 /* ------------------------------------------------------------------
  * Shared lab: one oscillator with a typed equation, sliders, the exact solution,
- * a time graph, an energy graph and small pictures (roots, phase plane, resonance).
+ * a time graph, an energy graph and small pictures (roots, phase space, resonance).
  * Subclasses supply `sys` (symbols, sliders, examples) and draw the mechanism.
  *
  * The motion is stored as segments of exact solutions. Most changes restart at t = 0;
@@ -1215,14 +1224,19 @@ class OscLab extends OscElement {
       this.auxNum, this.discEl, this.rootsEl);
 
     this.tabSeg = this.makeSeg([
-      { label: 'Roots', value: 'roots' }, { label: 'Phase plane', value: 'phase' }, { label: 'Resonance', value: 'response' },
+      { label: 'Roots', value: 'roots' }, { label: 'Phase space', value: 'phase' }, { label: 'Resonance', value: 'response' },
     ], v => this.setTab(v), 'Picture');
     this.mini = s('svg', { class: 'mini', viewBox: '0 0 268 184', role: 'img' });
     this.buildMini();
     const picCard = h('div', { class: 'card' }, h('div', { class: 'head' }, this.tabSeg), this.mini);
 
-    const side = h('div', { class: 'side' }, auxCard, picCard);
-    wrap.append(bar, problem, h('div', { class: 'layout' }, figure, side));
+    const analysis = h('details', { class: 'analysis-details' },
+      h('summary', { text: 'Roots, phase space & resonance' }),
+      h('div', { class: 'analysis-grid' }, auxCard, picCard));
+    analysis.addEventListener('toggle', () => {
+      if (analysis.open) this.renderMini();
+    });
+    wrap.append(bar, problem, h('div', { class: 'layout' }, figure), analysis);
     this.root.append(wrap);
 
     for (const [key, slider] of Object.entries(this.sliders)) slider.set(this.p[key]);
@@ -1363,7 +1377,7 @@ class OscLab extends OscElement {
     this.tab = tab;
     this.tabSeg.select(tab);
     for (const [key, g] of Object.entries(this.miniG)) g.style.display = key === tab ? '' : 'none';
-    const label = { roots: 'Roots of the auxiliary equation in the complex plane', phase: 'Phase plane with curves of constant energy', response: 'Steady-state amplitude against driving frequency; drag to change the driving frequency' }[tab];
+    const label = { roots: 'Roots of the auxiliary equation in the complex plane', phase: 'Phase space with curves of constant energy', response: 'Steady-state amplitude against driving frequency; drag to change the driving frequency' }[tab];
     this.mini.setAttribute('aria-label', label);
     this.mini.classList.toggle('draggable', tab === 'response');
     this.renderMini();
@@ -1707,7 +1721,7 @@ class OscLab extends OscElement {
     this.setClock(t);
   }
 
-  /* ---------- small pictures: roots, phase plane, resonance ---------- */
+  /* ---------- small pictures: roots, phase space, resonance ---------- */
 
   buildMini() {
     const svg = this.mini;
@@ -1811,7 +1825,7 @@ class OscLab extends OscElement {
     const r = this.rt;
     const sol = this.sol;
     const { W, H } = r;
-    const ox = Math.round(W * 0.8);
+    const ox = Math.round(W * 0.72);
     const oy = H / 2;
     const w0 = sol.w0;
     const minRe = Math.min(...sol.roots.map(z => z.re));
@@ -2255,7 +2269,7 @@ class LcCircuitLab extends OscLab {
   get sys() { return CIRCUIT_SYS; }
 
   mechGeom(W) {
-    if (W >= 660) return { mw: 252 };
+    if (W >= 660) return { mw: Math.round(clamp(W * 0.44, 320, 420)) };
     if (W < 460) return { mw: 0, stackH: 272, boxW: W, bars: false };
     const stackH = 272;
     const boxW = Math.min(330, Math.round(W * 0.64));
