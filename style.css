@@ -190,7 +190,7 @@ main.blog-page {
 
 .post-header,
 .post-text {
-    width: min(680px, calc(100% - 3rem));
+    width: min(960px, calc(100% - 3rem));
     margin-inline: auto;
 }
 
@@ -357,7 +357,7 @@ main.blog-page {
 }
 
 .post-section > .post-text {
-    width: min(680px, 100%);
+    width: min(960px, 100%);
 }
 
 .post-section > .blog-demo {
@@ -389,7 +389,7 @@ main.blog-page {
 }
 
 .post-text.demo-intro {
-    width: min(680px, 100%);
+    width: min(960px, 100%);
     margin-block: 14px 30px;
     font-size: 18px;
 }
