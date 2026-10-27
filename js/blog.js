@@ -17,7 +17,7 @@ if (typeof window.renderMathInElement === "function") {
 const disclosures = [...document.querySelectorAll(".post-section, .blog-demo")];
 
 function pauseDemos(container) {
-    container.querySelectorAll("pin-spin-cat, bloch-sphere, euler-method, divergence-probe, curl-paddle-wheel").forEach(demo => {
+    container.querySelectorAll("pin-spin-cat, bloch-sphere, euler-method, divergence-probe, curl-paddle-wheel, damping-cases, spring-mass-lab, lc-circuit-lab").forEach(demo => {
         demo.pause?.();
         demo.shadowRoot?.querySelectorAll("details[open]").forEach(detail => {
             detail.open = false;
@@ -56,6 +56,6 @@ disclosures.forEach(detail => {
         detail.querySelectorAll(":scope > .demo-template, :scope > .vector-demo > .demo-template").forEach(template => {
             template.replaceWith(template.content.cloneNode(true));
         });
-        detail.querySelectorAll("divergence-probe, curl-paddle-wheel").forEach(demo => demo.resume?.());
+        detail.querySelectorAll("divergence-probe, curl-paddle-wheel, damping-cases, spring-mass-lab, lc-circuit-lab").forEach(demo => demo.resume?.());
     });
 });
