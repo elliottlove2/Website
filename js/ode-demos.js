@@ -2215,7 +2215,7 @@ class EulerMethod extends OdeElement {
       else if (a.t < 0.85) text = `<b>Follow it</b> for $\\Delta x = ${dx.tex}$: the height changes by $\\Delta y = m_{${a.k}}\\,\\Delta x ${dy.exact ? '=' : '\\approx'} ${dy.tex}$.`;
       else text = `<b>Land</b> at ${'$' + this.pointTex(a.k + 1) + '$'}.`;
     } else if (s.k === 0) {
-      text = `Start at ${'$' + this.pointTex(0) + '$'}. Each step <b>reads the slope</b> where you are, then <b>walks straight</b> for $\\Delta x$. Drag $P_0$ or the target to change the problem.`;
+      text = `From a starting point $P_0$, calculate the slope then move in that direction for $\\Delta x$. This approximates the solution to the differential equation.`;
     } else if (s.k < this.nEff) {
       const P = this.pts[s.k];
       const prev = this.pts[s.k - 1];

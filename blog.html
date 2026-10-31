@@ -140,7 +140,7 @@
     <script src="https://cdn.jsdelivr.net/npm/katex@0.18.9/dist/katex.min.js" integrity="sha384-19KE2cFb3U+RUWmyhBz7aLOGDG8WrRC6hE3oY/HTZZlAAVWYTdmvLC//+TIV3zUx" crossorigin="anonymous" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/katex@0.18.9/dist/contrib/auto-render.min.js" integrity="sha384-bjyGPfbij8/NDKJhSGZNP/khQVgtHUE5exjm4Ydllo42FwIgYsdLO2lXGmRBf5Mz" crossorigin="anonymous" defer></script>
     <script src="js/vector-calculus.js?v=20261015-no-subtext" defer></script>
-    <script src="js/ode-demos.js?v=20261006-euler" defer></script>
+    <script src="js/ode-demos.js?v=20261031-caption" defer></script>
     <script src="js/harmonic-oscillators.js?v=20261027-circuit-layout" defer></script>
     <script src="js/blog.js?v=20261027-posts" defer></script>
 </head>
@@ -177,7 +177,7 @@
                     </summary>
                     <div class="post-body">
                         <div class="post-text">
-                            <p data-edit-id="calculus-intro" data-edit-label="Introduction" data-edit-group="Calculus" data-edit-multiline="true"></p>
+                            <p data-edit-id="calculus-intro" data-edit-label="Introduction" data-edit-group="Calculus" data-edit-multiline="true">These are animations and figures for the calculus recitations I am teaching.</p>
                             <p data-edit-id="calculus-content" data-edit-label="Post text" data-edit-group="Calculus" data-edit-multiline="true"></p>
                         </div>
                         <details class="post-section" id="eulers-method" name="calculus-topics">
@@ -193,45 +193,50 @@
                     <summary><h3 id="harmonic-oscillators-title" data-edit-id="osc-title" data-edit-label="Topic title" data-edit-group="Harmonic Oscillators" data-edit-multiline="false">Harmonic Oscillators and LC Circuits</h3></summary>
                     <div class="post-text">
                         <!-- WRITE HERE: introduction. -->
-                        <p data-edit-id="osc-intro" data-edit-label="Introduction" data-edit-group="Harmonic Oscillators" data-edit-multiline="true"></p>
+                        <p data-edit-id="osc-intro" data-edit-label="Introduction" data-edit-group="Harmonic Oscillators" data-edit-multiline="true">This section is concerned with differential equations of this form, with constant coefficients $a,c&gt;0$ and $b\ge 0$:</p>
                         <p data-edit-id="osc-equation" data-edit-label="The equation" data-edit-group="Harmonic Oscillators" data-edit-multiline="true">\[ a\,y'' + b\,y' + c\,y = 0 \]</p>
                         <p data-edit-id="osc-examples" data-edit-label="Spring and circuit" data-edit-group="Harmonic Oscillators" data-edit-multiline="true">\[ \text{spring: } \ m\,x'' + \gamma\,x' + k\,x = 0 \qquad\quad \text{circuit: } \ L\,q'' + R\,q' + \tfrac{1}{C}\,q = 0 \]</p>
 
                         <h3 data-edit-id="osc-aux-title" data-edit-label="Heading" data-edit-group="Harmonic Oscillators · Auxiliary equation" data-edit-multiline="false">The auxiliary equation</h3>
-                        <p data-edit-id="osc-aux-text" data-edit-label="Text" data-edit-group="Harmonic Oscillators · Auxiliary equation" data-edit-multiline="true"></p>
+                        <p data-edit-id="osc-aux-text" data-edit-label="Text" data-edit-group="Harmonic Oscillators · Auxiliary equation" data-edit-multiline="true">With an initial guess at the solution $y=e^{rt}$, plug in and see what $r$ must be to get a solution:</p>
                         <p data-edit-id="osc-aux-substitute" data-edit-label="Insert e^{rt}" data-edit-group="Harmonic Oscillators · Auxiliary equation" data-edit-multiline="true">\[ y = e^{rt}: \qquad a\,r^2 e^{rt} + b\,r\,e^{rt} + c\,e^{rt} = \big(a r^2 + b r + c\big)\,e^{rt} = 0 \]</p>
                         <p data-edit-id="osc-aux-equation" data-edit-label="Auxiliary equation" data-edit-group="Harmonic Oscillators · Auxiliary equation" data-edit-multiline="true">\[ a r^2 + b r + c = 0, \qquad r = \frac{-b \pm \sqrt{b^2 - 4ac}}{2a} \]</p>
 
                         <h3 data-edit-id="osc-cases-title" data-edit-label="Heading" data-edit-group="Harmonic Oscillators · Three cases" data-edit-multiline="false">Three cases</h3>
-                        <p data-edit-id="osc-cases-text" data-edit-label="Text" data-edit-group="Harmonic Oscillators · Three cases" data-edit-multiline="true"></p>
-                        <p data-edit-id="osc-cases-table" data-edit-label="Table of the three cases" data-edit-group="Harmonic Oscillators · Three cases" data-edit-multiline="true">\[ \begin{array}{c|c|c|c} b^2 - 4ac &amp; \text{roots} &amp; y(t) &amp; \\ \hline &gt; 0 &amp; r_1 \neq r_2 \ \text{real} &amp; C_1 e^{r_1 t} + C_2 e^{r_2 t} &amp; \text{overdamped} \\ = 0 &amp; r = -\tfrac{b}{2a} &amp; (C_1 + C_2\,t)\,e^{rt} &amp; \text{critically damped} \\ &lt; 0 &amp; \alpha \pm i\beta &amp; e^{\alpha t}\big(C_1\cos\beta t + C_2\sin\beta t\big) &amp; \text{underdamped} \end{array} \]</p>
+                        <p data-edit-id="osc-cases-text" data-edit-label="Text" data-edit-group="Harmonic Oscillators · Three cases" data-edit-multiline="true">The general solution depends on if the roots are real or complex, and whether the real roots are distinct or repeated. When $b=0$, the oscillation is undamped. </p>
+                        <p data-edit-id="osc-cases-table" data-edit-label="Table of the three cases" data-edit-group="Harmonic Oscillators · Three cases" data-edit-multiline="true">\[ \begin{array}{c|c|c|c} b^2 - 4ac &amp; \text{roots} &amp; y(t) &amp; \\ \hline &gt; 0 &amp; r_1 \neq r_2 \ \text{real} &amp; C_1 e^{r_1 t} + C_2 e^{r_2 t} &amp; \text{overdamped} \\ = 0 &amp; r = -\tfrac{b}{2a} &amp; (C_1 + C_2\,t)\,e^{rt} &amp; \text{critically damped} \\ &lt; 0 &amp; \alpha \pm i\beta &amp; e^{\alpha t}\big(C_1\cos\beta t + C_2\sin\beta t\big) &amp; \text{underdamped or undamped} \end{array} \]</p>
 
-                        <h3 data-edit-id="osc-compare-title" data-edit-label="Heading" data-edit-group="Harmonic Oscillators · Comparing the damping" data-edit-multiline="false">Comparing the damping</h3>
-                        <p data-edit-id="osc-compare-text" data-edit-label="Text" data-edit-group="Harmonic Oscillators · Comparing the damping" data-edit-multiline="true"></p>
-                    </div>
-                    <div class="vector-demo" id="osc-compare-demo">
-                        <template class="demo-template">
-                            <damping-cases class="blog-visualization" aria-label="Undamped, underdamped, critically damped and overdamped springs released together"></damping-cases>
-                        </template>
+                        <p data-edit-id="osc-compare-text" data-edit-label="Text" data-edit-group="Harmonic Oscillators · Comparing the damping" data-edit-multiline="true">Two important examples of these equations showing up in nature are springs and circuits. </p>
                     </div>
 
                     <details class="post-section" id="osc-spring" name="oscillator-sections">
                         <summary><h3 data-edit-id="osc-spring-title" data-edit-label="Section title" data-edit-group="Harmonic Oscillators · Spring and mass" data-edit-multiline="false">Spring and mass system</h3></summary>
                         <div class="post-text">
-                            <p data-edit-id="osc-spring-text" data-edit-label="Text" data-edit-group="Harmonic Oscillators · Spring and mass" data-edit-multiline="true"></p>
+                            <p data-edit-id="osc-spring-text" data-edit-label="Text" data-edit-group="Harmonic Oscillators · Spring and mass" data-edit-multiline="true">This equation describes the motion of an object with mass $m$ on a spring with spring constant $k$, external force $F(t)$, and damping $\gamma$, with $x$ measured from equilibrium:</p>
                             <p data-edit-id="osc-spring-equation" data-edit-label="Equation" data-edit-group="Harmonic Oscillators · Spring and mass" data-edit-multiline="true">\[ \underbrace{m\,x''}_{\text{mass}} + \underbrace{\gamma\,x'}_{\text{damping}} + \underbrace{k\,x}_{\text{spring}} = \underbrace{F(t)}_{\text{forcing}} \]</p>
 
+                        <h3 data-edit-id="osc-compare-title" data-edit-label="Heading" data-edit-group="Harmonic Oscillators · Comparing the damping" data-edit-multiline="false">Comparing the damping</h3>
+                        </div>
+                    <div class="vector-demo" id="osc-compare-demo">
+                        <template class="demo-template">
+                            <damping-cases class="blog-visualization" aria-label="Undamped, underdamped, critically damped and overdamped springs released together"></damping-cases>
+                        </template>
+                    </div>
+                        <div class="post-text">
                             <h3 data-edit-id="osc-spring-energy-title" data-edit-label="Heading" data-edit-group="Harmonic Oscillators · Spring and mass" data-edit-multiline="false">Energy</h3>
-                            <p data-edit-id="osc-spring-energy-text" data-edit-label="Energy text" data-edit-group="Harmonic Oscillators · Spring and mass" data-edit-multiline="true"></p>
+                            <p data-edit-id="osc-spring-energy-text" data-edit-label="Energy text" data-edit-group="Harmonic Oscillators · Spring and mass" data-edit-multiline="true">The potential and kinetic energy of the spring at $x$ are described below. Without damping or an external force, the total energy is the same, but it switches between potential and kinetic energy. When the spring is near equilibrium going fast it has more kinetic energy, when it is stretched or compressed it has more potential energy. </p>
                             <p data-edit-id="osc-spring-energy" data-edit-label="Kinetic and potential energy" data-edit-group="Harmonic Oscillators · Spring and mass" data-edit-multiline="true">\[ E = \underbrace{\tfrac12\, m\,(x')^2}_{\text{kinetic}} + \underbrace{\tfrac12\, k\,x^2}_{\text{potential}} \]</p>
-                            <p data-edit-id="osc-spring-exchange" data-edit-label="Energy moving back and forth" data-edit-group="Harmonic Oscillators · Spring and mass" data-edit-multiline="true">No damping, $x = A\cos\omega_0 t$: the energy moves back and forth and the total stays fixed. \[ \begin{aligned} \tfrac12\, m\,(x')^2 &amp;= \tfrac12\, k A^2 \sin^2 \omega_0 t \\ \tfrac12\, k\,x^2 &amp;= \tfrac12\, k A^2 \cos^2 \omega_0 t \\ E &amp;= \tfrac12\, k A^2 \end{aligned} \]</p>
-                            <p data-edit-id="osc-spring-heat" data-edit-label="Damping turns energy into heat" data-edit-group="Harmonic Oscillators · Spring and mass" data-edit-multiline="true">With damping, energy drains away as heat: \[ \frac{dE}{dt} = x'\,(m\,x'' + k\,x) = -\gamma\,(x')^2 \le 0, \qquad \text{heat} = E(0) - E(t) \]</p>
+                            <p data-edit-id="osc-spring-exchange" data-edit-label="Energy moving back and forth" data-edit-group="Harmonic Oscillators · Spring and mass" data-edit-multiline="true"></p>
+                            <p data-edit-id="osc-spring-heat" data-edit-label="Damping turns energy into heat" data-edit-group="Harmonic Oscillators · Spring and mass" data-edit-multiline="true">When the damping $\gamma&gt;0$ and $F(t)=0$, energy drains away as heat. This can be calculated by taking the derivative of $E$, \[ \frac{dE}{dt} = x'\,(m\,x'' + k\,x) = -\gamma\,(x')^2 \le 0, \qquad \text{heat} = E(0) - E(t) \]</p>
 
                             <h3 data-edit-id="osc-spring-forcing-title" data-edit-label="Heading" data-edit-group="Harmonic Oscillators · Spring and mass" data-edit-multiline="false">Forcing and resonance</h3>
-                            <p data-edit-id="osc-spring-forcing-text" data-edit-label="Forcing text" data-edit-group="Harmonic Oscillators · Spring and mass" data-edit-multiline="true"></p>
-                            <p data-edit-id="osc-spring-forcing" data-edit-label="Complementary plus particular" data-edit-group="Harmonic Oscillators · Spring and mass" data-edit-multiline="true">\[ F(t) = F_0\cos\omega t: \qquad x = \underbrace{x_c}_{\text{complementary}} + \underbrace{x_p}_{\text{particular}}, \qquad x_p = A\cos(\omega t - \delta) \]</p>
-                            <p data-edit-id="osc-spring-amplitude" data-edit-label="Resonance amplitude" data-edit-group="Harmonic Oscillators · Spring and mass" data-edit-multiline="true">\[ A(\omega) = \frac{F_0}{\sqrt{(k - m\,\omega^2)^2 + (\gamma\,\omega)^2}}, \qquad \omega_0 = \sqrt{\frac{k}{m}} \]</p>
-                            <p data-edit-id="osc-spring-pure" data-edit-label="Pure resonance" data-edit-group="Harmonic Oscillators · Spring and mass" data-edit-multiline="true">\[ \gamma = 0,\ \omega = \omega_0: \qquad x_p = \frac{F_0}{2m\,\omega_0}\; t\,\sin\omega_0 t \]</p>
+                            <p data-edit-id="osc-spring-forcing-text" data-edit-label="Forcing text" data-edit-group="Harmonic Oscillators · Spring and mass" data-edit-multiline="true">Imagine pushing someone on a swing. To increase the power, your pushes should be timed correctly with their motion, this is what resonance is all about. When $F(t)$ is the external force on the spring, the resonance condition is that the external force should be periodic and the frequency of the force should line up with the natural oscillation of the spring to produce larger oscillations. </p>
+                            <p data-edit-id="osc-spring-forcing" data-edit-label="Complementary plus particular" data-edit-group="Harmonic Oscillators · Spring and mass" data-edit-multiline="true">The natural frequency of the spring's oscillation is $\omega_0=\sqrt{k/m}$ (when the equation is undamped this is the frequency of the solutions' oscillation). Remember that the solution satisfies\[x = x_{\text{complementary}}+x_{\text{particular}},\]
+and when the spring is damped the particular solution determines the steady state (long time) behavior. For $\gamma&gt;0$, the particular solution with forcing $F(t)= F_0\cos(\omega t)$ is $A(\omega) \cos(\omega t-\phi)$, with amplitude \[A(\omega) = \frac{F_0}{\sqrt{(k-m\omega^2)^2+(\gamma\omega)^2}}.
+\]
+Notice that for weak damping, when $\omega\approx \omega_0$, the amplitudes are largest, lining up with our intuition about pushing swings. </p>
+                            <p data-edit-id="osc-spring-amplitude" data-edit-label="Resonance amplitude" data-edit-group="Harmonic Oscillators · Spring and mass" data-edit-multiline="true"></p>
+                            <p data-edit-id="osc-spring-pure" data-edit-label="Pure resonance" data-edit-group="Harmonic Oscillators · Spring and mass" data-edit-multiline="true"></p>
                         </div>
                         <template class="demo-template">
                             <spring-mass-lab class="blog-visualization" aria-label="Spring and mass system with damping, forcing and energy"></spring-mass-lab>
@@ -244,21 +249,21 @@
                             <lc-circuit-lab class="blog-visualization" aria-label="LC circuit with resistance, source voltage and energy"></lc-circuit-lab>
                         </template>
                         <div class="post-text">
-                            <p data-edit-id="osc-circuit-text" data-edit-label="Text" data-edit-group="Harmonic Oscillators · LC circuit" data-edit-multiline="true"></p>
+                            <p data-edit-id="osc-circuit-text" data-edit-label="Text" data-edit-group="Harmonic Oscillators · LC circuit" data-edit-multiline="true">Besides springs, circuits with an inductor and capacitor are governed by a similar equation. If the charge on the capacitor is $q(t)$, then the equation for $q$ is: </p>
                             <p data-edit-id="osc-circuit-equation" data-edit-label="Equation" data-edit-group="Harmonic Oscillators · LC circuit" data-edit-multiline="true">\[ \underbrace{L\,q''}_{\text{inductor}} + \underbrace{R\,q'}_{\text{resistor}} + \underbrace{\tfrac{1}{C}\,q}_{\text{capacitor}} = \underbrace{V(t)}_{\text{source}}, \qquad I = q' \]</p>
 
                             <h3 data-edit-id="osc-circuit-energy-title" data-edit-label="Heading" data-edit-group="Harmonic Oscillators · LC circuit" data-edit-multiline="false">Energy</h3>
-                            <p data-edit-id="osc-circuit-energy-text" data-edit-label="Energy text" data-edit-group="Harmonic Oscillators · LC circuit" data-edit-multiline="true"></p>
+                            <p data-edit-id="osc-circuit-energy-text" data-edit-label="Energy text" data-edit-group="Harmonic Oscillators · LC circuit" data-edit-multiline="true">Similar to the potential and kinetic energy for the object on a spring, the energy in this case splits into electric energy in the capacitor and magnetic energy from the current flowing through the inductor. </p>
                             <p data-edit-id="osc-circuit-energy" data-edit-label="Magnetic and electric energy" data-edit-group="Harmonic Oscillators · LC circuit" data-edit-multiline="true">\[ E = \underbrace{\tfrac12\, L\,I^2}_{\text{magnetic (inductor)}} + \underbrace{\frac{q^2}{2C}}_{\text{electric (capacitor)}} \]</p>
-                            <p data-edit-id="osc-circuit-analogy" data-edit-label="Kinetic and potential become magnetic and electric" data-edit-group="Harmonic Oscillators · LC circuit" data-edit-multiline="true">Kinetic becomes magnetic, potential becomes electric: \[ \tfrac12\, m\,(x')^2 \;\longleftrightarrow\; \tfrac12\, L\,I^2, \qquad \tfrac12\, k\,x^2 \;\longleftrightarrow\; \frac{q^2}{2C} \]</p>
-                            <p data-edit-id="osc-circuit-exchange" data-edit-label="Energy moving back and forth" data-edit-group="Harmonic Oscillators · LC circuit" data-edit-multiline="true">No resistance, $q = Q\cos\omega_0 t$: the energy moves between the capacitor and the inductor. \[ \begin{aligned} \tfrac12\, L\,I^2 &amp;= \frac{Q^2}{2C} \sin^2 \omega_0 t \\[6pt] \frac{q^2}{2C} &amp;= \frac{Q^2}{2C} \cos^2 \omega_0 t \\[6pt] E &amp;= \frac{Q^2}{2C} \end{aligned} \]</p>
-                            <p data-edit-id="osc-circuit-heat" data-edit-label="Resistance turns energy into heat" data-edit-group="Harmonic Oscillators · LC circuit" data-edit-multiline="true">With resistance, the resistor turns energy into heat: \[ \frac{dE}{dt} = I\,\Big(L\,I' + \frac{q}{C}\Big) = -R\,I^2 \le 0, \qquad \text{heat} = E(0) - E(t) \]</p>
+                            <p data-edit-id="osc-circuit-analogy" data-edit-label="Kinetic and potential become magnetic and electric" data-edit-group="Harmonic Oscillators · LC circuit" data-edit-multiline="true"></p>
+                            <p data-edit-id="osc-circuit-exchange" data-edit-label="Energy moving back and forth" data-edit-group="Harmonic Oscillators · LC circuit" data-edit-multiline="true">The damping in this case is now the resistance. When $V(t)=0$, without resistance the energy goes back and forth between magnetic and electric, and with resistance the energy dissipates as heat.  The derivative of $E$ says: \[ \frac{dE}{dt} = I\,\Big(L\,I' + \frac{q}{C}\Big) = -R\,I^2 \le 0, \qquad \text{heat} = E(0) - E(t) \]</p>
+                            <p data-edit-id="osc-circuit-heat" data-edit-label="Resistance turns energy into heat" data-edit-group="Harmonic Oscillators · LC circuit" data-edit-multiline="true"></p>
 
                             <h3 data-edit-id="osc-circuit-forcing-title" data-edit-label="Heading" data-edit-group="Harmonic Oscillators · LC circuit" data-edit-multiline="false">Forcing and resonance</h3>
-                            <p data-edit-id="osc-circuit-forcing-text" data-edit-label="Forcing text" data-edit-group="Harmonic Oscillators · LC circuit" data-edit-multiline="true"></p>
-                            <p data-edit-id="osc-circuit-forcing" data-edit-label="Complementary plus particular" data-edit-group="Harmonic Oscillators · LC circuit" data-edit-multiline="true">\[ V(t) = V_0\cos\omega t: \qquad q = \underbrace{q_c}_{\text{complementary}} + \underbrace{q_p}_{\text{particular}}, \qquad q_p = A\cos(\omega t - \delta) \]</p>
+                            <p data-edit-id="osc-circuit-forcing-text" data-edit-label="Forcing text" data-edit-group="Harmonic Oscillators · LC circuit" data-edit-multiline="true">Similar to the spring, we can apply an external voltage. The math is the same as the last section, but the letters are different and the quantities they represent are different:</p>
+                            <p data-edit-id="osc-circuit-forcing" data-edit-label="Complementary plus particular" data-edit-group="Harmonic Oscillators · LC circuit" data-edit-multiline="true">\[ V(t) = V_0\cos\omega t,\ R&gt;0: \qquad q = \underbrace{q_c}_{\text{complementary}} + \underbrace{q_p}_{\text{particular}}, \qquad q_p = A(\omega)\cos(\omega t - \delta) \]</p>
                             <p data-edit-id="osc-circuit-amplitude" data-edit-label="Resonance amplitude" data-edit-group="Harmonic Oscillators · LC circuit" data-edit-multiline="true">\[ A(\omega) = \frac{V_0}{\sqrt{\big(\tfrac{1}{C} - L\,\omega^2\big)^2 + (R\,\omega)^2}}, \qquad \omega_0 = \frac{1}{\sqrt{LC}} \]</p>
-                            <p data-edit-id="osc-circuit-pure" data-edit-label="Pure resonance" data-edit-group="Harmonic Oscillators · LC circuit" data-edit-multiline="true">\[ R = 0,\ \omega = \omega_0: \qquad q_p = \frac{V_0}{2L\,\omega_0}\; t\,\sin\omega_0 t \]</p>
+                            <p data-edit-id="osc-circuit-pure" data-edit-label="Pure resonance" data-edit-group="Harmonic Oscillators · LC circuit" data-edit-multiline="true"></p>
                         </div>
                     </details>
                 </details>
